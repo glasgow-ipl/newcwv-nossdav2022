@@ -16,6 +16,7 @@ $RUN_PROBE = <<SCRIPT
 	apt-get install -y ffmpeg
 	apt-get install -y mininet
 	apt-get install -y python-pip
+	apt-get install -y openvswitch-testcontroller
 	pip install psutil
 	mkdir exp
 	cd exp && cp -r /vagrant/* . && rm Vagrantfile
