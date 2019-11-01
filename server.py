@@ -44,16 +44,17 @@ class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         info += ", CPU_LOAD: %f" % cpu_load
         print 'PATH %s' % self.path
         if 'video' in self.path:
-            with open('cubic.out', 'a') as f:
-                t = time.time() - now
-                quality_no = self.path.split('video=')[1]
-                if '-' in quality_no:
-                    quality, no = quality_no.split('-')
-                    no = no[:-4]
+            t = time.time() - now
+            quality_no = self.path.split('video=')[1]
+            if '-' in quality_no:
+                quality, no = quality_no.split('-')
+                no = no[:-4]
+                with open('cubic.out', 'a') as f:
                     f.write('%.5f,%s,%s\n%s\n' % (t, quality, no,info))
-                    if int(no) == 100:
-                        print 'EXITING now'
-                        sys.exit(1)
+                #print 'written to FILE %s' % str(f)
+                if int(no) == 100:
+                    print 'EXITING now'
+                    sys.exit(1)
 
         print '-'*10+'END custom GET'+'-'*10
         SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
@@ -65,6 +66,8 @@ now = time.time()
 
 #print psutil.cpu_percent()
 print getServerInfo()
+
+#f = open('cubic.out', 'w')
 
 print "serving at port", PORT
 httpd.serve_forever() 
