@@ -37,7 +37,7 @@ def perfTest():
     import threading
 #    t = threading.Thread(target=h1.cmdPrint, args=('python2 server.py',))
 #    t.start()
-    h1.cmdPrint('python2 server.py&')
+    h1.cmdPrint('python server.py&')
     time.sleep(2)
 #CHANGE USER
     #h2.cmd('xterm')
@@ -45,7 +45,7 @@ def perfTest():
     #h2.cmd("runuser -l tech -c 'firefox --private --headless http://"+h1.IP()+":8000/player.html&'")
     #h1.cmdPrint('ls -la')
 
-    t = threading.Thread(target=h2.cmd, args=('xterm',))    
+    t = threading.Thread(target=h2.cmd, args=('xterm -hold "./last.sh"',))    
     t.start()
     print 'sleepin`'
     time.sleep(80)
