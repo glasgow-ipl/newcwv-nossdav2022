@@ -36,7 +36,10 @@ class DumbbellTopo( Topo ):
         self.addLink( s1, s2, bw=1, delay='5ms', loss=0)
 
 
-
+def changeLinkBw(ep1, ep2, in_bw, out_bw=-1):
+    link = ep1.connectionsTo(ep2)
+    link[0][0].config(**{'bw': in_bw})
+    link[0][1].config(**{'bw': out_bw if out_bw != -1 else in_bw})
 
 
 def perfTest():
