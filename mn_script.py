@@ -71,7 +71,7 @@ def perfTest():
 #    t = threading.Thread(target=h2.cmd, args=('xterm -hold "./last.sh"',))    
     #t = threading.Thread(target=h2.cmd, args=('xterm -hold "/run_chrome.sh"',))
     #t.start()
-    h2.cmdPrint('su - vagrant -c "/usr/bin/google-chrome --incognito http://10.0.0.1:8000/player.html&"')
+    h2.cmdPrint('su - vagrant -c "/usr/bin/google-chrome --incognito --disable-application-cahce http://10.0.0.1:8000/player.html&"')
     s1, s2 = net.get('s1', 's2')
     print 'sleepin`'
     time.sleep(80)
