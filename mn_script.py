@@ -19,9 +19,29 @@ class SingleSwitchTopo( Topo ):
 	    self.addLink( host, switch, bw=10, delay='5ms', loss=2,
                           max_queue_size=1000, use_htb=True )
 
+class DumbbellTopo( Topo ):
+    "Dumbbell topology with n hosts."
+    def build( self, n=2 ):
+        s1 = self.addSwitch( 's1' )
+        s2 = self.addSwitch( 's2' )
+        hosts = []
+        for h in range(n):
+	        # Each host gets 50%/n of system CPU
+            host = self.addHost( 'h%s' % (h + 1), cpu=.5/n )
+            hosts += [host]
+
+        # 10 Mbps, 5ms delay, 2% loss, 1000 packet queue
+        self.addLink( hosts[0], s1, bw=1, delay='5ms', loss=0 )
+        self.addLink( hosts[1], s2, bw=1, delay='5ms', loss=0 )
+        self.addLink( s1, s2, bw=1, delay='5ms', loss=0)
+
+
+
+
+
 def perfTest():
     "Create network and run simple performance test"
-    topo = SingleSwitchTopo()
+    topo = DumbbellTopo()
     net = Mininet( topo=topo,
 	           host=CPULimitedHost, link=TCLink)
     net.start()
@@ -45,16 +65,18 @@ def perfTest():
     #h2.cmd("runuser -l tech -c 'firefox --private --headless http://"+h1.IP()+":8000/player.html&'")
     #h1.cmdPrint('ls -la')
 
-    t = threading.Thread(target=h2.cmd, args=('xterm -hold "./last.sh"',))    
-    t.start()
+#    t = threading.Thread(target=h2.cmd, args=('xterm -hold "./last.sh"',))    
+    #t = threading.Thread(target=h2.cmd, args=('xterm -hold "/run_chrome.sh"',))
+    #t.start()
+    h2.cmdPrint('su - vagrant -c "/usr/bin/google-chrome --incognito http://10.0.0.1:8000/player.html&"')
+    s1, s2 = net.get('s1', 's2')
     print 'sleepin`'
     time.sleep(80)
-    s1 = net.get('s1')
     print 'changing BW'
-    s1.intf().config(bw=5)
+    changeLinkBw(s1, s2, .5)
     time.sleep(60)
     print 'changing BW'    
-    s1.intf().config(bw=10)
+    changeLinkBw(s1, s2, 1)
     time.sleep(60)
     
     net.stop()
