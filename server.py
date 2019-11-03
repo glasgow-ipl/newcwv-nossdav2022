@@ -19,10 +19,10 @@ PORT = 8000
 # 18 -> SND_CWND
 
 def getTCPInfo(s):
-    fmt_14.04 = "B"*7+"I"*21
-    fmt_18.04 = "B"*8+"I"*21
+    fmt_14_04 = "B"*7+"I"*21
+    fmt_18_04 = "B"*8+"I"*21
 
-    desired = fmt_18.04
+    desired = fmt_18_04
 
     struct_size = struct.calcsize(desired)
 
