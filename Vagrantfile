@@ -17,6 +17,8 @@ $RUN_PROBE = <<SCRIPT
 	apt-get install -y mininet
 	apt-get install -y python-pip
 	apt-get install -y openvswitch-testcontroller
+	sudo cp /usr/bin/ovs-testcontroller /usr/bin/ovs-controller
+	export LC_ALL=C
 	pip install psutil
 	mkdir exp
 	cd exp && cp -r /vagrant/* . && rm Vagrantfile
