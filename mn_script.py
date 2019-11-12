@@ -31,9 +31,9 @@ class DumbbellTopo( Topo ):
             hosts += [host]
 
         # 10 Mbps, 5ms delay, 2% loss, 1000 packet queue
-        self.addLink( hosts[0], s1, bw=1, delay='5ms', loss=0 )
-        self.addLink( hosts[1], s2, bw=1, delay='5ms', loss=0 )
-        self.addLink( s1, s2, bw=1, delay='5ms', loss=0)
+        self.addLink( hosts[0], s1, bw=1, delay='5ms'  )
+        self.addLink( hosts[1], s2, bw=1, delay='5ms' )
+        self.addLink( s1, s2, bw=1, delay='5ms')
 
 
 def changeLinkBw(ep1, ep2, in_bw, out_bw=-1):
@@ -60,8 +60,7 @@ def perfTest():
     import threading
 #    t = threading.Thread(target=h1.cmdPrint, args=('python2 server.py',))
 #    t.start()
-    h1.cmdPrint('python server.py&')
-    time.sleep(2)
+    h1.cmdPrint('python2 server.py&')
 #CHANGE USER
     #h2.cmd('xterm')
     #h2.cmd('echo "a" > server-output.txt')
@@ -71,7 +70,10 @@ def perfTest():
 #    t = threading.Thread(target=h2.cmd, args=('xterm -hold "./last.sh"',))    
     #t = threading.Thread(target=h2.cmd, args=('xterm -hold "/run_chrome.sh"',))
     #t.start()
-    h2.cmdPrint('su - vagrant -c "/usr/bin/google-chrome --incognito --disable-application-cahce http://10.0.0.1:8000/player.html&"')
+
+    h2.cmdPrint('su - vagrant -c "firefox --headless --private http://'+ h1.IP() +':8000/player.html&"')
+
+#    h2.cmdPrint('su - tech -c "/usr/bin/google-chrome --incognito --disable-application-cahce http://' + h1.IP() + ':8000/player.html&"')
     s1, s2 = net.get('s1', 's2')
     print 'sleepin`'
     time.sleep(80)
