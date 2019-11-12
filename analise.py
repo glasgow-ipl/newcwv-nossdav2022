@@ -50,7 +50,7 @@ plt.legend()
 import sys
 import getopt
 
-available_bitrates = [86000, 156000, 281000, 437000, 827000,]  #+ [1604000]
+available_bitrates = [86000, 156000, 281000, 437000, 5*10**5, 827000, 1*10**6]  #+ [1604000]
 
 bandwidth_limits = [(0, 1*10**6), (80, 1*10**6), (80, .5*10**6), (140, .5*10**6), (140, 1*10**6), (200, 1*10**6)]
 
@@ -73,13 +73,16 @@ def main():
 
 	fig, ax1= plt.subplots()
 
-	ax1.plot(times, chunks, 'r', label='chunk #')
+	#ax1.plot(times, chunks, 'r', label='chunk #')
+	ax1.set_xlabel('time')
+	ax1.set_ylabel('cwnd')
 
 	ax2 = ax1.twinx()
 
 	print times, qualities
-	ax2.plot(times, qualities, 'b', marker='o', label='requested bitrate')
+	ax2.plot(times, qualities, 'b', marker='o', label='requested bit-rate')
 	ax2.set_yticks(available_bitrates)
+	ax2.set_ylabel('bit-rate')
 
 	limit_opts = {'color': 'green', 'ls': '--', 'lw': 1, 'label': 'bandwidth limit'}
 
