@@ -42,6 +42,8 @@ class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         print 'PATH %s' % self.path
         if 'video' in self.path:
             cpu_load = psutil.cpu_percent()
+            if self.request != self.wfile._sock:
+                print '%s %d %d' % ('>'*15, self.request.fileno(), self.wfile._sock.fileno())
             info = getTCPInfo(self.wfile._sock)
             info += ", CPU_LOAD: %f" % cpu_load
 
