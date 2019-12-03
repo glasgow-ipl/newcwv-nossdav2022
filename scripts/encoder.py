@@ -22,7 +22,7 @@ def check_and_create(dir_path):
 	print ("Checking: %s" % dir_path)
 	if not os.path.isdir(dir_path):
 		print ('Destination directory: %s does not exist, creating one' % dir_path)
-		os.mkdir(dir_path)
+		#os.mkdir(dir_path)
 	else:
 		print ('Found directory: %s ' % dir_path)
 
@@ -109,7 +109,7 @@ def process_mpds():
 	
 	# Make a string out of the stiched_mpds list
 	stiched_mpds = ''.join(x for x in stiched_mpds)
-	with open('bbb.mpd', 'w') as f:
+	with open('%sbbb.mpd' % prefix, 'w') as f:
 		# Put all tags prior to the <representation> tag in the mpd
 		f.write('''<?xml version="1.0" encoding="utf-8"?>
 <MPD xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -148,13 +148,16 @@ if __name__ == '__main__':
 	if args.prefix:
 		if not args.prefix.endswith('/'):
 			prefix = args.prefix + '/'
+		else:
+			prefix = args.prefix
+	else:
+		print ("No prefix given")
 	if args.source:
 		source = args.source 
 	if args.fps:
 		framerate = args.fps
 
 	print ('Running "%s" script with arguemnts: prefix(%s) source(%s) fps(%s)' % (args.action, prefix, source, framerate))
-
 	if args.action == 'truncate':
 		main_truncate()
 	elif args.action == 'encode':
