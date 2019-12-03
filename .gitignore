@@ -1,6 +1,14 @@
 #Data directory
-
 data/
+
+#local backups
+*.bak
+
+#Vagrant config files
+.vagrant/
+
+#Generated binaries
+*.pdf
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
