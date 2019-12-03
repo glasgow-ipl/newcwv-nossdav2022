@@ -2,6 +2,7 @@ from threading import Thread
 import os
 import time
 import sys
+import argparse
 
 # ffmpeg -i ../bbb_fragmented.mp4 -vf scale=%s -b:v %sM -bufsize %sM -c:v libx264 -x264opts 'keyint=30:min-keyint=30:no-scenecut' -crf 0 -preset veryslow -c:a copy %s/bbb_%s_%s.mp4
 
@@ -18,6 +19,7 @@ prefix = '/vagrant/'
 framerate = 60
 
 def check_and_create(dir_path):
+	print ("Checking: %s" % dir_path)
 	if not os.path.isdir(dir_path):
 		print ('Destination directory: %s does not exist, creating one' % dir_path)
 		os.mkdir(dir_path)
@@ -61,6 +63,7 @@ def main_truncate():
 		check_and_create('%s%s/out' % (prefix, quality) )
 		out_dir = '%s%s/out' % (prefix, quality)
 		truncate(in_source, out_dir)
+
 
 #TODO: Should really make a use of a built-in xml library for this
 def process_mpds():
@@ -131,10 +134,33 @@ def process_mpds():
 
 
 if __name__ == '__main__':
-	print ('Specify command: truncate, encode, or stitch')
-	if sys.argv[1] == 'truncate':
+	parser = argparse.ArgumentParser(description='Video utility script')
+	parser.add_argument('--prefix', '-p', help='Prefix')
+
+	parser.add_argument('--source', '-s', help='Mp4 video source')
+
+	parser.add_argument('--fps', help="Frames per second to use for re-encoding")
+
+	parser.add_argument('--action', required=True, help='Action to be performed by the script. Possible actions are: encode, truncate(segment), and mpd (to generate an MPD file)')
+
+	args = parser.parse_args()
+	
+	if args.prefix:
+		if not args.prefix.endswith('/'):
+			prefix = args.prefix + '/'
+	if args.source:
+		source = args.source 
+	if args.fps:
+		framerate = args.fps
+
+	print ('Running "%s" script with arguemnts: prefix(%s) source(%s) fps(%s)' % (args.action, prefix, source, framerate))
+
+	if args.action == 'truncate':
 		main_truncate()
-	elif sys.argv[1] == 'encode':
+	elif args.action == 'encode':
 		main_encode()
-	elif sys.argv[1] == 'mpd':
+	elif args.action == 'mpd':
 		process_mpds()
+	else:
+		print("Unknown action requested. Specify one of: truncate, encode, or mpd")
+
