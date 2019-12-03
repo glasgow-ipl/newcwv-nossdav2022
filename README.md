@@ -5,12 +5,11 @@
 To run the experiments, you need to:
 
 1. Clone this repository
-2. Obtain a DASH encoded data-set and place it within a directory path: <code>bbb_1.0/1.0/</code> relative from project's root
-3. Obtain a mpd (media presentation document file) and place it within a the <code>bbb_1.0/</code> directory. The MPD file needs to be called: <code>bbb.mpd</code>
-4. Create a results folder in the project root called <code>mn_res</code>
-5. Run the <code>init_and_run.sh</code> script (this will take a while)
+2. Obtain a video dataset and a media presentation description file. You can do that by <code>make gen_mpd</code> 
+3. Create a results folder in the project root called <code>mn_res</code>
+4. Run the <code>init_and_run.sh</code> script (this will take a while)
 
 # Plotting the results
 
-To plot the results you can use analise.py script. It takes a in_file via the <code>fname</code> flag, out_file via the <code>out</code> flag.
+To plot the results you can use the analise.py script. It takes a in_file via the <code>fname</code> flag, out_file via the <code>out</code> flag.
 
