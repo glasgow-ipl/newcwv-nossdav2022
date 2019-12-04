@@ -1,9 +1,5 @@
+Hopefully, at some point I'll just delete this file as it will be redundant. Rather than keeping it as a collection of hacks.
+
 Q: Browser gives CORS blocking error.
 A: Make sure all served files are fetched from the same origin.
-
-Q: Video freezes and does not play. JS console says mp4/ac3 is not supported.
-A: Have not figured this one out yet... Resolution for now seems to be get a browser that supports these codecs (chrome?)
-
-Q: I do not see cubic.out generated.
-A: This needs fixing... but for now make sure an empty cubic.out exists before running the experiment
 
