@@ -75,4 +75,9 @@ print getServerInfo()
 #f = open('cubic.out', 'w')
 
 print "serving at port", PORT
-httpd.serve_forever() 
+try:
+    httpd.serve_forever() 
+except Exception as e:
+    #Should not really ever get to this point, but if we do log will be interesting
+    with open('server.err', 'w') as f:
+        f.write(repr(e))
