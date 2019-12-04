@@ -5,7 +5,10 @@ from mininet.link import TCLink
 from mininet.util import dumpNodeConnections
 from mininet.log import setLogLevel
 #from mininet.node import OVSController
+
 import time
+from threading import Thread
+
 
 class SingleSwitchTopo( Topo ):
     "Single switch connected to n hosts."
@@ -42,6 +45,10 @@ def changeLinkBw(ep1, ep2, in_bw, out_bw=-1):
     link[0][1].config(**{'bw': out_bw if out_bw != -1 else in_bw})
 
 
+def run_on_host(host, cmd):
+    host.cmdPrint(cmd)
+
+
 def perfTest():
     "Create network and run simple performance test"
     topo = DumbbellTopo()
@@ -57,25 +64,14 @@ def perfTest():
 #CHANGE PYTHON2
     h1.cmdPrint('pwd')
 
-    import threading
-#    t = threading.Thread(target=h1.cmdPrint, args=('python2 server.py',))
-#    t.start()
-    h1.cmdPrint('python2 server.py&')
-#CHANGE USER
-    #h2.cmd('xterm')
-    #h2.cmd('echo "a" > server-output.txt')
-    #h2.cmd("runuser -l tech -c 'firefox --private --headless http://"+h1.IP()+":8000/player.html&'")
-    #h1.cmdPrint('ls -la')
+    t = Thread(target=run_on_host, args=(h1, 'python2 server.py'))
+    t.start()
 
-#    t = threading.Thread(target=h2.cmd, args=('xterm -hold "./last.sh"',))    
-    #t = threading.Thread(target=h2.cmd, args=('xterm -hold "/run_chrome.sh"',))
-    #t.start()
+    t = Thread(target=run_on_host, args=(h2, 'su - tech -c "nohup firefox --headless --private http://'+ h1.IP() +':8000/player.html"')) 
+    t.start()
 
-    h2.cmdPrint('su - vagrant -c "firefox --headless --private http://'+ h1.IP() +':8000/player.html&"')
-
-#    h2.cmdPrint('su - tech -c "/usr/bin/google-chrome --incognito --disable-application-cahce http://' + h1.IP() + ':8000/player.html&"')
     s1, s2 = net.get('s1', 's2')
-    print 'sleepin`'
+    print 'Waiting for 80 seconds'
     time.sleep(80)
     print 'changing BW'
     changeLinkBw(s1, s2, .5)
@@ -83,7 +79,16 @@ def perfTest():
     print 'changing BW'    
     changeLinkBw(s1, s2, 1)
     time.sleep(60)
+
+
+    print('alive: %s' % t.is_alive()) 
+    t.join()
+    print('alive: %s' % t.is_alive())
     
+    time.sleep(20)
+
+    print('alive: %s' % t.is_alive())
+
     net.stop()
 
 if __name__ == '__main__':
