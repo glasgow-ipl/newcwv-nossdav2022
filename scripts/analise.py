@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 # Current file format:
@@ -22,7 +24,7 @@ def parse_file(fname):
 		for i, line in enumerate(f):
 			if not line.strip():
 				continue
-			if i % 2 == 0:
+			if i % 2 == 1:
 				parse_tcpinfo(line)
 			else:
 				print "line", line
@@ -95,11 +97,13 @@ def main():
 	fig.legend(bbox_to_anchor=(0.5, 1), loc='upper center', ncol=3)	
 	fig.tight_layout()
 
+	print("save %s" % save)
+
 	if show:
 		plt.show()
 	if save:
 		print 'saving'	
-		plt.savefig('DASH_CC_effect.pdf', bbox_inches='tight')
+		plt.savefig('results/DASH_CC_effect.pdf', bbox_inches='tight')
 
 if __name__ == '__main__':
 	main()
