@@ -7,6 +7,7 @@ import SocketServer
 # For monitoriong CPU usage
 import psutil
 import time
+import os
 
 PORT = 8000
 
@@ -64,33 +65,37 @@ class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
                 print("sending shutdown signal")
                 self.server._BaseServer__shutdown_request = True
                 output_str = ''.join(output)
-                f = open('cubic.out', 'w')
+                f = open('logs/cubic.out', 'w')
                 f.write(output_str)
                 f.close()
                 
         print '-'*10+'END custom GET'+'-'*10
         SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
 
-handler = MyHandler
+# Change directory to project root and serve that
+os.chdir('..')
+print("CWD: %s" % os.getcwd())
 
+handler = MyHandler
 httpd = SocketServer.TCPServer(("", PORT), handler)
+
 now = time.time()
 
 #print psutil.cpu_percent()
 print getServerInfo()
 
-#f = open('cubic.out', 'w')
+#f = open('logs/cubic.out', 'w')
 
 print "serving at port", PORT
 try:
     httpd.serve_forever() 
 except Exception as e:
     # Should not really ever get to this point, but if we do log will be interesting
-    with open('server.err', 'w') as f:
+    with open('logs/server.err', 'w') as f:
         f.write(repr(e))
     # Write whatever output we had so far to the outfile
     output_str = ''.join(output)
-    f = open('cubic.out', 'w')
+    f = open('logs/cubic.out', 'w')
     f.write(output_str)
     f.close()
     
