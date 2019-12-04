@@ -10,6 +10,8 @@ import time
 
 PORT = 8000
 
+MAX_SEGMENTS = 635 # Assuming bbb_sunflower and 1 second segments TODO: Get value from MPD or data directory
+
 # Returns TCP_INFO encoded structure
 # for exact unpack format and size, check TCP_INFO struct at /usr/include/linux/tcp.h
 
@@ -17,6 +19,8 @@ PORT = 8000
 # 14 -> RCV_SSTRESH
 # 17 -> SND_SSTRESH
 # 18 -> SND_CWND
+
+output = []
 
 def getTCPInfo(s):
     fmt_14_04 = "B"*7+"I"*21
@@ -54,13 +58,16 @@ class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             if no == 'init':
                 no = '0'
 
-            with open('cubic.out', 'a') as f:
-                f.write('%.5f,%s,%s\n%s %s\n' % (t, quality, no,info, self.request.fileno()))
+            output.append('%.5f,%s,%s\n%s %s\n' % (t, quality, no,info, self.request.fileno()))
 
-            #if int(no) == 100:
-            #    print 'EXITING now'
-            #    sys.exit(1)
-
+            if int(no) == MAX_SEGMENTS:
+                print("sending shutdown signal")
+                self.server._BaseServer__shutdown_request = True
+                output_str = ''.join(output)
+                f = open('cubic.out', 'w')
+                f.write(output_str)
+                f.close()
+                
         print '-'*10+'END custom GET'+'-'*10
         SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
 
@@ -78,6 +85,12 @@ print "serving at port", PORT
 try:
     httpd.serve_forever() 
 except Exception as e:
-    #Should not really ever get to this point, but if we do log will be interesting
+    # Should not really ever get to this point, but if we do log will be interesting
     with open('server.err', 'w') as f:
         f.write(repr(e))
+    # Write whatever output we had so far to the outfile
+    output_str = ''.join(output)
+    f = open('cubic.out', 'w')
+    f.write(output_str)
+    f.close()
+    
