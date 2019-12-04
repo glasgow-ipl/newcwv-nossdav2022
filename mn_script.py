@@ -64,14 +64,15 @@ def perfTest():
 #CHANGE PYTHON2
     h1.cmdPrint('pwd')
 
-    t = Thread(target=run_on_host, args=(h1, 'python2 server.py'))
-    t.start()
+    server_thread = Thread(target=run_on_host, args=(h1, 'python2 server.py'))
+    server_thread.start()
 
     user = 'vagrant'
     host_ip = h1.IP()
 
-    t = Thread(target=run_on_host, args=(h2, 'su - %s -c "nohup firefox --headless --private http://%s:8000/player.html"' % (user, host_ip) )) 
-    t.start()
+    client_thread = Thread(target=run_on_host, args=(h2, 'su - %s -c "nohup firefox --headless --private http://%s:8000/player.html"' % (user, host_ip) ))
+    client_thread.setDaemon(True) 
+    client_thread.start()
 
     s1, s2 = net.get('s1', 's2')
     print 'Waiting for 80 seconds'
@@ -83,14 +84,8 @@ def perfTest():
     changeLinkBw(s1, s2, 1)
     time.sleep(60)
 
-
-    print('alive: %s' % t.is_alive()) 
-    t.join()
-    print('alive: %s' % t.is_alive())
-    
-    time.sleep(20)
-
-    print('alive: %s' % t.is_alive())
+    # Wait for the last sement to be requested at the server
+    server_thread.join()
 
     net.stop()
 
