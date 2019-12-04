@@ -1,6 +1,7 @@
 <!doctype html>
 <html>
     <head>
+        <meta charset="utf-8" />
         <title>Dash.js Rocks</title>
         <style>
             video {
@@ -16,7 +17,7 @@
         <script src="http://10.0.0.1:8000/dash.all.debug.js"></script>
         <script>
             (function(){
-                var url = "http://10.0.0.1:8000/bbb_1.0/bbb.mpd";
+                var url = "http://10.0.0.1:8000/data/bbb.mpd";
                 var player = dashjs.MediaPlayer().create();
                 player.initialize(document.querySelector("#videoPlayer"), url, true);
             })();
