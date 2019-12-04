@@ -40,7 +40,7 @@ class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         print '-'*10+'custom GET'+'-'*10
  
         print 'PATH %s' % self.path
-        if 'video' in self.path:
+        if 'm4s' in self.path: # this is a segment
             cpu_load = psutil.cpu_percent()
             if self.request != self.wfile._sock:
                 print '%s %d %d' % ('>'*15, self.request.fileno(), self.wfile._sock.fileno())
@@ -48,16 +48,18 @@ class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             info += ", CPU_LOAD: %f" % cpu_load
 
             t = time.time() - now
-            quality_no = self.path.split('video=')[1]
-            if '-' in quality_no:
-                quality, no = quality_no.split('-')
-                no = no[:-4]
-                with open('cubic.out', 'a') as f:
-                    f.write('%.5f,%s,%s\n%s %s\n' % (t, quality, no,info, self.request.fileno()))
-                #print 'written to FILE %s' % str(f)
-                if int(no) == 100:
-                    print 'EXITING now'
-                    sys.exit(1)
+            root_stripped = self.path.split('/data/')[1].split('/') 
+            quality = root_stripped[0]
+            no = root_stripped[-1][2:-4] # TODO: remove magic numbers
+            if no == 'init':
+                no = '0'
+
+            with open('cubic.out', 'a') as f:
+                f.write('%.5f,%s,%s\n%s %s\n' % (t, quality, no,info, self.request.fileno()))
+
+            #if int(no) == 100:
+            #    print 'EXITING now'
+            #    sys.exit(1)
 
         print '-'*10+'END custom GET'+'-'*10
         SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
