@@ -78,6 +78,7 @@ def process_mpds():
 		with open(segment_dir + '/output.mpd', 'r') as f:
 			content = f.read()
 			bandwidth = content.split('bandwidth="')[1].split('"')[0]
+			seg_duration = content.split('duration="')[1].split('"')[0]
 
 		representation_tag = '\t'*3 + '<Representation id="%s" mimeType="video/mp4" codecs="avc1.64001f" bandwidth="%s" width="%s" height="%s" frameRate="60/1">\n' % (i, bandwidth, width, height)		
 		stiched_mpds.append(representation_tag)
@@ -85,7 +86,9 @@ def process_mpds():
 
 		files = sorted(os.listdir(segment_dir))
 		
-		segmentlist_tag = '\t'*4 + '<SegmentList timescale="1000000" duration="5000000" startNumber="1">\n'  
+		# Duration should NOT be a hardcoded value!
+		# Duration is the length of each individual segment duration (math.ciel(mediaPresentationDuration / # of segments))
+		segmentlist_tag = '\t'*4 + ('<SegmentList timescale="1000000" duration="%s" startNumber="1">\n' % seg_duration)  
 		stiched_mpds.append(segmentlist_tag)
 		print (segmentlist_tag)
 
