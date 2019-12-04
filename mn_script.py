@@ -67,7 +67,10 @@ def perfTest():
     t = Thread(target=run_on_host, args=(h1, 'python2 server.py'))
     t.start()
 
-    t = Thread(target=run_on_host, args=(h2, 'su - tech -c "nohup firefox --headless --private http://'+ h1.IP() +':8000/player.html"')) 
+    user = 'vagrant'
+    host_ip = h1.IP()
+
+    t = Thread(target=run_on_host, args=(h2, 'su - %s -c "nohup firefox --headless --private http://%s:8000/player.html"' % (user, host_ip) )) 
     t.start()
 
     s1, s2 = net.get('s1', 's2')
