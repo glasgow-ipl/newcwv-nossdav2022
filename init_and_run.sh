@@ -1,3 +1,3 @@
 vagrant up
-vagrant ssh -c "cd exp && sudo ./run_exp.sh"
+vagrant ssh -c "mkdir logs && cd scripts && make gen_mpd && sudo python2 mn_script.py"
 

@@ -11,7 +11,7 @@ import os
 
 PORT = 8000
 
-MAX_SEGMENTS = 635 # Assuming bbb_sunflower and 1 second segments TODO: Get value from MPD or data directory
+MAX_SEGMENTS = 30 # Assuming bbb_sunflower and 1 second segments TODO: Get value from MPD or data directory
 
 # Returns TCP_INFO encoded structure
 # for exact unpack format and size, check TCP_INFO struct at /usr/include/linux/tcp.h

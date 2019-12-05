@@ -20,8 +20,9 @@ $RUN_PROBE = <<SCRIPT
 	sudo cp /usr/bin/ovs-testcontroller /usr/bin/ovs-controller
 	export LC_ALL=C
 	pip install psutil
-	mkdir exp
-	cd exp && cp -r /vagrant/* . && rm Vagrantfile
+	echo "Copying"
+	cp -r /vagrant/* . && rm Vagrantfile
+	echo "Done"
 SCRIPT
 
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
