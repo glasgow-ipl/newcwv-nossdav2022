@@ -1,5 +1,10 @@
-import matplotlib
-matplotlib.use('Agg')
+import os
+
+# Force matplotlib to not use Xserver if there is no such
+if not os.environ['DISPLAY']:
+	import matplotlib
+	matplotlib.use('Agg')
+	
 import matplotlib.pyplot as plt
 
 # Current file format:
@@ -18,7 +23,7 @@ def parse_videoinfo(line):
 
 def parse_file(fname):
 	times = []
-	qualities = []
+	bandwidths = []
 	chunks = []
 	with open(fname) as f:
 		for i, line in enumerate(f):
@@ -30,13 +35,16 @@ def parse_file(fname):
 				print "line", line
 				time, quality, chunk = parse_videoinfo(line)
 				times += [time]
-				qualities += [quality]
+				i = resolutions.index(str(quality))
+				bandwidth = bitrates[i] * 10**5
+				bandwidths += [bandwidth]
+#				qualities += [quality]
 				chunks += [chunk]
 
 				if int(chunk) == 100:
 					break
 
-	return times, qualities, chunks
+	return times, bandwidths, chunks
 
 
 '''
@@ -58,8 +66,10 @@ bandwidth_limits = [(0, 1*10**6), (80, 1*10**6), (80, .5*10**6), (140, .5*10**6)
 
 bw_l = [(0, 1000000), (200, 1000000)]
 
-def main():
+resolutions=['360', '480', '720', '1080']#, '2560x1440']
+bitrates=[1.5, 4, 7.5, 12]#, 24]
 
+def main():
 	opts, _ = getopt.getopt(sys.argv[1:], "", ['fname=', 'save', 'noshow', 'out='])
 	opts_d = {k:v for (k,v) in opts}
 
