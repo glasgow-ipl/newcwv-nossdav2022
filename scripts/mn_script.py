@@ -74,8 +74,7 @@ def perfTest():
     client_thread.setDaemon(True) 
     client_thread.start()
 
-
-    '''
+'''
     s1, s2 = net.get('s1', 's2')
     print 'Waiting for 80 seconds'
     time.sleep(80)
@@ -85,7 +84,8 @@ def perfTest():
     print 'changing BW'    
     changeLinkBw(s1, s2, 1)
     time.sleep(60)
-    '''
+'''
+    
     # Wait for the last sement to be requested at the server
     server_thread.join()
 
