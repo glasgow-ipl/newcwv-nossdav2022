@@ -42,13 +42,13 @@ def getServerInfo():
 
 class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def do_GET(self):
-        print '-'*10+'custom GET'+'-'*10
+        print ('-'*10+'custom GET'+'-'*10)
  
-        print 'PATH %s' % self.path
+        print ('PATH %s' % self.path)
         if 'm4s' in self.path: # this is a segment
             cpu_load = psutil.cpu_percent()
             if self.request != self.wfile._sock:
-                print '%s %d %d' % ('>'*15, self.request.fileno(), self.wfile._sock.fileno())
+                print ('%s %d %d' % ('>'*15, self.request.fileno(), self.wfile._sock.fileno()))
             info = getTCPInfo(self.wfile._sock)
             info += ", CPU_LOAD: %f" % cpu_load
 
@@ -69,7 +69,7 @@ class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
                 f.write(output_str)
                 f.close()
                 
-        print '-'*10+'END custom GET'+'-'*10
+        print ('-'*10+'END custom GET'+'-'*10)
         SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
 
 # Change directory to project root and serve that
@@ -82,11 +82,11 @@ httpd = SocketServer.TCPServer(("", PORT), handler)
 now = time.time()
 
 #print psutil.cpu_percent()
-print getServerInfo()
+print(getServerInfo())
 
 #f = open('logs/cubic.out', 'w')
 
-print "serving at port", PORT
+print("serving at port", PORT)
 try:
     httpd.serve_forever() 
 except Exception as e:
