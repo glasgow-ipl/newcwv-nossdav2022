@@ -22,7 +22,7 @@ def check_and_create(dir_path):
 	print ("Checking: %s" % dir_path)
 	if not os.path.isdir(dir_path):
 		print ('Destination directory: %s does not exist, creating one' % dir_path)
-		#os.mkdir(dir_path)
+		os.mkdir(dir_path)
 	else:
 		print ('Found directory: %s ' % dir_path)
 
@@ -40,7 +40,10 @@ def encode(idx):
 	if dst_dir:
 		check_and_create(dst_dir)
 
-	os.system("ffmpeg -i " + source + " -vf scale=" + resolutions[idx] + " -b:v " + str(bitrates[idx]) + "M -bufsize " + str(bitrates[idx]/2) + "M -c:v libx264 -x264opts 'keyint=60:min-keyint=60:no-scenecut' -c:a copy " + destination )
+	#print("ffmpeg -i " + source + " -vf scale=" + resolutions[idx] + "
+	cmd = "ffmpeg -i " + source + " -vf scale=" + resolutions[idx] + " -b:v " + str(bitrates[idx]) + "M -bufsize " + str(bitrates[idx]/2) + "M -c:v libx264 -x264opts 'keyint=60:min-keyint=60:no-scenecut' -c:a copy " + destination
+	print("Encoding %s: " % cmd)
+	os.system(cmd)
 
 	print ('Done encoding %sp' % quality) 
 
