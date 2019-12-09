@@ -8,7 +8,7 @@ bbb_hd:=${out_dir}/bbb_sunflower_2160p_60fps_normal.mp4
 #setup
 ${bbb_hd}:
 	@echo 'running setup'
-	wget http://distribution.bbb3d.renderfarming.net/video/mp4/bbb_sunflower_2160p_60fps_normal.mp4
+	wget http://distribution.bbb3d.renderfarming.net/video/mp4/bbb_sunflower_2160p_60fps_normal.mp4 -P ${out_dir}
 	@echo 'Video downloaded successfully'
 
 #encoder
