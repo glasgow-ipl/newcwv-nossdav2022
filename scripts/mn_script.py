@@ -13,14 +13,14 @@ from threading import Thread
 class SingleSwitchTopo( Topo ):
     "Single switch connected to n hosts."
     def build( self, n=2 ):
-	switch = self.addSwitch( 's1' )
-	for h in range(n):
-	    # Each host gets 50%/n of system CPU
-	    host = self.addHost( 'h%s' % (h + 1),
-		                 cpu=.5/n )
-	    # 10 Mbps, 5ms delay, 2% loss, 1000 packet queue
-	    self.addLink( host, switch, bw=10, delay='5ms', loss=2,
-                          max_queue_size=1000, use_htb=True )
+        switch = self.addSwitch( 's1' )
+        for h in range(n):
+            # Each host gets 50%/n of system CPU
+            host = self.addHost( 'h%s' % (h + 1),
+                            cpu=.5/n )
+            # 10 Mbps, 5ms delay, 2% loss, 1000 packet queue
+            self.addLink( host, switch, bw=10, delay='5ms', loss=2,
+                            max_queue_size=1000, use_htb=True )
 
 class DumbbellTopo( Topo ):
     "Dumbbell topology with n hosts."
@@ -29,7 +29,7 @@ class DumbbellTopo( Topo ):
         s2 = self.addSwitch( 's2' )
         hosts = []
         for h in range(n):
-	        # Each host gets 50%/n of system CPU
+            # Each host gets 50%/n of system CPU
             host = self.addHost( 'h%s' % (h + 1), cpu=.5/n )
             hosts += [host]
 
@@ -53,11 +53,11 @@ def perfTest():
     "Create network and run simple performance test"
     topo = DumbbellTopo()
     net = Mininet( topo=topo,
-	           host=CPULimitedHost, link=TCLink)
+               host=CPULimitedHost, link=TCLink)
     net.start()
-    print "Dumping host connections"
+    print("Dumping host connections")
     dumpNodeConnections( net.hosts )
-    print "Testing network connectivity"
+    print("Testing network connectivity")
     net.pingAll()
 
     h1, h2 = net.get( 'h1', 'h2' )
@@ -74,7 +74,7 @@ def perfTest():
     client_thread.setDaemon(True) 
     client_thread.start()
 
-'''
+    '''
     s1, s2 = net.get('s1', 's2')
     print 'Waiting for 80 seconds'
     time.sleep(80)
@@ -84,7 +84,7 @@ def perfTest():
     print 'changing BW'    
     changeLinkBw(s1, s2, 1)
     time.sleep(60)
-'''
+    '''
     
     # Wait for the last sement to be requested at the server
     server_thread.join()
