@@ -10,6 +10,9 @@
 
 
 $RUN_PROBE = <<SCRIPT
+  service vboxguest enable
+  service vboxservice enable
+
 	pwd
 	apt-get update
 	apt-get install -y firefox
@@ -25,47 +28,18 @@ $RUN_PROBE = <<SCRIPT
 	echo "Done"
 SCRIPT
 
-# All Vagrant configuration is done below. The "2" in Vagrant.configure
-# configures the configuration version (we support older styles for
-# backwards compatibility). Please don't change it unless you know what
-# you're doing.
-Vagrant.configure("2") do |config|
-  # The most common configuration options are documented and commented below.
-  # For a complete reference, please see the online documentation at
-  # https://docs.vagrantup.com.
 
-  # Every Vagrant development environment requires a box. You can search for
-  # boxes at https://vagrantcloud.com/search.
+Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/xenial64"
 
   # enable X11 forwarding
   config.ssh.forward_agent = true
   config.ssh.forward_x11 = true
 
-  # Disable automatic box update checking. If you disable this, then
-  # boxes will only be checked for updates when the user runs
-  # `vagrant box outdated`. This is not recommended.
-  # config.vm.box_check_update = false
-
-  # Create a forwarded port mapping which allows access to a specific port
-  # within the machine from a port on the host machine. In the example below,
-  # accessing "localhost:8080" will access port 80 on the guest machine.
-  # NOTE: This will enable public access to the opened port
-  # config.vm.network "forwarded_port", guest: 80, host: 8080
-
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine and only allow access
   # via 127.0.0.1 to disable public access
   # config.vm.network "forwarded_port", guest: 80, host: 8080, host_ip: "127.0.0.1"
-
-  # Create a private network, which allows host-only access to the machine
-  # using a specific IP.
-  # config.vm.network "private_network", ip: "192.168.33.10"
-
-  # Create a public network, which generally matched to bridged network.
-  # Bridged networks make the machine appear as another physical device on
-  # your network.
-  # config.vm.network "public_network"
 
   # Share an additional folder to the guest VM. The first argument is
   # the path on the host to the actual folder. The second argument is
@@ -77,26 +51,35 @@ Vagrant.configure("2") do |config|
   # backing providers for Vagrant. These expose provider-specific options.
   # Example for VirtualBox:
   #
-   config.vm.provider "virtualbox" do |vb|
-     # Display the VirtualBox GUI when booting the machine
-  #   vb.gui = true
-  #
-     # Customize the amount of memory on the VM:
-     vb.memory = "8196"
-   end
-  #
-  # View the documentation for the provider you are using for more
-  # information on available options.
+  config.vm.provider :virtualbox do |v|
+    v.customize ["modifyvm", :id, "--memory",                 "8192"]
+    v.customize ["modifyvm", :id, "--cpus",                      "4"]
+    v.customize ["modifyvm", :id, "--hwvirtex",                 "on"]
+    v.customize ["modifyvm", :id, "--nestedpaging",             "on"]
+    v.customize ["modifyvm", :id, "--largepages",               "on"]
+    v.customize ["modifyvm", :id, "--acpi",                     "on"]
+    v.customize ["modifyvm", :id, "--apic",                     "on"]
+    v.customize ["modifyvm", :id, "--ioapic",                   "on"]
+    v.customize ["modifyvm", :id, "--x2apic",                   "on"]
+    v.customize ["modifyvm", :id, "--biosapic",             "x2apic"]
+    v.customize ["modifyvm", :id, "--hpet",                     "on"]
+    v.customize ["modifyvm", :id, "--rtcuseutc",                "on"]
+    v.customize ["modifyvm", :id, "--paravirtprovider",        "kvm"]
+    v.customize ["modifyvm", :id, "--nictype1",             "virtio"]
+    v.customize ["modifyvm", :id, "--nictype2",             "virtio"]
+    v.customize ["modifyvm", :id, "--cableconnected1",          "on"]
+    v.customize ["modifyvm", :id, "--audio",                  "none"]
+    v.customize ["modifyvm", :id, "--usb",                     "off"]
+    v.customize ["modifyvm", :id, "--usbehci",                 "off"]
+    v.customize ["modifyvm", :id, "--usbxhci",                 "off"]
+    v.customize ["modifyvm", :id, "--usbcardreader",           "off"]
+    v.customize ["modifyvm", :id, "--accelerate2dvideo",        "on"]
+    v.customize ["modifyvm", :id, "--accelerate3d",             "on"]
+    v.customize ["modifyvm", :id, "--vram",                    "256"]
+    v.customize ["modifyvm", :id, "--graphicscontroller", "VBoxSVGA"]
+    v.gui = true
+  end
 
-  # Enable provisioning with a shell script. Additional provisioners such as
-  # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
-  # documentation for more information about their specific syntax and use.
-  # config.vm.provision "shell", inline: <<-SHELL
-  #   apt-get update
-  #   apt-get install -y apache2
-  # SHELL
-
-  config.vm.provision "shell", privileged: true, inline: $RUN_PROBE
-
+  config.vm.provision "shell", privileged: true, inline: $RUN_PROBE 
 
 end
