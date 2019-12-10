@@ -1,7 +1,7 @@
 import os
 
 # Force matplotlib to not use Xserver if there is no such
-if not os.environ['DISPLAY']:
+if not os.environ.get('DISPLAY'):
 	import matplotlib
 	matplotlib.use('Agg')
 	
