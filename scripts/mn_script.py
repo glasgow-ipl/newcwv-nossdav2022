@@ -8,6 +8,7 @@ from mininet.log import setLogLevel
 
 import time
 from threading import Thread
+import os
 
 
 class SingleSwitchTopo( Topo ):
@@ -67,7 +68,7 @@ def perfTest():
     server_thread = Thread(target=run_on_host, args=(h1, 'python2 server.py'))
     server_thread.start()
 
-    user = 'tech'
+    user = os.getlogin()
     host_ip = h1.IP()
 
     client_thread = Thread(target=run_on_host, args=(h2, 'su - %s -c "nohup firefox --headless --private http://%s:8000/scripts/player.html"' % (user, host_ip) ))
