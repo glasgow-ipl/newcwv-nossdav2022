@@ -114,3 +114,11 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# Editor settings
+.vscode
+.idea
+.eclipse
+
+# Configuration files
+scripts/nginx-conf.conf
