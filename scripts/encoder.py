@@ -115,7 +115,8 @@ def process_mpds():
 	
 	# Make a string out of the stiched_mpds list
 	stiched_mpds = ''.join(x for x in stiched_mpds)
-	with open('%sbbb.mpd' % prefix, 'w') as f:
+	mpd_path = '%sbbb.mpd' % prefix
+	with open(mpd_path, 'w') as f:
 		# Put all tags prior to the <representation> tag in the mpd
 		f.write('''<?xml version="1.0" encoding="utf-8"?>
 <MPD xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -137,6 +138,8 @@ def process_mpds():
 		f.write('\t'*2 + '''</AdaptationSet>
 	</Period>
 </MPD>''') # closing tags
+
+	print('file saved to: %s' % mpd_path)
 
 
 if __name__ == '__main__':
