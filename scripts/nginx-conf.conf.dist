@@ -1,0 +1,1 @@
+events { } http { server { listen X.X.X.X; root /PATH_TO_ROOT_FOLDER; access_log /ACCESS_LOG_LOCATION;} }
