@@ -1,4 +1,4 @@
-out_dir:=../data
+out_dir:=/vagrant/data
 bbb_hd:=${out_dir}/bbb_sunflower_2160p_60fps_normal.mp4
 
 

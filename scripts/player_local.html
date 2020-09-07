@@ -14,10 +14,10 @@
         <div>
             <video id="videoPlayer" controls muted autoplay=""></video>
         </div>
-        <script src="http://10.0.0.1/scripts/dash.all.debug.js"></script>
+        <script src="http://localhost/scripts/dash.all.debug.js"></script>
         <script>
             (function(){
-                var url = "http://10.0.0.1/data/bbb.mpd";
+                var url = "http://localhost/data/bbb.mpd";
                 var player = dashjs.MediaPlayer().create();
                 player.initialize(document.querySelector("#videoPlayer"), url, true);
             })();
