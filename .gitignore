@@ -122,3 +122,6 @@ venv.bak/
 
 # Configuration files
 scripts/nginx-conf.conf
+
+# Logs
+logs/
