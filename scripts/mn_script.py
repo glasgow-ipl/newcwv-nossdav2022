@@ -12,6 +12,7 @@ from threading import Thread
 import os
 import datetime
 import sys
+import server
 
 
 class SingleSwitchTopo( Topo ):
@@ -73,6 +74,7 @@ def doSimulation():
     net = Mininet( topo=topo,
                host=CPULimitedHost, link=TCLink)
     net.start()
+    precise_time_str = "%m-%d-%H:%M:%S:%f"
 
     # Test connectivity
     print("Dumping host connections")
@@ -93,8 +95,19 @@ def doSimulation():
     # Create server config
     time_str = datetime.datetime.now().strftime('%m-%d-%H%M')
     server_log_name = "%s_nginx_access.log" % time_str
-    server.cmd("echo 'events { } http { server { listen " + server_ip + "; root /vagrant; access_log /vagrant/logs/"
-         + server_log_name + ";} }' > nginx-conf.conf")
+
+    
+
+    # optionally add buffer=32k (or some other big value for access_log)
+    config_str = "events { } http { log_format tcp_info '$time_local, \"$request\", $status, $tcpinfo_rtt, $tcpinfo_rttvar, \"$tcpinfo_snd_cwnd\", $tcpinfo_rcv_space, $body_bytes_sent, \"$http_referer\", \"$http_user_agent\"'; server { listen " + server_ip + "; root /vagrant; access_log /vagrant/logs/" + server_log_name + " tcp_info;} }"
+    with open('nginx-conf.conf', 'w') as f:
+        f.write(config_str)
+
+    # Start watchdog service
+
+    server.cmd("python watchdog.py &")
+    watchdog_pid = server.cmd("echo $!")
+    print("watchdog pid: %s" % watchdog_pid)
 
     # Start HTTP server
     server_out = server.cmd("sudo nginx -c " + wd + "/nginx-conf.conf &")
@@ -103,6 +116,7 @@ def doSimulation():
 
     net.iperf((client, server))
 
+    print("starting client at: %s" % datetime.datetime.now().strftime(precise_time_str))
     client_cmd = 'su - %s -c "nohup firefox --headless --private http://%s/scripts/player.html&"' % (user, server_ip)
     print ("Client cmd: %s " % client_cmd)
 
@@ -127,9 +141,8 @@ def doSimulation():
     print 'Waiting for 80 seconds'
     time.sleep(80)
 
-    #month-day-hour:minute:second:microsecond
-    precise_time_str = "%m-%d-%H:%M:%S:%f"
 
+    #month-day-hour:minute:second:microsecond
     print 'changing BW %s ' % datetime.datetime.now().strftime(precise_time_str)
     changeLinkBw(server, s1, .5)
     net.iperf((client, server))
@@ -140,13 +153,18 @@ def doSimulation():
     net.iperf((client, server))
     time.sleep(80)
     
-    # Wait for the last sement to be requested at the server
-    #server_thread.join()
+    print("Waiting for server to finish %s" % datetime.datetime.now().strftime(precise_time_str))
+    server.cmd("wait %s " % watchdog_pid)
+
+    time.sleep(2)
 
     print("Stopping server")
     server.cmd("sudo nginx -s stop")
     print("Closing...")
     net.stop()
+
+    os.system('su - %s -c "/vagrant/scripts/quitff.sh"' % user)
+
 
 if __name__ == '__main__':
     setLogLevel( 'info' )
