@@ -9,9 +9,9 @@ import psutil
 import time
 import os
 
-PORT = 8000
+import threading
 
-MAX_SEGMENTS = 30 # Assuming bbb_sunflower and 1 second segments TODO: Get value from MPD or data directory
+PORT = 8000
 
 # Returns TCP_INFO encoded structure
 # for exact unpack format and size, check TCP_INFO struct at /usr/include/linux/tcp.h
@@ -36,66 +36,38 @@ def getTCPInfo(s):
     return "app_limited: %s, RCV_SSTRESH: %s, SND_SSTRESH: %s, SND_CWND: %s" % (x[7], x[21], x[24], x[25])
 
 
-def getServerInfo():
-    return getTCPInfo(httpd.socket)
-
-
 class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def do_GET(self):
-        print ('-'*10+'custom GET'+'-'*10)
- 
-        print ('PATH %s' % self.path)
-        if 'm4s' in self.path: # this is a segment
-            cpu_load = psutil.cpu_percent()
-            if self.request != self.wfile._sock:
-                print ('%s %d %d' % ('>'*15, self.request.fileno(), self.wfile._sock.fileno()))
-            info = getTCPInfo(self.wfile._sock)
-            info += ", CPU_LOAD: %f" % cpu_load
+        if self.path == '/end':
+            print ("will close server now")
+            self.server.server_close()
+        
 
-            t = time.time() - now
-            root_stripped = self.path.split('/data/')[1].split('/') 
-            quality = root_stripped[0]
-            no = root_stripped[-1][2:-4] # TODO: remove magic numbers
-            if no == 'init':
-                no = '0'
-
-            output.append('%.5f,%s,%s\n%s %s\n' % (t, quality, no,info, self.request.fileno()))
-
-            if int(no) == MAX_SEGMENTS:
-                print("sending shutdown signal")
-                self.server._BaseServer__shutdown_request = True
-                output_str = ''.join(output)
-                f = open('logs/cubic.out', 'w')
-                f.write(output_str)
-                f.close()
-                
-        print ('-'*10+'END custom GET'+'-'*10)
         SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
 
-# Change directory to project root and serve that
-os.chdir('..')
-print("CWD: %s" % os.getcwd())
 
-handler = MyHandler
-httpd = SocketServer.TCPServer(("", PORT), handler)
+def start_server():
+    handler = MyHandler
+    httpd = SocketServer.TCPServer(("", PORT), handler)
 
-now = time.time()
+    try:
+        httpd.serve_forever() 
+    except Exception as e:
+        if e.args[0] == 9:
+            return
+        # Should not really ever get to this point, but if we do log will be interesting
+        with open('logs/server.err', 'w') as f:
+            f.write(repr(e))
+        # Write whatever output we had so far to the outfile
+        output_str = ''.join(output)
+        f = open('logs/cubic.out', 'w')
+        f.write(output_str)
+        f.close()
 
-#print psutil.cpu_percent()
-print(getServerInfo())
 
-#f = open('logs/cubic.out', 'w')
+if __name__ == '__main__':
+    t = threading.Thread(target=start_server)        
+    t.start()
 
-print("serving at port", PORT)
-try:
-    httpd.serve_forever() 
-except Exception as e:
-    # Should not really ever get to this point, but if we do log will be interesting
-    with open('logs/server.err', 'w') as f:
-        f.write(repr(e))
-    # Write whatever output we had so far to the outfile
-    output_str = ''.join(output)
-    f = open('logs/cubic.out', 'w')
-    f.write(output_str)
-    f.close()
-    
+
+    t.join()
