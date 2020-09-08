@@ -21,6 +21,13 @@
                 var player = dashjs.MediaPlayer().create();
                 player.initialize(document.querySelector("#videoPlayer"), url, true);
             })();
+
+            var player_element = document.getElementById("videoPlayer");
+            player_element.onended = function() {
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.open("GET", "http://10.0.0.1:8000/end", false);
+                xmlHttp.send(null);
+            };
         </script>
     </body>
 </html>
