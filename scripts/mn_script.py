@@ -23,9 +23,11 @@ class SingleSwitchTopo( Topo ):
             # Each host gets 50%/n of system CPU
             host = self.addHost( 'h%s' % (h + 1),
                             cpu=.5/n )
-            # 10 Mbps, 5ms delay, 2% loss, 1000 packet queue
-            self.addLink( host, switch, bw=1000, delay='5ms',
-                             )
+            # 10 Mbps, 5ms delay, 2% loss
+            bw = 1000
+            delay = 5
+            bdp = bw*delay
+            self.addLink( host, switch, bw=bw, delay='%dms' % delay, max_queue_size=bdp)
 
 class DumbbellTopo( Topo ):
     "Dumbbell topology with n hosts."
@@ -39,15 +41,19 @@ class DumbbellTopo( Topo ):
             hosts += [host]
 
         # 10 Mbps, 5ms delay, 2% loss, 1000 packet queue
-        self.addLink( hosts[0], s1, bw=10000, delay='5ms'  )
-        self.addLink( hosts[1], s2, bw=10000, delay='5ms' )
-        self.addLink( s1, s2, bw=10000, delay='5ms')
+        bw = 1000
+        delay = 5
+        bdp = bw*delay
+        self.addLink( hosts[0], s1, bw=bw, delay='%dms' % delay, max_queue_size=bdp)
+        self.addLink( hosts[1], s2, bw=bw, delay='%dms' % delay, max_queue_size=bdp)
+        self.addLink( s1, s2, bw=bw, delay='%dms' % delay, max_queue_size=bdp)
 
 
-def changeLinkBw(ep1, ep2, in_bw, out_bw=-1):
+def changeLinkBw(ep1, ep2, in_bw, delay, out_bw=-1):
     link = ep1.connectionsTo(ep2)
-    link[0][0].config(**{'bw': in_bw})
-    link[0][1].config(**{'bw': out_bw if out_bw != -1 else in_bw})
+    bdp = in_bw * delay
+    link[0][0].config(**{'bw': in_bw, 'max_queue_size': bdp})
+    link[0][1].config(**{'bw': out_bw if out_bw != -1 else in_bw, 'max_queue_size': bdp})
 
 
 def run_on_host(host, cmd):
@@ -64,8 +70,14 @@ def test_change_bw():
     s1 = net.get('s1')
     net.iperf((h1, h2))
     
-    changeLinkBw(h1, s1, 10)
+    changeLinkBw(h1, s1, 10, 5)
     net.iperf((h1, h2))
+    net.iperf((h1, h2))
+    net.iperf((h1, h2))
+
+    setLogLevel('info')
+    #print(h1.connectionsTo(s1)[0][0].tc())
+    # CLI(net)
 
 def doSimulation():
     "Create network and run simple performance test"
@@ -144,12 +156,12 @@ def doSimulation():
 
     #month-day-hour:minute:second:microsecond
     print 'changing BW %s ' % datetime.datetime.now().strftime(precise_time_str)
-    changeLinkBw(server, s1, .5)
+    changeLinkBw(server, s1, .5, 5)
     net.iperf((client, server))
     time.sleep(60)
 
     print 'changing BW %s ' % datetime.datetime.now().strftime(precise_time_str)    
-    changeLinkBw(server, s1, 10)
+    changeLinkBw(server, s1, 10, 5)
     net.iperf((client, server))
     time.sleep(80)
     
