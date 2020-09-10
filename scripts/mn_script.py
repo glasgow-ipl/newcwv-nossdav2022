@@ -16,6 +16,7 @@ import server
 
 import subprocess
 
+bw_init = 200
 class SingleSwitchTopo( Topo ):
     "Single switch connected to n hosts."
     def build( self, n=2 ):
@@ -25,10 +26,9 @@ class SingleSwitchTopo( Topo ):
             host = self.addHost( 'h%s' % (h + 1),
                             cpu=.5/n )
             # 10 Mbps, 5ms delay, 2% loss
-            bw = 1000
             delay = 5
-            bdp = bw*delay
-            self.addLink( host, switch, bw=bw, delay='%dms' % delay, max_queue_size=bdp)
+            bdp = bw_init*delay
+            self.addLink( host, switch, bw=bw_init, delay='%dms' % delay, max_queue_size=bdp)
 
 class DumbbellTopo( Topo ):
     "Dumbbell topology with n hosts."
@@ -42,7 +42,7 @@ class DumbbellTopo( Topo ):
             hosts += [host]
 
         # 10 Mbps, 5ms delay, 2% loss, 1000 packet queue
-        bw = 1000
+        bw = 200
         delay = 5
         bdp = bw*delay
         self.addLink( hosts[0], s1, bw=bw, delay='%dms' % delay, max_queue_size=bdp)
@@ -85,6 +85,7 @@ def doSimulation():
 
     # Create a list to keep logging events
     logger = []
+    logger.append('initial link speed: %sMbps' % bw_init)
 
     # Create Topology
     topo = DumbbellTopo()
@@ -128,6 +129,7 @@ def doSimulation():
         sys.exit(1)
     else:
         os.mkdir(pcap_path)
+
 
     # Start pcaps on the client and the server
     server_pcap = server.popen('tcpdump -w %s -z gzip' % s_name)
@@ -191,17 +193,19 @@ def doSimulation():
 
 
     #month-day-hour:minute:second:microsecond
-    msg = 'changing BW %s ' % datetime.datetime.now().strftime(precise_time_str)
+    bw_speed = .5
+    msg = 'changing BW %s %s ' % (bw_speed, datetime.datetime.now().strftime(precise_time_str))
     print msg
     logger.append(msg)
-    changeLinkBw(s1, s2, .5, 5)
+    changeLinkBw(s1, s2, bw_speed, 5)
     net.iperf((client, server))
     time.sleep(60)
 
-    msg = 'changing BW %s ' % datetime.datetime.now().strftime(precise_time_str)
+    bw_speed = 15
+    msg = 'changing BW to %s %s ' % (bw_speed, datetime.datetime.now().strftime(precise_time_str) )
     print msg
     logger.append(msg)    
-    changeLinkBw(s1, s2, 15, 5)
+    changeLinkBw(s1, s2, bw_speed, 5)
     net.iperf((client, server))
     time.sleep(80)
     
