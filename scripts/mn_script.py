@@ -14,6 +14,7 @@ import datetime
 import sys
 import server
 
+import subprocess
 
 class SingleSwitchTopo( Topo ):
     "Single switch connected to n hosts."
@@ -81,12 +82,17 @@ def test_change_bw():
 
 def doSimulation():
     "Create network and run simple performance test"
+
+    # Create a list to keep logging events
+    logger = []
+
     # Create Topology
     topo = DumbbellTopo()
     net = Mininet( topo=topo,
                host=CPULimitedHost, link=TCLink)
     net.start()
     precise_time_str = "%m-%d-%H:%M:%S:%f"
+    time_stamp = datetime.datetime.now().strftime('%m-%d-%H%M')
 
     # Test connectivity
     print("Dumping host connections")
@@ -94,19 +100,46 @@ def doSimulation():
     print("Testing network connectivity")
     net.pingAll()
 
-    
-
     server, client = net.get( 'h1', 'h2' )
 #CHANGE PYTHON2
 
+
+    pcap_path = os.path.join('/', 'vagrant', 'logs', time_stamp)
+
+    print('tcpdump -w %s' % os.path.join(pcap_path, 'server.pcap'))
+    # server.cmdPrint('ls /vagrant/logs')
+
+
+    s_name = os.path.join(pcap_path, 'server.pcap')
+    c_name = os.path.join(pcap_path, 'client.pcap')
+
+    print ('ethtool -K ' + str(server.intf()) + ' gso off')
+
+    # Disable segment offloading for hosts
+    server.cmd('ethtool -K ' + str(server.intf()) + ' gso off')
+    server.cmd('ethtool --offload ' + str(server.intf()) + ' tso off')
+    client.cmd('ethtool -K ' + str(client.intf()) + ' gso off')
+    client.cmd('ethtool --offload ' + str(client.intf()) + ' tso off')
+
+    # Create root folder for experiment data
+    if os.path.exists(pcap_path):
+        print("Os path exists... exiting")
+        net.stop()
+        sys.exit(1)
+    else:
+        os.mkdir(pcap_path)
+
+    # Start pcaps on the client and the server
+    server_pcap = server.popen('tcpdump -w %s -z gzip' % s_name)
+    print(type(server_pcap))
+    client_pcap = client.popen('tcpdump -w %s -z gzip' % c_name)
     # Get server/client config settings
     wd = str(server.cmd('pwd'))[:-2]
     user = os.getlogin()
     server_ip = server.IP()
 
     # Create server config
-    time_str = datetime.datetime.now().strftime('%m-%d-%H%M')
-    server_log_name = "%s_nginx_access.log" % time_str
+    server_log_name = os.path.join(time_stamp, "nginx_access.log")
 
     
 
@@ -128,7 +161,10 @@ def doSimulation():
 
     net.iperf((client, server))
 
-    print("starting client at: %s" % datetime.datetime.now().strftime(precise_time_str))
+    msg = "starting client at: %s" % datetime.datetime.now().strftime(precise_time_str)
+    print(msg)
+    logger.append(msg)
+
     client_cmd = 'su - %s -c "nohup firefox --headless --private http://%s/scripts/player.html&"' % (user, server_ip)
     print ("Client cmd: %s " % client_cmd)
 
@@ -155,18 +191,30 @@ def doSimulation():
 
 
     #month-day-hour:minute:second:microsecond
-    print 'changing BW %s ' % datetime.datetime.now().strftime(precise_time_str)
-    changeLinkBw(server, s1, .5, 5)
+    msg = 'changing BW %s ' % datetime.datetime.now().strftime(precise_time_str)
+    print msg
+    logger.append(msg)
+    changeLinkBw(s1, s2, .5, 5)
     net.iperf((client, server))
     time.sleep(60)
 
-    print 'changing BW %s ' % datetime.datetime.now().strftime(precise_time_str)    
-    changeLinkBw(server, s1, 10, 5)
+    msg = 'changing BW %s ' % datetime.datetime.now().strftime(precise_time_str)
+    print msg
+    logger.append(msg)    
+    changeLinkBw(s1, s2, 15, 5)
     net.iperf((client, server))
     time.sleep(80)
     
-    print("Waiting for server to finish %s" % datetime.datetime.now().strftime(precise_time_str))
+    msg = "Waiting for server to finish %s" % datetime.datetime.now().strftime(precise_time_str)
+    print(msg)
+    logger.append(msg)
+
     server.cmd("wait %s " % watchdog_pid)
+
+    logger.append("terminating")
+
+    server_pcap.terminate()
+    client_pcap.terminate()
 
     time.sleep(2)
 
@@ -174,6 +222,12 @@ def doSimulation():
     server.cmd("sudo nginx -s stop")
     print("Closing...")
     net.stop()
+
+
+    logger_path = os.path.join(pcap_path, 'events.log')
+    logger = '\n'.join(logger)
+    with open(logger_path, 'w') as f:
+        f.write(logger)
 
     os.system('su - %s -c "/vagrant/scripts/quitff.sh"' % user)
 
