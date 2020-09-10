@@ -17,15 +17,14 @@ $RUN_PROBE = <<SCRIPT
 	apt-get update
 	apt-get install -y firefox
 	apt-get install -y ffmpeg
-	apt-get install -y mininet
+
+  git clone git://github.com/mininet/mininet
+  cd mininet && git tag && git checkout 2.3.0d6 && cd .. && mininet/util/install.sh -a 
 	apt-get install -y python-pip
 	apt-get install -y openvswitch-testcontroller
 	sudo cp /usr/bin/ovs-testcontroller /usr/bin/ovs-controller
 	export LC_ALL=C
 	pip install psutil
-	echo "Copying"
-	cp -r /vagrant/* . && rm Vagrantfile
-	echo "Done"
 SCRIPT
 
 
