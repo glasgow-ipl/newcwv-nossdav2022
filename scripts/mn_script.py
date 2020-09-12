@@ -146,7 +146,7 @@ def doSimulation():
     
 
     # optionally add buffer=32k (or some other big value for access_log)
-    config_str = "events { } http { log_format tcp_info '$time_local, \"$request\", $status, $tcpinfo_rtt, $tcpinfo_rttvar, \"$tcpinfo_snd_cwnd\", $tcpinfo_rcv_space, $body_bytes_sent, \"$http_referer\", \"$http_user_agent\"'; server { listen " + server_ip + "; root /vagrant; access_log /vagrant/logs/" + server_log_name + " tcp_info;} }"
+    config_str = "events { } http { log_format tcp_info '$time_local, $msec, \"$request\", $status, $tcpinfo_rtt, $tcpinfo_rttvar, \"$tcpinfo_snd_cwnd\", $tcpinfo_rcv_space, $body_bytes_sent, \"$http_referer\", \"$http_user_agent\"'; server { listen " + server_ip + "; root /vagrant; access_log /vagrant/logs/" + server_log_name + " tcp_info;} }"
     with open('nginx-conf.conf', 'w') as f:
         f.write(config_str)
 
