@@ -10,16 +10,16 @@
 
 
 $RUN_PROBE = <<SCRIPT
-  service vboxguest enable
-  service vboxservice enable
+	service vboxguest enable
+	service vboxservice enable
 
 	pwd
 	apt-get update
 	apt-get install -y firefox
 	apt-get install -y ffmpeg
 
-  git clone git://github.com/mininet/mininet
-  cd mininet && git tag && git checkout 2.3.0d6 && cd .. && mininet/util/install.sh -a 
+	git clone git://github.com/mininet/mininet
+	cd mininet && git tag && git checkout 2.3.0d6 && cd .. && mininet/util/install.sh -a 
 	apt-get install -y python-pip
 	apt-get install -y openvswitch-testcontroller
 	sudo cp /usr/bin/ovs-testcontroller /usr/bin/ovs-controller
@@ -76,7 +76,6 @@ Vagrant.configure("2") do |config|
     v.customize ["modifyvm", :id, "--accelerate3d",             "on"]
     v.customize ["modifyvm", :id, "--vram",                    "256"]
     v.customize ["modifyvm", :id, "--graphicscontroller", "VBoxSVGA"]
-    v.gui = true
   end
 
   config.vm.provision "shell", privileged: true, inline: $RUN_PROBE 
