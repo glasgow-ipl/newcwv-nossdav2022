@@ -131,10 +131,9 @@ def doSimulation():
     print ('ethtool -K ' + str(server.intf()) + ' gso off')
 
     # Disable segment offloading for hosts
-    server.cmd('ethtool -K ' + str(server.intf()) + ' gso off')
-    server.cmd('ethtool --offload ' + str(server.intf()) + ' tso off')
-    client.cmd('ethtool -K ' + str(client.intf()) + ' gso off')
-    client.cmd('ethtool --offload ' + str(client.intf()) + ' tso off')
+    for host in [server, client]:
+        host.cmd('ethtool -K ' + str(server.intf()) + ' gso off')
+        host.cmd('ethtool --offload ' + str(server.intf()) + ' tso off')
 
     # Create root folder for experiment data
     if os.path.exists(pcap_path):
@@ -190,23 +189,23 @@ def doSimulation():
 
 
     #month-day-hour:minute:second:microsecond
-    # bw_speed = .5
-    #msg = 'changing BW %s %s ' % (bw_speed, datetime.datetime.now().strftime(precise_time_str))
-    #print(msg)
-    #logger.append(msg)
+    bw_speed = .5
+    msg = 'changing BW %s %s ' % (bw_speed, datetime.datetime.now().strftime(precise_time_str))
+    print(msg)
+    logger.append(msg)
 
-    #changeLinkBw(s1, s2, bw_speed, topo._RTT)
-    #net.iperf((client, server))
-    #time.sleep(60)
+    changeLinkBw(s1, s2, bw_speed, topo._RTT)
+    net.iperf((client, server))
+    time.sleep(60)
 
-    # bw_speed = 15
-    # msg = 'changing BW to %s %s ' % (bw_speed, datetime.datetime.now().strftime(precise_time_str) )
-    # print(msg)
+    bw_speed = 15
+    msg = 'changing BW to %s %s ' % (bw_speed, datetime.datetime.now().strftime(precise_time_str) )
+    print(msg)
 
-    # logger.append(msg)    
-    # changeLinkBw(s1, s2, bw_speed, topo._RTT)
-    # net.iperf((client, server))
-    # time.sleep(80)
+    logger.append(msg)    
+    changeLinkBw(s1, s2, bw_speed, topo._RTT)
+    net.iperf((client, server))
+    time.sleep(80)
     
     msg = "Waiting for server to finish %s" % datetime.datetime.now().strftime(precise_time_str)
     print(msg)
