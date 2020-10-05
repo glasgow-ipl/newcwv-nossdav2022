@@ -13,6 +13,7 @@ import os
 import datetime
 import sys
 import server
+import math
 
 import subprocess
 
@@ -50,7 +51,7 @@ class DumbbellTopo( Topo ):
         bw = 50 #Mbps
         bw_init = self._bw = bw
         RTT = self._RTT = 70 #ms
-        bdp = calculate_bdp(bw, RTT)
+        bdp = _calculate_bdp(bw, RTT)
         print(bdp) 
 
         # Leaving non-bottleneck links to run at maximum capacity with default parameters
@@ -59,7 +60,7 @@ class DumbbellTopo( Topo ):
         self.addLink( s1, s2, bw=bw, delay='%dms' % (RTT/2), max_queue_size=bdp)
 
 
-def calculate_bdp(bw, RTT):
+def _calculate_bdp(bw, RTT):
     '''
         Returns BDP in MTU sized packets, default MTU=1500
         @bw -> badwidth in Mbps
@@ -68,14 +69,14 @@ def calculate_bdp(bw, RTT):
     bdp = bw * 1000 # kbps
     bdp /= 8 #kBps
     bdp *= RTT # Bytes
-    bdp /= 1500 # MTU sized packets
-    return bdp
+    bdp = math.ceil(bdp / 1500.0) # MTU sized packets
+    return int(bdp)
 
 def changeLinkBw(ep1, ep2, in_bw, RTT, out_bw=-1):
     link = ep1.connectionsTo(ep2)
-    bdp = calculate_bdp(in_bw, RTT)
+    bdp = _calculate_bdp(in_bw, RTT)
     link[0][0].config(**{'bw': in_bw, 'max_queue_size': bdp})
-    link[0][1].config(**{'bw': out_bw if out_bw != -1 else in_bw, 'max_queue_size': bdp if out_bw == -1 else calculate_bdp(out_bw, RTT)})
+    link[0][1].config(**{'bw': out_bw if out_bw != -1 else in_bw, 'max_queue_size': bdp if out_bw == -1 else _calculate_bdp(out_bw, RTT)})
 
 
 def run_on_host(host, cmd):
