@@ -14,20 +14,71 @@
         <div>
             <video id="videoPlayer" controls muted autoplay=""></video>
         </div>
+
+        <div>
+            <strong>Reported bitrate:</strong>
+            <span id="reportedBitrate"></span>
+            <br/>
+            <strong>Buffer level:</strong>
+            <span id="bufferLevel"></span>
+            <div id="chrome-only">
+                <strong>Calculated bitrate:</strong>
+                <span id="calculatedBitrate"></span>
+            </div>
+            <strong>Framerate:</strong>
+            <span id="framerate"></span>
+        </div>
+
         <script src="http://10.0.0.1/scripts/dash.all.debug.js"></script>
         <script>
+
+            var player;
+            var metrics = {};
+            metrics.bufferLevel = [];
+            metrics.frameRate = [];
+            metrics.reportedBitrate = [];
+
             (function(){
                 var url = "http://10.0.0.1/data/bbb.mpd";
-                var player = dashjs.MediaPlayer().create();
+                player = dashjs.MediaPlayer().create();
                 player.initialize(document.querySelector("#videoPlayer"), url, true);
             })();
 
+
             var player_element = document.getElementById("videoPlayer");
             player_element.onended = function() {
+                
+                // clear polling for events
+                clearInterval(eventPoller)
+
                 var xmlHttp = new XMLHttpRequest();
                 xmlHttp.open("GET", "http://10.0.0.1:8000/end", false);
                 xmlHttp.send(null);
             };
+
+            var eventPoller = setInterval(function () {
+                var streamInfo = player.getActiveStream().getStreamInfo();
+                var dashMetrics = player.getDashMetrics();
+                var dashAdapter = player.getDashAdapter();
+
+                if (dashMetrics && streamInfo) {
+                    const periodIdx = streamInfo.index;
+                    var repSwitch = dashMetrics.getCurrentRepresentationSwitch('video', true);
+                    var bufferLevel = dashMetrics.getCurrentBufferLevel('video', true);
+                    var bitrate = repSwitch ? Math.round(dashAdapter.getBandwidthForRepresentation(repSwitch.to, periodIdx) / 1000) : NaN;
+                    var adaptation = dashAdapter.getAdaptationForType(periodIdx, 'video', streamInfo)
+                    var frameRate = adaptation.Representation_asArray.find(function (rep) {
+                        return rep.id === repSwitch.to
+                    }).frameRate;
+                    document.getElementById('bufferLevel').innerText = bufferLevel + " secs";
+                    metrics.bufferLevel.push(bufferLevel);
+                    document.getElementById('framerate').innerText = frameRate + " fps";
+                    metrics.frameRate.push(frameRate);
+                    document.getElementById('reportedBitrate').innerText = bitrate + " Kbps";
+                    metrics.reportedBitrate.push(reportedBitrate);
+                }
+            }, 1000);
+
         </script>
     </body>
 </html>
