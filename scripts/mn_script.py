@@ -36,12 +36,13 @@ class DumbbellTopo( Topo ):
     _bw = None
     _RTT = None
 
+    _hosts = 0
+
     def build( self, n=2 ):
         s1 = self.addSwitch( 's1' )
         s2 = self.addSwitch( 's2' )
         hosts = []
         for h in range(n):
-            # Each host gets 50%/n of system CPU
             host = self.addHost( 'h%s' % (h + 1))
             hosts += [host]
 
@@ -177,7 +178,9 @@ def doSimulation():
     print(msg)
     logger.append(msg)
 
-    client_cmd = 'su - %s -c "nohup firefox --headless --private http://%s/scripts/player.html&"' % (user, server_ip)
+    firefox_output = os.path.join(pcap_path, "browser_out.txt")
+    firefox_log_format = "timestamp,rotate:200,nsHttp:5,cache2:5,nsSocketTransport:5,nsHostResolver:5,cookie:5"
+    client_cmd = 'su - %s -c "nohup firefox --headless --private http://%s/scripts/player.html --MOZ_LOG=%s --MOZ_LOG_FILE=%s &"' % (user, server_ip, firefox_log_format, firefox_output)
     print ("Client cmd: %s " % client_cmd)
 
     client.cmd(client_cmd)
