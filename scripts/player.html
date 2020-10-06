@@ -51,9 +51,16 @@
                 // clear polling for events
                 clearInterval(eventPoller)
 
-                var xmlHttp = new XMLHttpRequest();
-                xmlHttp.open("GET", "http://10.0.0.1:8000/end", false);
-                xmlHttp.send(null);
+                // var xmlHttp = new XMLHttpRequest();
+                // xmlHttp.open("GET", "http://10.0.0.1:8000/end", false);
+                // xmlHttp.send(null);
+
+                fetch("http://10.0.0.1:8000/end", {
+                    method: "POST", 
+                    body: JSON.stringify(metrics)
+                    }).then(res => {
+                        
+                });
             };
 
             var eventPoller = setInterval(function () {
@@ -75,7 +82,9 @@
                     document.getElementById('framerate').innerText = frameRate + " fps";
                     metrics.frameRate.push(frameRate);
                     document.getElementById('reportedBitrate').innerText = bitrate + " Kbps";
-                    metrics.reportedBitrate.push(reportedBitrate);
+                    metrics.reportedBitrate.push(bitrate);
+
+                    //get stalls
                 }
             }, 1000);
 

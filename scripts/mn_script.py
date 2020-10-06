@@ -229,6 +229,13 @@ def doSimulation():
     print("Closing...")
     net.stop()
 
+    # Move dashjs_metrics file to relevant directory
+    if os.path.exists('dashjs_metrics.json'):
+        print("Saving dash metrics to %s" % pcap_path)
+        os.system('mv dashjs_metrics.json %s' % pcap_path)
+    else:
+        print("Dash metrics not found")
+
 
     logger_path = os.path.join(pcap_path, 'events.log')
     logger = '\n'.join(logger)
