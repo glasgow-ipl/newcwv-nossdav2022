@@ -23,7 +23,7 @@ ${out_dir}/360/out/output.mpd ${out_dir}/480/out/output.mpd ${out_dir}/720/out/o
 	python encoder.py --prefix ${out_dir} --action truncate --source ${bbb_hd}
 	@echo 'Qualities truncated'
 
-gen_mpd: ${out_dir}/bbb.mpd
+gen_mpd: ${out_dir}/bbb.mpd data
 	@echo 'Generating mpd'
 
 
@@ -36,6 +36,14 @@ test: ${root}/scripts/experiment_test.py
 	@echo 'Running unit tests'
 	cd ${root}/scripts && sudo python experiment_test.py
 
-simulation: ${root}/scripts/mn_script.py
+simulation: ${root}/scripts/mn_script.py logs
 	@echo 'Running simulation'
 	cd ${root}/scripts && sudo python mn_script.py
+
+logs:
+	@echo 'creating logs'
+	mkdir $@
+
+data:
+	@echo 'Creating Data directory
+	mkdir $@
