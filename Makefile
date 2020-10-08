@@ -23,7 +23,7 @@ ${out_dir}/360/out/output.mpd ${out_dir}/480/out/output.mpd ${out_dir}/720/out/o
 	python encoder.py --prefix ${out_dir} --action truncate --source ${bbb_hd}
 	@echo 'Qualities truncated'
 
-gen_mpd: ${out_dir}/bbb.mpd data
+stage1-mpd: ${out_dir}/bbb.mpd data
 	@echo 'Generating mpd'
 
 
@@ -32,11 +32,11 @@ ${out_dir}/bbb.mpd: ${out_dir}/360/out/output.mpd ${out_dir}/480/out/output.mpd 
 	@echo 'stitching mpds'
 	python encoder.py --prefix ${out_dir} --action mpd --source ${bbb_hd}
 
-test: ${root}/scripts/experiment_test.py
+stage2-test: ${root}/scripts/experiment_test.py
 	@echo 'Running unit tests'
 	cd ${root}/scripts && sudo python experiment_test.py
 
-simulation: ${root}/scripts/mn_script.py logs
+stage2-simulation: ${root}/scripts/mn_script.py logs
 	@echo 'Running simulation'
 	cd ${root}/scripts && sudo python mn_script.py
 
