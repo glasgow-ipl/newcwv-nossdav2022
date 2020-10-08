@@ -13,18 +13,19 @@ $RUN_PROBE = <<SCRIPT
 	service vboxguest enable
 	service vboxservice enable
 
-	pwd
-	apt-get update
-	apt-get install -y firefox
-	apt-get install -y ffmpeg
+#	pwd
+#	apt-get update
+#	apt-get install -y firefox
+#	apt-get install -y ffmpeg
+	sudo apt-get update && sudo apt-get upgrade
 
 	git clone git://github.com/mininet/mininet
-	cd mininet && git tag && git checkout 2.3.0d6 && cd .. && mininet/util/install.sh -a 
-	apt-get install -y python-pip
-	apt-get install -y openvswitch-testcontroller
-	sudo cp /usr/bin/ovs-testcontroller /usr/bin/ovs-controller
+	cd mininet && git tag && git checkout 2.3.0d6 && cd util && rm install.sh && wget https://gist.githubusercontent.com/janev94/c443075986ec344359904c9ceba93f2b/raw/99c9146940450beb155a31cb5b30c38643466b46/install.sh && chmod u+x install.sh && cd ../..
+	echo `pwd`
 	export LC_ALL=C
-	pip install psutil
+	sudo mininet/util/install.sh -a
+#	apt-get install -y python-pip
+#	pip install psutil
 SCRIPT
 
 
