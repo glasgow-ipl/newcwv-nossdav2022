@@ -16,7 +16,7 @@ $RUN_PROBE = <<SCRIPT
 #	pwd
 	apt-get update
 	apt-get install -y firefox
-#	apt-get install -y ffmpeg
+	apt-get install -y ffmpeg
 #	sudo apt-get update && sudo apt-get upgrade
 
 	git clone git://github.com/mininet/mininet
