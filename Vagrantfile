@@ -14,16 +14,18 @@ $RUN_PROBE = <<SCRIPT
 	service vboxservice enable
 
 #	pwd
-#	apt-get update
-#	apt-get install -y firefox
+	apt-get update
+	apt-get install -y firefox
 #	apt-get install -y ffmpeg
-	sudo apt-get update && sudo apt-get upgrade
+#	sudo apt-get update && sudo apt-get upgrade
 
 	git clone git://github.com/mininet/mininet
 	cd mininet && git tag && git checkout 2.3.0d6 && cd util && rm install.sh && wget https://gist.githubusercontent.com/janev94/c443075986ec344359904c9ceba93f2b/raw/99c9146940450beb155a31cb5b30c38643466b46/install.sh && chmod u+x install.sh && cd ../..
 	echo `pwd`
 	export LC_ALL=C
 	sudo mininet/util/install.sh -a
+  apt-get install -y nginx
+  apt-get install -y iperf3
 #	apt-get install -y python-pip
 #	pip install psutil
 SCRIPT
