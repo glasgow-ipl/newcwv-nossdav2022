@@ -49,6 +49,7 @@ class DumbbellTopo( Topo ):
 
         # 10 Mbps, 5ms delay, 2% loss, 1000 packet queue
         bw = 50 #Mbps
+        global bw_init
         bw_init = self._bw = bw
         RTT = self._RTT = 70 #ms
         bdp = _calculate_bdp(bw, RTT)

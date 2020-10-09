@@ -37,6 +37,7 @@
             metrics.bufferLevel = [];
             metrics.frameRate = [];
             metrics.reportedBitrate = [];
+            metrics.currentTime = [];
 
             (function(){
                 var url = "http://10.0.0.1/data/bbb.mpd";
@@ -83,6 +84,7 @@
                     metrics.frameRate.push(frameRate);
                     document.getElementById('reportedBitrate').innerText = bitrate + " Kbps";
                     metrics.reportedBitrate.push(bitrate);
+                    metrics.currentTime.push(new Date().getTime());
 
                     //get stalls
                 }

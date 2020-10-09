@@ -100,6 +100,7 @@ class TestMininet(unittest.TestCase):
         # For 30 seconds we should have had at least 15 retransmits, realistically, the number will be way bigger
         self.assertGreater(out['end']['sum_sent']['retransmits'], 15)
 
+    # TODO: write test to verify sawtooth pattern
 
 if __name__ == '__main__':
     unittest.main()
