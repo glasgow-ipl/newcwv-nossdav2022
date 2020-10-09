@@ -5,7 +5,7 @@ from binascii import *
 import SimpleHTTPServer
 import SocketServer
 # For monitoriong CPU usage
-import psutil
+# import psutil
 import time
 import os
 
