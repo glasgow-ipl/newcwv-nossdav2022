@@ -1,6 +1,6 @@
 #!/bin/bash
 
-deps=('ffmpeg' 'python' 'mn' 'firefox')
+deps=('ffmpeg' 'python' 'mn' 'firefox' 'nginx' 'iperf3')
 
 for d in "${deps[@]}"
 do
