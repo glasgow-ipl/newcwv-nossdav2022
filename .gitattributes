@@ -1,0 +1,22 @@
+*.css text
+*.js text
+*.html text
+*.py text
+*.c text
+*.py text
+*.txt text
+*.json text
+*.txt text
+*.conf text
+*.sh text
+*.mpd text
+
+*.pdf binary
+*.jpg binary
+*.gz binary
+*.pcap binary
+*.jpeg binary
+*.png binary
+*.pyc binary
+*.mov binary
+*.mp4 binary
