@@ -113,8 +113,8 @@ def doSimulation():
     logger.append('initial link speed: %sMbps' % bw_init)
 
     net.start()
-    precise_time_str = "%m-%d-%H:%M:%S:%f"
-    time_stamp = datetime.datetime.now().strftime('%m-%d-%H%M')
+    precise_time_str = "%y-%m-%d-%H:%M:%S:%f"
+    time_stamp = datetime.datetime.now().strftime('%y-%m-%d-%H%M')
 
     # Test connectivity
     print("Dumping host connections")

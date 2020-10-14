@@ -81,7 +81,8 @@ def big_xaxis():
     plt.xlim(right=630)
 
     print(fig.get_size_inches())
-    fig.set_size_inches((50, 5))
+    fig.set_size_inches((35, 5))
+    plt.xticks(rotation=45)
     # plt.figure(figsize=(100,100))
     plt.savefig('fig.png')
 
