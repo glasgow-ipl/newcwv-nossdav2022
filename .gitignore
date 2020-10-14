@@ -126,3 +126,6 @@ scripts/nginx-conf.conf
 
 # Logs
 logs/
+
+# Plotting virtual env
+plotter/
