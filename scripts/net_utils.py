@@ -1,3 +1,4 @@
+import sys
 import csv
 import datetime
 import matplotlib.pyplot as plt
@@ -5,6 +6,7 @@ import matplotlib.colors as mcolors
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, AutoMinorLocator
 import numpy as np
 import os
+import argparse
 
 def count_oscillations(values): # returns the number of oscillations in the value list (cwnd)
     changes = 0
@@ -17,12 +19,10 @@ def count_oscillations(values): # returns the number of oscillations in the valu
             if values[idx][1] > values[idx + 1][1]:
                 direction = not direction
                 changes += 1
-                # print(values[idx][1], values[idx+1][1])
         else:
             if values[idx][1] < values[idx + 1][1]:
                 direction = not direction
                 changes += 1
-                # print(values[idx][1], values[idx+1][1])
         
     return changes
 
@@ -30,33 +30,56 @@ def count_oscillations(values): # returns the number of oscillations in the valu
 def gen_plot(plot_info):
     cwnd_info = plot_info['cwnds']
     cwnd_info = np.array(cwnd_info)#, dtype=np.dtype('float64,int'))
-    # time = 
+
+    quality_info = plot_info['qualities']
+    quality_info = np.array(quality_info)
+
     time = cwnd_info[:,0]
     cwnd = cwnd_info[:,1]
 
-    fig, ax = plt.subplots()
+    quality = quality_info[:,1]
 
-    ax.xaxis.set_major_locator(MultipleLocator(5))
-    ax.xaxis.set_major_formatter(FormatStrFormatter('%d'))
+    fig, axs = plt.subplots(2)
 
-    # For the minor ticks, use no labels; default NullFormatter.
-    ax.xaxis.set_minor_locator(MultipleLocator(1))
-    plt.xlim(right=max(time) + 5)
+    # Axis setup
+    for ax in axs:
+        ax.xaxis.set_major_locator(MultipleLocator(5))
+        ax.xaxis.set_major_formatter(FormatStrFormatter('%d'))
 
-    plt.plot(time, cwnd)
+        # For the minor ticks, use no labels; default NullFormatter.
+        ax.xaxis.set_minor_locator(MultipleLocator(1))
+        ax.set_xlim(right=max(time) + 5)
 
-    fig.set_size_inches((35, 5))
-    plt.xticks(rotation=45)
+    axs[0].set_yticks(np.arange(0, 500, 50))
+    axs[1].set_yticks([360, 480, 720, 1080])
+    axs[1].set_ylim(bottom=0, top=1200)
+
+    # plotting
+    axs[0].plot(time, cwnd)
+    axs[1].scatter(time, quality)
 
     colors = iter(mcolors.TABLEAU_COLORS.keys())
     colors.__next__() # discard blue from the set
 
     bw_changes = plot_info['bw_changes']
     for change in bw_changes:
-        ax.axvline(x=change[0], color=colors.__next__(), linewidth=4, label='bw changed to: %sMbps' % change[1])
+        col = colors.__next__()
+        for ax in axs:
+            ax.axvline(x=change[0], color=col, linewidth=3, label='bw changed to: %sMbps' % change[1])
 
-    plt.legend()
+    # labels configuration
+    axs[0].set(ylabel='Cwnd (MSS packets)')
+    axs[1].set(xlabel='Time (s)')
+    axs[1].set(ylabel='Requested Bitrate')
 
+    fig.set_size_inches((35, 5))
+    for ax in axs:
+        ax.tick_params(labelrotation=45)
+    
+
+    fig.legend()
+
+    plt.tight_layout()
     plt.savefig('fig2.png')
 
 
@@ -73,9 +96,12 @@ def parse_logs(log_root):
 
     access_log_path = os.path.join(log_root, 'nginx_access.log')
 
-    cwnds, init_time = get_cwnd(access_log_path)
-    plot_info['cwnds'] = cwnds
-    plot_info['init_time'] = init_time
+    nginx_info = parse_nginx_log(access_log_path)
+    # plot_info['cwnds'] = cwnds
+    # plot_info['init_time'] = init_time
+    plot_info.update(nginx_info)
+
+    init_time = plot_info['init_time']
 
     event_log_path = os.path.join(log_root, 'events.log')
     bw_changes = get_bw_changes(event_log_path, init_time) 
@@ -99,8 +125,9 @@ def get_bw_changes(event_log_path, init_time):
     return bw_change_times
 
 
-def get_cwnd(access_log_path):
+def parse_nginx_log(access_log_path):
     cwnd_time = []
+    quality_time = []
     with open(access_log_path) as f:
         reader = csv.reader(f)
         # find the first video segment requested and treat it as start of time
@@ -113,6 +140,8 @@ def get_cwnd(access_log_path):
                 cwnd = rec[6].strip()
                 cwnd = int(cwnd[1:-1])
                 cwnd_time.append((ms_delta, cwnd))
+                quality = int(rec[2].split('data/')[1].split('/', 1)[0])
+                quality_time.append((ms_delta, quality))
                 break
 
         for line in reader:
@@ -122,10 +151,25 @@ def get_cwnd(access_log_path):
             cwnd = line[6].strip()
             cwnd = int(cwnd[1:-1]) # Remove the "" from the begining and the end of the cwnd value
             cwnd_time.append((ms_delta, cwnd))
-    
-    return cwnd_time, time_init
+
+            quality = int(line[2].split('data/')[1].split('/',1)[0])
+            quality_time.append((ms_delta, quality))
+
+    res = {}
+    res['cwnds'] = cwnd_time
+    res['init_time'] = time_init
+    res['qualities'] = quality_time
+
+    return res
 
 if __name__ == '__main__':
-    plot_info = parse_logs('/vagrant/logs/10-12-1307')
-    print(count_oscillations(plot_info['cwnds']))
-    # gen_plot(plot_info)
+
+    if len(sys.argv) == 1: # script was run with no arguments
+        plot_info = parse_logs('/vagrant/logs/10-12-1307')
+        gen_plot(plot_info)
+
+    parser = argparse.ArgumentParser(description='Collection of functions that handle graph plotting')
+    parser.add_argument('--source', help='data source')
+    parser.add_argument('-all', help='Generate plots for all data')
+
+    args = parser.parse_args()
