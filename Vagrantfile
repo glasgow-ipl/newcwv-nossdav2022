@@ -30,7 +30,7 @@ $RUN_PROBE = <<SCRIPT
   # Create virtual envrionment for plotting results
   apt-get install -y python3-venv
   apt-get install -y virtualenv
-  cd /vagrant && virtualenv plotter -p python3 --always-copy
+  cd /vagrant && virtualenv plotter -p python3 --always-copy && plotter/bin/pip install -r deps/requirements.txt 
 #	apt-get install -y python-pip
 #	pip install psutil
 SCRIPT
