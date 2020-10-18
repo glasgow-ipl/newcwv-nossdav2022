@@ -169,7 +169,7 @@ if __name__ == '__main__':
         gen_plot(plot_info)
 
     parser = argparse.ArgumentParser(description='Collection of functions that handle graph plotting')
-    parser.add_argument('--source', help='data source')
-    parser.add_argument('-all', help='Generate plots for all data')
+    parser.add_argument('--source', help='single log file to be parsed')
+    parser.add_argument('-all', help='Root directory for logged data for batch plotting')
 
     args = parser.parse_args()

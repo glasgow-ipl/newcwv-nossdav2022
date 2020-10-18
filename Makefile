@@ -45,9 +45,14 @@ logs:
 	mkdir $@
 
 data:
-	@echo 'Creating Data directory
+	@echo 'Creating Data directory'
 	mkdir $@
 
-stage3-plot: ${root}/scripts/net_utils.py
+stage3-plot: ${root}/scripts/net_utils.py doc
 	@echo 'plotting data'
 	/vagrant/plotter/bin/python3.6 /vagrant/scripts/net_utils.py
+
+doc:
+	@echo 'Creating doc directory'
+	mkdir $@
+	
