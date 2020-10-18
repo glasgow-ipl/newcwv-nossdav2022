@@ -75,10 +75,10 @@ Vagrant.configure("2") do |config|
     v.customize ["modifyvm", :id, "--usbehci",                 "off"]
     v.customize ["modifyvm", :id, "--usbxhci",                 "off"]
     v.customize ["modifyvm", :id, "--usbcardreader",           "off"]
-    v.customize ["modifyvm", :id, "--accelerate2dvideo",        "on"]
-    v.customize ["modifyvm", :id, "--accelerate3d",             "on"]
+#    v.customize ["modifyvm", :id, "--accelerate2dvideo",        "on"]
+#    v.customize ["modifyvm", :id, "--accelerate3d",             "on"]
     v.customize ["modifyvm", :id, "--vram",                    "256"]
-    v.customize ["modifyvm", :id, "--graphicscontroller", "VBoxSVGA"]
+#    v.customize ["modifyvm", :id, "--graphicscontroller", "VBoxSVGA"]
   end
 
   config.vm.provision "shell", privileged: true, inline: $RUN_PROBE 
