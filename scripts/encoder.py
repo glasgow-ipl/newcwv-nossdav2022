@@ -17,6 +17,7 @@ bitrates=[1.5, 4, 7.5, 12]#, 24]
 source = 'bbb_sunflower_2160p_60fps_normal.mp4'
 prefix = '/vagrant/'
 framerate = 60
+media_prefix = None
 
 def check_and_create(dir_path):
 	print ("Checking: %s" % dir_path)
@@ -76,9 +77,9 @@ def process_mpds():
 		width, height = resolution.split('x')
 		#<Representation id="0" mimeType="video/mp4" codecs="avc1.64001f" bandwidth="1409668" width="640" height="360" frameRate="60/1">
 		
-		segment_dir = '%s%s/out' % (prefix, height)
+		segment_dir = os.path.join(prefix, height, 'out')
 		# Get the bandwidth, currently got no better way of doing this
-		with open(segment_dir + '/output.mpd', 'r') as f:
+		with open(os.path.join(segment_dir, 'output.mpd'), 'r') as f:
 			content = f.read()
 			bandwidth = content.split('bandwidth="')[1].split('"')[0]
 			seg_duration = content.split('duration="')[1].split('"')[0]
@@ -86,6 +87,10 @@ def process_mpds():
 		representation_tag = '\t'*3 + '<Representation id="%s" mimeType="video/mp4" codecs="avc1.64001f" bandwidth="%s" width="%s" height="%s" frameRate="60/1">\n' % (i, bandwidth, width, height)		
 		stiched_mpds.append(representation_tag)
 		print (representation_tag) 
+
+		media_url = media_prefix if media_prefix else segment_dir
+
+		media_url = os.path.join(media_url, height, 'out')
 
 		files = sorted(os.listdir(segment_dir))
 		
@@ -95,15 +100,15 @@ def process_mpds():
 		stiched_mpds.append(segmentlist_tag)
 		print (segmentlist_tag)
 
-		initseg_tag = '\t'*5 + '<Initialization sourceURL="' + segment_dir + '/0-init.m4s" />\n'
+		initseg_tag = '\t'*5 + '<Initialization sourceURL="' + media_url + '/0-init.m4s" />\n'
 		stiched_mpds.append(initseg_tag)		
 		print (initseg_tag)
 
 		
 		for f in files:
 			if f.startswith('0') and 'init' not in f: # if the file is video and is not the initial segment
-				media_url = '%s/%s' % ( segment_dir, f)
-				segment_tag = '\t'*5 + '<SegmentURL media="' + media_url + '" />\n'
+				seg_path = os.path.join(media_url, f)
+				segment_tag = '\t'*5 + '<SegmentURL media="' + seg_path + '" />\n'
 				stiched_mpds.append(segment_tag)
 				#print ()
 
@@ -150,6 +155,8 @@ if __name__ == '__main__':
 
 	parser.add_argument('--fps', help="Frames per second to use for re-encoding")
 
+	parser.add_argument('--media_prefix', help='prefix to be used for media segments path')
+
 	parser.add_argument('--action', required=True, help='Action to be performed by the script. Possible actions are: encode, truncate(segment), and mpd (to generate an MPD file)')
 
 	args = parser.parse_args()
@@ -165,6 +172,8 @@ if __name__ == '__main__':
 		source = args.source 
 	if args.fps:
 		framerate = args.fps
+	if args.media_prefix:
+		media_prefix = args.media_prefix
 
 	print ('Running "%s" script with arguemnts: prefix(%s) source(%s) fps(%s)' % (args.action, prefix, source, framerate))
 	if args.action == 'truncate':
