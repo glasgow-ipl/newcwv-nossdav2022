@@ -26,6 +26,11 @@ $RUN_PROBE = <<SCRIPT
 	sudo mininet/util/install.sh -a
   apt-get install -y nginx
   apt-get install -y iperf3
+
+  # Create virtual envrionment for plotting results
+  apt-get install -y python3-venv
+  apt-get install -y virtualenv
+  cd /vagrant && virtualenv plotter -p python3 --always-copy
 #	apt-get install -y python-pip
 #	pip install psutil
 SCRIPT
