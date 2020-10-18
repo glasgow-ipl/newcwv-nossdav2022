@@ -27,7 +27,7 @@ def count_oscillations(values): # returns the number of oscillations in the valu
     return changes
 
 
-def gen_plot(plot_info):
+def gen_plot(plot_info, root='.'):
     cwnd_info = plot_info['cwnds']
     cwnd_info = np.array(cwnd_info)#, dtype=np.dtype('float64,int'))
 
@@ -80,7 +80,10 @@ def gen_plot(plot_info):
     fig.legend()
 
     plt.tight_layout()
-    plt.savefig('fig2.png')
+
+    for ext in ['fig.png', 'fig.pdf']:
+        save_path = os.path.join(root, ext)
+        plt.savefig(save_path)
 
 
 def parse_logs(log_root):
@@ -170,6 +173,24 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Collection of functions that handle graph plotting')
     parser.add_argument('--source', help='single log file to be parsed')
-    parser.add_argument('-all', help='Root directory for logged data for batch plotting')
+    parser.add_argument('--all', action='store_true', help='Creates plots for all data rooted at /vagrant/logs')
 
     args = parser.parse_args()
+
+    if args.all:
+        print("all arg")
+        root = os.path.join('/', 'vagrant', 'logs')
+        deps = ['nginx_access.log', 'events.log']
+        for path, dirs, files in os.walk(root):
+            print (path, dirs, files)
+            if all(x in files for x in deps):
+                print(f'parsing {path}')
+                dir_name = os.path.split(path)[-1]
+                doc_root = os.path.join('/', 'vagrant', 'doc', dir_name)
+                if os.path.exists(doc_root):
+                    print(f'Warning: {doc_root} already exists, potentially overwriting data')
+                else:
+                    os.mkdir(doc_root)
+                plot_info = parse_logs(path)
+                gen_plot(plot_info, root=doc_root)
+                print(f'Plots saved to {doc_root}')
