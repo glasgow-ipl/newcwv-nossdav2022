@@ -29,14 +29,14 @@ $RUN_PROBE = <<SCRIPT
   cd /vagrant && virtualenv plotter -p python3 --always-copy && plotter/bin/pip install -r deps/requirements.txt 
   
   #DNS does not work on some machines, unless some traffic has gone out already
-  ping -c 3 google.com 
+  #ping -c 3 google.com 
 SCRIPT
 
 
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/bionic64"
-  config.vm.box_version = "1.0.282"
-
+  config.vm.box_version = "20201016.0.0"
+  
   # enable X11 forwarding
   config.ssh.forward_agent = true
   config.ssh.forward_x11 = true
