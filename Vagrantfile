@@ -3,10 +3,7 @@
 
 # install mininet + firefox
 # install xterm (DEBUG ONLY)
-# install ffmpeg
-# make experiment directory
-# copy vagrantfiles to exp directory
-# remove Vagrantfile
+# install ffmpeg (required to play video)
 
 
 $RUN_PROBE = <<SCRIPT
@@ -17,7 +14,6 @@ $RUN_PROBE = <<SCRIPT
 	apt-get update
 	apt-get install -y firefox
 	apt-get install -y ffmpeg
-#	sudo apt-get update && sudo apt-get upgrade
 
 	git clone git://github.com/mininet/mininet
 	cd mininet && git tag && git checkout 2.3.0d6 && cd util && rm install.sh && wget https://gist.githubusercontent.com/janev94/c443075986ec344359904c9ceba93f2b/raw/99c9146940450beb155a31cb5b30c38643466b46/install.sh && chmod u+x install.sh && cd ../..
@@ -31,33 +27,20 @@ $RUN_PROBE = <<SCRIPT
   apt-get install -y python3-venv
   apt-get install -y virtualenv
   cd /vagrant && virtualenv plotter -p python3 --always-copy && plotter/bin/pip install -r deps/requirements.txt 
-#	apt-get install -y python-pip
-#	pip install psutil
+  
+  #DNS does not work on some machines, unless some traffic has gone out already
+  ping -c 3 google.com 
 SCRIPT
 
 
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/bionic64"
+  config.vm.box_version = "1.0.282"
 
   # enable X11 forwarding
   config.ssh.forward_agent = true
   config.ssh.forward_x11 = true
 
-  # Create a forwarded port mapping which allows access to a specific port
-  # within the machine from a port on the host machine and only allow access
-  # via 127.0.0.1 to disable public access
-  # config.vm.network "forwarded_port", guest: 80, host: 8080, host_ip: "127.0.0.1"
-
-  # Share an additional folder to the guest VM. The first argument is
-  # the path on the host to the actual folder. The second argument is
-  # the path on the guest to mount the folder. And the optional third
-  # argument is a set of non-required options.
-  # config.vm.synced_folder "../data", "/vagrant_data"
-
-  # Provider-specific configuration so you can fine-tune various
-  # backing providers for Vagrant. These expose provider-specific options.
-  # Example for VirtualBox:
-  #
   config.vm.provider :virtualbox do |v|
     v.customize ["modifyvm", :id, "--memory",                 "8192"]
     v.customize ["modifyvm", :id, "--cpus",                      "4"]
