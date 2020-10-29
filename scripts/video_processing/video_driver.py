@@ -23,15 +23,6 @@ prefix = '/vagrant/'
 framerate = 60
 media_prefix = None
 
-def check_and_create(dir_path):
-	print ("Checking: %s" % dir_path)
-	if not os.path.isdir(dir_path):
-		print ('Destination directory: %s does not exist, creating one' % dir_path)
-		os.mkdir(dir_path)
-	else:
-		print ('Found directory: %s ' % dir_path)
-
-
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Video utility script')
 	parser.add_argument('--prefix', '-p', help='Prefix')
@@ -86,9 +77,9 @@ if __name__ == '__main__':
 
 		idx = args.extra_arg
 		idx = int(idx)
-		print(f"Encoding {resolutions[idx]}")
+		# print("Encoding {resolutions[idx]}")
 		encode(meta, idx)
-		print(f"Done encoding {resolutions[idx]}")
+		# print(f"Done encoding {resolutions[idx]}")
 	
 	elif args.action == 'mpd':
 		process_mpds(meta)

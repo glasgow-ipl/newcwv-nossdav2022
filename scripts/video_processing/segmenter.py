@@ -1,5 +1,5 @@
-from video_driver import check_and_create
 import os
+from utils import check_and_create
 
 def _segment(in_source, dst_dir):
 	print('in:%s out:%s' % (in_source, dst_dir))
