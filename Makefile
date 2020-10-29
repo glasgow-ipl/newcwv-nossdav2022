@@ -60,7 +60,7 @@ ${out_dir}/1080/out/output.mpd: ${out_dir}/1080/bbb_1080_60.mp4 ${root}/scripts/
 	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir} --action truncate --source ${bbb_hd} --extra_arg 1920x1080
 	@echo 'Qualities truncated'
 
-stage1-mpd: ${out_dir}/bbb.mpd data
+stage1-mpd: ${out_dir}/bbb.mpd
 	@echo 'Generating mpd'
 
 #MPD generator
