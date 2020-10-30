@@ -7,6 +7,7 @@ from matplotlib.ticker import MultipleLocator, FormatStrFormatter, AutoMinorLoca
 import numpy as np
 import os
 import argparse
+import json
 
 def count_oscillations(values): # returns the number of oscillations in the value list (cwnd)
     changes = 0
@@ -165,11 +166,44 @@ def parse_nginx_log(access_log_path):
 
     return res
 
+
+def parse_dash_metrics(json_dump):
+    dash_metrics = {}
+    with open(json_dump) as f:
+        dash_metrics = json.load(f)
+
+    print(dash_metrics.keys())
+    print(dash_metrics['bufferLevel'])
+    print(dash_metrics['currentTime'])
+
+
+def parse_log_dir(path):
+    """
+    Parses the given log directory. Generates plots from the data and stores them in /vagrant/doc/DIR
+     where DIR is the same as the top level directory
+
+    Args:
+        path ([str]): A path like string pointing to the root log directory
+    """
+    print(f'parsing {path}')
+    dir_name = os.path.split(path)[-1]
+    doc_root = os.path.join('/', 'vagrant', 'doc', dir_name)
+    if os.path.exists(doc_root):
+        print(f'Warning: {doc_root} already exists, potentially overwriting data')
+    else:
+        os.mkdir(doc_root)
+    plot_info = parse_logs(path)
+    gen_plot(plot_info, root=doc_root)
+    print(f'Plots saved to {doc_root}')
+
+
 if __name__ == '__main__':
 
     if len(sys.argv) == 1: # script was run with no arguments
-        plot_info = parse_logs('/vagrant/logs/10-12-1307')
-        gen_plot(plot_info)
+        parse_dash_metrics('/vagrant/logs/10-12-1307/dashjs_metrics.json')
+        # plot_info = parse_logs('/vagrant/logs/10-12-1307')
+        # gen_plot(plot_info)
+        sys.exit(1)
 
     parser = argparse.ArgumentParser(description='Collection of functions that handle graph plotting')
     parser.add_argument('--source', help='single log file to be parsed')
@@ -184,13 +218,7 @@ if __name__ == '__main__':
         for path, dirs, files in os.walk(root):
             print (path, dirs, files)
             if all(x in files for x in deps):
-                print(f'parsing {path}')
-                dir_name = os.path.split(path)[-1]
-                doc_root = os.path.join('/', 'vagrant', 'doc', dir_name)
-                if os.path.exists(doc_root):
-                    print(f'Warning: {doc_root} already exists, potentially overwriting data')
-                else:
-                    os.mkdir(doc_root)
-                plot_info = parse_logs(path)
-                gen_plot(plot_info, root=doc_root)
-                print(f'Plots saved to {doc_root}')
+                parse_log_dir(path)
+    elif args.source:
+        parse_log_dir(args.source)
+
