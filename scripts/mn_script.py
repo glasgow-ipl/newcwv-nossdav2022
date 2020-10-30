@@ -14,6 +14,7 @@ import datetime
 import sys
 import server
 import math
+import argparse
 
 import subprocess
 
@@ -101,7 +102,7 @@ def test_change_bw():
 
     setLogLevel('info')
 
-def doSimulation():
+def doSimulation(log_root=None):
     "Create network and run simple performance test"
 
     # Create a list to keep logging events
@@ -124,7 +125,10 @@ def doSimulation():
 
     server, client = net.get( 'h1', 'h2' )
 
-    pcap_path = os.path.join('/', 'vagrant', 'logs', time_stamp)
+    if not log_root:
+        pcap_path = os.path.join('/', 'vagrant', 'logs', time_stamp)
+    else:
+        pcap_path = os.path.normpath(log_root)
 
     print('tcpdump -w %s' % os.path.join(pcap_path, 'server.pcap'))
 
@@ -157,10 +161,12 @@ def doSimulation():
     server_ip = server.IP()
 
     # Create server config
-    server_log_name = os.path.join(time_stamp, "nginx_access.log")
+    #server_log_name = os.path.join(time_stamp, "nginx_access.log")
+    server_log_name = os.path.join(pcap_path, "nginx_access.log")
 
     # optionally add buffer=32k (or some other big value for access_log)
-    config_str = "events { } http { log_format tcp_info '$time_local, $msec, \"$request\", $status, $tcpinfo_rtt, $tcpinfo_rttvar, \"$tcpinfo_snd_cwnd\", $tcpinfo_rcv_space, $body_bytes_sent, \"$http_referer\", \"$http_user_agent\"'; server { listen " + server_ip + "; root /vagrant; access_log /vagrant/logs/" + server_log_name + " tcp_info;} }"
+    config_str = "events { } http { log_format tcp_info '$time_local, $msec, \"$request\", $status, $tcpinfo_rtt, $tcpinfo_rttvar, \"$tcpinfo_snd_cwnd\", $tcpinfo_rcv_space, $body_bytes_sent, \"$http_referer\", \"$http_user_agent\"'; server { listen " + server_ip + "; root /vagrant; access_log " + server_log_name + " tcp_info;} }"
+    print(config_str)
     with open('nginx-conf.conf', 'w') as f:
         f.write(config_str)
 
@@ -247,5 +253,11 @@ def doSimulation():
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="")
+    parser.add_argument('--log_dir', help="Root directory for the generated logs")
+
+    args = parser.parse_args()
+    log_dir = args.log_dir
+
     setLogLevel( 'info' )
-    doSimulation()
+    doSimulation(log_root=log_dir)
