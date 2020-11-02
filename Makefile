@@ -103,7 +103,7 @@ stage2-simulation: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd
 	cd ${root}/scripts && sudo python mn_script.py
 
 
-${root}logs:
+${root}/logs:
 	@echo 'creating logs'
 	mkdir $@
 
