@@ -103,14 +103,14 @@ stage2-simulation: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd
 	cd ${root}/scripts && sudo python mn_script.py
 
 
-logs:
+${root}logs:
 	@echo 'creating logs'
-	mkdir ${root}/$@
+	mkdir $@
 
 
-data:
+${root}/data:
 	@echo 'Creating Data directory'
-	mkdir ${root}/$@
+	mkdir $@
 
 
 ${root}/logs/%_bbr/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
@@ -141,7 +141,7 @@ stage3-plot-all: ${root}/scripts/net_utils.py ${root}/plotter/bin/python3.6
 	/vagrant/plotter/bin/python3.6 /vagrant/scripts/net_utils.py --all
 
 
-doc:
+${root}/doc:
 	@echo 'Creating doc directory'
-	mkdir ${root}/$@
+	mkdir $$@
 	
