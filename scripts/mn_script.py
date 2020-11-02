@@ -102,7 +102,7 @@ def test_change_bw():
 
     setLogLevel('info')
 
-def doSimulation(log_root=None):
+def doSimulation(log_root=None, cong_alg=None):
     "Create network and run simple performance test"
 
     # Create a list to keep logging events
@@ -124,6 +124,14 @@ def doSimulation(log_root=None):
     net.pingAll()
 
     server, client = net.get( 'h1', 'h2' )
+
+    # If congestion control algorithm was specified, enable that algortithm on the server
+    if cong_alg:
+        print("Enabling " + cong_alg + " at the server...")
+        server.cmd('sudo /vagrant/scripts/enable_' + cong_alg + '.sh')
+    else:
+        print("No congestion control algorithm specified, running with:")
+        server.cmdPrint("sudo sysctl net.ipv4.tcp_available_congestion_control")
 
     if not log_root:
         pcap_path = os.path.join('/', 'vagrant', 'logs', time_stamp)
@@ -256,8 +264,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="")
     parser.add_argument('--log_dir', help="Root directory for the generated logs")
 
+    parser.add_argument('--cong_alg', help="Congestion control algorithm to use for the simulation")
+
     args = parser.parse_args()
     log_dir = args.log_dir
 
+    cong_alg = args.cong_alg
+
     setLogLevel( 'info' )
-    doSimulation(log_root=log_dir)
+    doSimulation(log_root=log_dir, cong_alg=cong_alg)
