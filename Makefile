@@ -105,12 +105,12 @@ stage2-simulation: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd
 
 logs:
 	@echo 'creating logs'
-	mkdir $@
+	mkdir ${root}/$@
 
 
 data:
 	@echo 'Creating Data directory'
-	mkdir $@
+	mkdir ${root}/$@
 
 
 ${root}/logs/%_bbr/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
@@ -143,5 +143,5 @@ stage3-plot-all: ${root}/scripts/net_utils.py ${root}/plotter/bin/python3.6
 
 doc:
 	@echo 'Creating doc directory'
-	mkdir $@
+	mkdir ${root}/$@
 	
