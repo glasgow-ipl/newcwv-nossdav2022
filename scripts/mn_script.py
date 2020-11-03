@@ -130,8 +130,12 @@ def doSimulation(log_root=None, cong_alg=None):
         print("Enabling " + cong_alg + " at the server...")
         server.cmd('sudo /vagrant/scripts/enable_' + cong_alg + '.sh')
     else:
-        print("No congestion control algorithm specified, running with:")
-        server.cmdPrint("sudo sysctl net.ipv4.tcp_available_congestion_control")
+        print("No congestion control algorithm specified")
+
+
+    server.cmdPrint("sudo sysctl net.ipv4.tcp_congestion_control")
+#    server.cmdPrint("sudo sysctl net.core.default_qdisc")
+
 
     if not log_root:
         pcap_path = os.path.join('/', 'vagrant', 'logs', time_stamp)
@@ -196,7 +200,7 @@ def doSimulation(log_root=None, cong_alg=None):
 
     firefox_output = os.path.join(pcap_path, "browser_out.txt")
     firefox_log_format = "timestamp,rotate:200,nsHttp:5,cache2:5,nsSocketTransport:5,nsHostResolver:5,cookie:5"
-    client_cmd = 'su - %s -c "nohup firefox --headless --private http://%s/scripts/player.html --MOZ_LOG=%s --MOZ_LOG_FILE=%s &"' % (user, server_ip, firefox_log_format, firefox_output)
+    client_cmd = 'su - %s -c "firefox --headless --private http://%s/scripts/player.html --MOZ_LOG=%s --MOZ_LOG_FILE=%s &"' % (user, server_ip, firefox_log_format, firefox_output)
     print ("Client cmd: %s " % client_cmd)
 
     client.cmd(client_cmd)
