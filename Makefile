@@ -129,7 +129,7 @@ ${root}/logs/%_reno/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bb
 
 ${root}/doc/%/fig.pdf: ${root}/logs/%/nginx_access.log ${root}/scripts/net_utils.py ${root}/plotter/bin/python3.6 | ${root}/doc
 	@echo $@
-	/vagrant/plotter/bin/python3.6 /vagrant/scripts/net_utils.py --source $(<D)
+	python3 /vagrant/scripts/net_utils.py --source $(<D)
 
 
 stage3-plot: ${OUTPUT_PLOTS}
@@ -138,7 +138,7 @@ stage3-plot: ${OUTPUT_PLOTS}
 
 stage3-plot-all: ${root}/scripts/net_utils.py ${root}/plotter/bin/python3.6
 	@echo 'plotting data'
-	/vagrant/plotter/bin/python3.6 /vagrant/scripts/net_utils.py --all
+	python3 /vagrant/scripts/net_utils.py --all
 
 
 ${root}/doc:
