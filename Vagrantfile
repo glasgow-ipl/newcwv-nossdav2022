@@ -35,7 +35,7 @@ $RUN_PROBE = <<SCRIPT
 #	apt-get install -y virtualenv
 #	cd /vagrant && virtualenv plotter -p python3 --always-copy && plotter/bin/pip install -r deps/requirements.txt 
 	apt-get install -y python3-pip
-	pip3 install -r deps/requirements.txt
+	cd /vagrant && pip3 install -r deps/requirements.txt
   
   #DNS does not work on some machines, unless some traffic has gone out already
   #ping -c 3 google.com 
