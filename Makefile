@@ -127,7 +127,7 @@ ${root}/logs/%_reno/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bb
 	@echo $@
 	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno
 
-${root}/doc/%/fig.pdf: ${root}/logs/%/nginx_access.log ${root}/scripts/net_utils.py ${root}/plotter/bin/python3.6 | ${root}/doc
+${root}/doc/%/fig.pdf: ${root}/logs/%/nginx_access.log ${root}/scripts/net_utils.py | ${root}/doc
 	@echo $@
 	python3 /vagrant/scripts/net_utils.py --source $(<D)
 
@@ -136,12 +136,12 @@ stage3-plot: ${OUTPUT_PLOTS}
 	@echo 'Generating plots'
 
 
-stage3-plot-all: ${root}/scripts/net_utils.py ${root}/plotter/bin/python3.6
+stage3-plot-all: ${root}/scripts/net_utils.py
 	@echo 'plotting data'
 	python3 /vagrant/scripts/net_utils.py --all
 
 
 ${root}/doc:
 	@echo 'Creating doc directory'
-	mkdir $$@
-	
+	mkdir $@
+
