@@ -15,18 +15,21 @@ $RUN_PROBE = <<SCRIPT
 	apt-get install -y firefox
 	apt-get install -y ffmpeg
 
+	sudo update-alternatives --install /usr/bin/python python /usr/bin/python2 2
+	sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 1	
+
 	git clone git://github.com/mininet/mininet
 	cd mininet && git tag && git checkout 2.3.0d6 && cd util && rm install.sh && wget https://gist.githubusercontent.com/janev94/c443075986ec344359904c9ceba93f2b/raw/99c9146940450beb155a31cb5b30c38643466b46/install.sh && chmod u+x install.sh && cd ../..
 	echo `pwd`
 	export LC_ALL=C
-	sudo mininet/util/install.sh -a
-  apt-get install -y nginx
-  apt-get install -y iperf3
+	sudo mininet/util/install.sh -fnv
+  #apt-get install -y nginx
+  #apt-get install -y iperf3
 
   # Create virtual envrionment for plotting results
-  apt-get install -y python3-venv
-  apt-get install -y virtualenv
-  cd /vagrant && virtualenv plotter -p python3 --always-copy && plotter/bin/pip install -r deps/requirements.txt 
+  #apt-get install -y python3-venv
+  #apt-get install -y virtualenv
+  #cd /vagrant && virtualenv plotter -p python3 --always-copy && plotter/bin/pip install -r deps/requirements.txt 
   
   #DNS does not work on some machines, unless some traffic has gone out already
   #ping -c 3 google.com 

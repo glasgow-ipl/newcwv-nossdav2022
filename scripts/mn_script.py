@@ -123,7 +123,8 @@ def doSimulation(log_root=None, cong_alg=None):
     print("Testing network connectivity")
     net.pingAll()
 
-    server, client = net.get( 'h1', 'h2' )
+    server, client = net.get( 'h1', 'h2' ) # Hosts
+    s1, s2 = net.get('s1', 's2') # Switches
 
     # If congestion control algorithm was specified, enable that algortithm on the server
     if cong_alg:
@@ -192,6 +193,13 @@ def doSimulation(log_root=None, cong_alg=None):
 
     time.sleep(3)
 
+    bw_speed = 9
+    msg = 'changing BW %s %s ' % (bw_speed, datetime.datetime.now().strftime(precise_time_str))
+    print(msg)
+    logger.append(msg)
+
+    changeLinkBw(s1, s2, bw_speed, topo._RTT)
+
     net.iperf((client, server))
 
     msg = "starting client at: %s" % datetime.datetime.now().strftime(precise_time_str)
@@ -201,34 +209,37 @@ def doSimulation(log_root=None, cong_alg=None):
     firefox_output = os.path.join(pcap_path, "browser_out.txt")
     firefox_log_format = "timestamp,rotate:200,nsHttp:5,cache2:5,nsSocketTransport:5,nsHostResolver:5,cookie:5"
     client_cmd = 'su - %s -c "firefox --headless --private http://%s/scripts/player.html --MOZ_LOG=%s --MOZ_LOG_FILE=%s &"' % (user, server_ip, firefox_log_format, firefox_output)
+
+    client_cmd = 'su - %s -c "firefox --headless --private http://%s/scripts/player.html&"' % (user, server_ip)
+
     print ("Client cmd: %s " % client_cmd)
+
+    # CLI(net)
 
     client.cmd(client_cmd)
 
-    s1, s2 = net.get('s1', 's2')
-
-    print('Waiting for 80 seconds')
-    time.sleep(80)
+    # print('Waiting for 80 seconds')
+    # time.sleep(80)
 
 
     #month-day-hour:minute:second:microsecond
-    bw_speed = .5
-    msg = 'changing BW %s %s ' % (bw_speed, datetime.datetime.now().strftime(precise_time_str))
-    print(msg)
-    logger.append(msg)
+    # bw_speed = .5
+    # msg = 'changing BW %s %s ' % (bw_speed, datetime.datetime.now().strftime(precise_time_str))
+    # print(msg)
+    # logger.append(msg)
 
-    changeLinkBw(s1, s2, bw_speed, topo._RTT)
-    net.iperf((client, server))
-    time.sleep(60)
+    # changeLinkBw(s1, s2, bw_speed, topo._RTT)
+    # net.iperf((client, server))
+    # time.sleep(60)
 
-    bw_speed = 15
-    msg = 'changing BW to %s %s ' % (bw_speed, datetime.datetime.now().strftime(precise_time_str) )
-    print(msg)
+    # bw_speed = 15
+    # msg = 'changing BW to %s %s ' % (bw_speed, datetime.datetime.now().strftime(precise_time_str) )
+    # print(msg)
 
-    logger.append(msg)    
-    changeLinkBw(s1, s2, bw_speed, topo._RTT)
-    net.iperf((client, server))
-    time.sleep(80)
+    # logger.append(msg)    
+    # changeLinkBw(s1, s2, bw_speed, topo._RTT)
+    # net.iperf((client, server))
+    # time.sleep(80)
     
     msg = "Waiting for server to finish %s" % datetime.datetime.now().strftime(precise_time_str)
     print(msg)
