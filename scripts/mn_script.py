@@ -208,7 +208,14 @@ def doSimulation(log_root=None, cong_alg=None):
 
     firefox_output = os.path.join(pcap_path, "browser_out.txt")
     firefox_log_format = "timestamp,rotate:200,nsHttp:5,cache2:5,nsSocketTransport:5,nsHostResolver:5,cookie:5"
+<<<<<<< HEAD
     client_cmd = 'su - %s -c "firefox --headless --private http://%s/scripts/player.html --MOZ_LOG=%s --MOZ_LOG_FILE=%s &"' % (user, server_ip, firefox_log_format, firefox_output)
+=======
+    client_cmd = 'su - %s -c "nohup firefox --headless --private http://%s/scripts/player.html --MOZ_LOG=%s --MOZ_LOG_FILE=%s > /dev/null 2>&1 &"' % (user, server_ip, firefox_log_format, firefox_output)
+    print ("Client cmd: %s " % client_cmd)
+
+    client.cmd(client_cmd)
+>>>>>>> 4ee31a80f437d0640b6faecf780f5a2bc99f208e
 
     client_cmd = 'su - %s -c "firefox --headless --private http://%s/scripts/player.html&"' % (user, server_ip)
 

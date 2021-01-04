@@ -1,6 +1,8 @@
 import sys
 import csv
 import datetime
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, AutoMinorLocator
