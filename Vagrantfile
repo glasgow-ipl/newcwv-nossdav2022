@@ -15,31 +15,16 @@ $RUN_PROBE = <<SCRIPT
 	apt-get install -y firefox
 	apt-get install -y ffmpeg
 
-<<<<<<< HEAD
-	sudo update-alternatives --install /usr/bin/python python /usr/bin/python2 2
-	sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 1	
-=======
 	apt-get install -y python2
 	apt-get install -y net-tools
 
 	sudo update-alternatives --install /usr/bin/python python /usr/bin/python2 2
 	sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 1
->>>>>>> 4ee31a80f437d0640b6faecf780f5a2bc99f208e
 
 	git clone git://github.com/mininet/mininet
 #	cd mininet && git tag && git checkout 2.3.0d6 && cd util && rm install.sh && wget https://gist.githubusercontent.com/janev94/c443075986ec344359904c9ceba93f2b/raw/99c9146940450beb155a31cb5b30c38643466b46/install.sh && chmod u+x install.sh && cd ../..
 	echo `pwd`
 	export LC_ALL=C
-<<<<<<< HEAD
-	sudo mininet/util/install.sh -fnv
-  #apt-get install -y nginx
-  #apt-get install -y iperf3
-
-  # Create virtual envrionment for plotting results
-  #apt-get install -y python3-venv
-  #apt-get install -y virtualenv
-  #cd /vagrant && virtualenv plotter -p python3 --always-copy && plotter/bin/pip install -r deps/requirements.txt 
-=======
 	# Cannot use -a flag on install.sh as pox requires python-scapy package which is no longer supported in 20.04
 	sudo mininet/util/install.sh -fnv
 	apt-get install -y nginx
@@ -51,7 +36,6 @@ $RUN_PROBE = <<SCRIPT
 #	cd /vagrant && virtualenv plotter -p python3 --always-copy && plotter/bin/pip install -r deps/requirements.txt 
 	apt-get install -y python3-pip
 	cd /vagrant && pip3 install -r deps/requirements.txt
->>>>>>> 4ee31a80f437d0640b6faecf780f5a2bc99f208e
   
   #DNS does not work on some machines, unless some traffic has gone out already
   #ping -c 3 google.com 
