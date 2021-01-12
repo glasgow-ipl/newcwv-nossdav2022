@@ -32102,6 +32102,8 @@ module.exports = exports['default'];
 
 'use strict';
 
+var q_l_idx = 0;
+
 Object.defineProperty(exports, '__esModule', {
     value: true
 });
@@ -32510,6 +32512,7 @@ function AbrController() {
      * @memberof AbrController#
      */
     function getQualityForBitrate(mediaInfo, bitrate, latency) {
+        //console.log(bitrate, latency, ++q_l_idx);
         var voRepresentation = mediaInfo && mediaInfo.type ? streamProcessorDict[mediaInfo.type].getRepresentationInfo() : null;
 
         if (settings.get().streaming.abr.useDeadTimeLatency && latency && voRepresentation && voRepresentation.fragmentDuration) {
@@ -32563,17 +32566,20 @@ function AbrController() {
     }
 
     function updateIsUsingBufferOccupancyABR(mediaType, bufferLevel) {
-        var strategy = settings.get().streaming.ABRStrategy;
+        var strategy = settings.get().streaming.abr.ABRStrategy;
+
 
         if (strategy === _constantsConstants2['default'].ABR_STRATEGY_BOLA) {
             isUsingBufferOccupancyABRDict[mediaType] = true;
+            // console.log('BOLA');
             return;
         } else if (strategy === _constantsConstants2['default'].ABR_STRATEGY_THROUGHPUT) {
             isUsingBufferOccupancyABRDict[mediaType] = false;
+            // console.log('Throughput');
             return;
         }
         // else ABR_STRATEGY_DYNAMIC
-
+        // console.log('Dynamic');
         var stableBufferTime = mediaPlayerModel.getStableBufferTime();
         var switchOnThreshold = stableBufferTime;
         var switchOffThreshold = 0.5 * stableBufferTime;
@@ -50128,6 +50134,7 @@ var MINIMUM_BUFFER_PER_BITRATE_LEVEL_S = 2;
 var PLACEHOLDER_BUFFER_DECAY = 0.99; // Make sure placeholder buffer does not stick around too long.
 
 function BolaRule(config) {
+    // console.log('calling bola')
 
     config = config || {};
     var context = this.context;
@@ -50266,6 +50273,7 @@ function BolaRule(config) {
 
     // The core idea of BOLA.
     function getQualityFromBufferLevel(bolaState, bufferLevel) {
+        // console.log('pure bola')
         var bitrateCount = bolaState.bitrates.length;
         var quality = NaN;
         var score = NaN;
@@ -51019,6 +51027,7 @@ var _constantsMetricsConstants = _dereq_(108);
 var _constantsMetricsConstants2 = _interopRequireDefault(_constantsMetricsConstants);
 
 function ThroughputRule(config) {
+    // console.log('calling throughput')
 
     config = config || {};
     var context = this.context;
