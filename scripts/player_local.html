@@ -32,11 +32,27 @@
         <script src="http://localhost/scripts/dash.all.debug.js"></script>
         <script>
 
-            var player, video;
+            var video;
+            var player;
+            var metrics = {};
+            metrics.bufferLevel = [];
+            metrics.frameRate = [];
+            metrics.reportedBitrate = [];
+            metrics.currentTime = [];
 
             (function(){
                 var url = "http://localhost/data/bbb.mpd";
                 player = dashjs.MediaPlayer().create();
+
+                player.updateSettings({'streaming': {'abr': {'ABRStrategy': 'abrThroughput'}}})
+                metrics.ABRStrategy = player.getSettings().streaming.abr.ABRStrategy;
+
+                console.log(metrics.ABRStrategy);
+
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.open("GET", "http://localhost/" + metrics.ABRStrategy, false);
+                xmlHttp.send(null);
+
                 video = document.querySelector("#videoPlayer")
                 player.initialize(video, url, true);
             })();
@@ -47,11 +63,17 @@
                 
                 // clear polling for events
                 clearInterval(eventPoller)
-                clearInterval(bitrateCalculator)
 
-                var xmlHttp = new XMLHttpRequest();
+                // var xmlHttp = new XMLHttpRequest();
                 // xmlHttp.open("GET", "http://10.0.0.1:8000/end", false);
-                xmlHttp.send(null);
+                // xmlHttp.send(null);
+
+                fetch("http://localhost:8000/end", {
+                    method: "POST", 
+                    body: JSON.stringify(metrics)
+                    }).then(res => {
+                        
+                });
             };
 
             var eventPoller = setInterval(function () {
@@ -69,19 +91,57 @@
                         return rep.id === repSwitch.to
                     }).frameRate;
                     document.getElementById('bufferLevel').innerText = bufferLevel + " secs";
+                    metrics.bufferLevel.push(bufferLevel);
                     document.getElementById('framerate').innerText = frameRate + " fps";
+                    metrics.frameRate.push(frameRate);
                     document.getElementById('reportedBitrate').innerText = bitrate + " Kbps";
+                    metrics.reportedBitrate.push(bitrate);
+                    metrics.currentTime.push(new Date().getTime());
+
+                    //get stalls
                 }
             }, 1000);
 
-            var lastDecodedByteCount = 0;
-            const bitrateInterval = 1;
-            var bitrateCalculator = setInterval(function () {
-                var calculatedBitrate = (((video.webkitVideoDecodedByteCount - lastDecodedByteCount) / 1000) * 8) / bitrateInterval;
-                console.log(video.webkitVideoDecodedByteCount);
-                document.getElementById('calculatedBitrate').innerText = Math.round(calculatedBitrate) + " Kbps";
-                lastDecodedByteCount = video.webkitVideoDecodedByteCount;
-            }, bitrateInterval * 1000);
+            // var player_element = document.getElementById("videoPlayer");
+            // player_element.onended = function() {
+                
+            //     // clear polling for events
+            //     clearInterval(eventPoller)
+            //     clearInterval(bitrateCalculator)
+
+            //     var xmlHttp = new XMLHttpRequest();
+            //     // xmlHttp.open("GET", "http://10.0.0.1:8000/end", false);
+            //     xmlHttp.send(null);
+            // };
+
+            // var eventPoller = setInterval(function () {
+            //     var streamInfo = player.getActiveStream().getStreamInfo();
+            //     var dashMetrics = player.getDashMetrics();
+            //     var dashAdapter = player.getDashAdapter();
+
+            //     if (dashMetrics && streamInfo) {
+            //         const periodIdx = streamInfo.index;
+            //         var repSwitch = dashMetrics.getCurrentRepresentationSwitch('video', true);
+            //         var bufferLevel = dashMetrics.getCurrentBufferLevel('video', true);
+            //         var bitrate = repSwitch ? Math.round(dashAdapter.getBandwidthForRepresentation(repSwitch.to, periodIdx) / 1000) : NaN;
+            //         var adaptation = dashAdapter.getAdaptationForType(periodIdx, 'video', streamInfo)
+            //         var frameRate = adaptation.Representation_asArray.find(function (rep) {
+            //             return rep.id === repSwitch.to
+            //         }).frameRate;
+            //         document.getElementById('bufferLevel').innerText = bufferLevel + " secs";
+            //         document.getElementById('framerate').innerText = frameRate + " fps";
+            //         document.getElementById('reportedBitrate').innerText = bitrate + " Kbps";
+            //     }
+            // }, 1000);
+
+            // var lastDecodedByteCount = 0;
+            // const bitrateInterval = 1;
+            // var bitrateCalculator = setInterval(function () {
+            //     var calculatedBitrate = (((video.webkitVideoDecodedByteCount - lastDecodedByteCount) / 1000) * 8) / bitrateInterval;
+            //     console.log(video.webkitVideoDecodedByteCount);
+            //     document.getElementById('calculatedBitrate').innerText = Math.round(calculatedBitrate) + " Kbps";
+            //     lastDecodedByteCount = video.webkitVideoDecodedByteCount;
+            // }, bitrateInterval * 1000);
 
         </script>
     </body>
