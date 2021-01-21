@@ -18,6 +18,8 @@ import argparse
 
 import subprocess
 
+from utils import bw_utils
+
 bw_init = None
 class SingleSwitchTopo( Topo ):
     "Single switch connected to n hosts."
@@ -53,32 +55,13 @@ class DumbbellTopo( Topo ):
         global bw_init
         bw_init = self._bw = bw
         RTT = self._RTT = 70 #ms
-        bdp = _calculate_bdp(bw, RTT)
+        bdp = bw_utils._calculate_bdp(bw, RTT)
         print(bdp) 
 
         # Leaving non-bottleneck links to run at maximum capacity with default parameters
         self.addLink( hosts[0], s1)#, bw=bw, delay='%dms' % delay, max_queue_size=bdp)
         self.addLink( hosts[1], s2)#, bw=bw, delay='%dms' % delay, max_queue_size=bdp)
         self.addLink( s1, s2, bw=bw, delay='%dms' % (RTT/2), max_queue_size=bdp)
-
-
-def _calculate_bdp(bw, RTT):
-    '''
-        Returns BDP in MTU sized packets, default MTU=1500
-        @bw -> badwidth in Mbps
-        @RTT -> round trip time in ms
-    '''
-    bdp = bw * 1000 # kbps
-    bdp /= 8 #kBps
-    bdp *= RTT # Bytes
-    bdp = math.ceil(bdp / 1500.0) # MTU sized packets
-    return int(bdp)
-
-def changeLinkBw(ep1, ep2, in_bw, RTT, out_bw=-1):
-    link = ep1.connectionsTo(ep2)
-    bdp = _calculate_bdp(in_bw, RTT)
-    link[0][0].config(**{'bw': in_bw, 'max_queue_size': bdp})
-    link[0][1].config(**{'bw': out_bw if out_bw != -1 else in_bw, 'max_queue_size': bdp if out_bw == -1 else _calculate_bdp(out_bw, RTT)})
 
 
 def run_on_host(host, cmd):
@@ -95,14 +78,14 @@ def test_change_bw():
     s1 = net.get('s1')
     net.iperf((h1, h2))
     
-    changeLinkBw(h1, s1, 10, 5)
+    bw_utils.changeLinkBw(h1, s1, 10, 5)
     net.iperf((h1, h2))
     net.iperf((h1, h2))
     net.iperf((h1, h2))
 
     setLogLevel('info')
 
-def doSimulation(log_root=None, cong_alg=None):
+def doSimulation(log_root=None, cong_alg=None, network_model_file=None):
     "Create network and run simple performance test"
 
     # Create a list to keep logging events
@@ -193,12 +176,11 @@ def doSimulation(log_root=None, cong_alg=None):
 
     time.sleep(3)
 
-    bw_speed = 9
-    msg = 'changing BW %s %s ' % (bw_speed, datetime.datetime.now().strftime(precise_time_str))
-    print(msg)
-    logger.append(msg)
+    bw_manager = Thread(target=bw_utils.config_bw, args=(network_model_file, s1, s2, logger))
+    bw_manager.start()
+    time.sleep(1)
 
-    changeLinkBw(s1, s2, bw_speed, topo._RTT)
+    # bw_utils.changeLinkBw(s1, s2, bw_speed, topo._RTT)
 
     net.iperf((client, server))
 
@@ -254,6 +236,8 @@ def doSimulation(log_root=None, cong_alg=None):
 
     time.sleep(2)
 
+    bw_manager.join()
+
     print("Stopping server")
     server.cmd("sudo nginx -s stop")
     print("Closing...")
@@ -281,10 +265,14 @@ if __name__ == '__main__':
 
     parser.add_argument('--cong_alg', help="Congestion control algorithm to use for the simulation")
 
+    parser.add_argument('--network_model', help="A JSON file, that contains data for BW and RTT changes required during the experiment")
+
     args = parser.parse_args()
     log_dir = args.log_dir
 
     cong_alg = args.cong_alg
 
+    network_model_file = args.network_model
+
     setLogLevel( 'info' )
-    doSimulation(log_root=log_dir, cong_alg=cong_alg)
+    doSimulation(log_root=log_dir, cong_alg=cong_alg, network_model_file=network_model_file)

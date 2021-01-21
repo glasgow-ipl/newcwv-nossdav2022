@@ -115,21 +115,24 @@ ${root}/data:
 
 ${root}/logs/%_bbr/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/scripts/network_config.json
 
 
 ${root}/logs/%_cubic/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/scripts/network_config.json
 
 
 ${root}/logs/%_reno/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/scripts/network_config.json
 
 ${root}/doc/%/fig.pdf: ${root}/logs/%/nginx_access.log ${root}/scripts/net_utils.py | ${root}/doc
 	@echo $@
 	python3 /vagrant/scripts/net_utils.py --source $(<D)
+
+stage3-run: ${NGINX_LOGS}
+	@echo 'Running experiments'
 
 
 stage3-plot: ${OUTPUT_PLOTS}
