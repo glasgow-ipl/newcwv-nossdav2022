@@ -2,6 +2,10 @@ out_dir:=/vagrant/data
 bbb_hd:=${out_dir}/bbb_sunflower_2160p_60fps_normal.mp4
 root:=/vagrant
 
+BW_SETTINGS := $(shell seq 1 117)
+
+BW_RUNS = $(foreach bw_set, $(BW_SETTINGS), ${root}/logs/bw_cubic_${bw_set}/nginx_access.log)
+
 RUN_NUMBERS  = 1 2 3 4 5 6 7 8 9 10
 CONG_ALGS = bbr cubic reno
 NGINX_LOGS   = $(foreach alg, $(CONG_ALGS), $(foreach run, $(RUN_NUMBERS), ${root}/logs/$(run)_$(alg)/nginx_access.log))
@@ -127,6 +131,12 @@ ${root}/logs/%_reno/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bb
 	@echo $@
 	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/scripts/network_config.json
 
+
+${root}/logs/bw_cubic_%/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
+	@echo $@
+	#cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/scripts/bws/network_config_${*}.json
+
+
 ${root}/doc/%/fig.pdf: ${root}/logs/%/nginx_access.log ${root}/scripts/net_utils.py | ${root}/doc
 	@echo $@
 	python3 /vagrant/scripts/net_utils.py --source $(<D)
@@ -134,6 +144,8 @@ ${root}/doc/%/fig.pdf: ${root}/logs/%/nginx_access.log ${root}/scripts/net_utils
 stage3-run: ${NGINX_LOGS}
 	@echo 'Running experiments'
 
+stage3-diff_bw: ${BW_RUNS}
+	@echo ${BW_RUNS}
 
 stage3-plot: ${OUTPUT_PLOTS}
 	@echo 'Generating plots'
