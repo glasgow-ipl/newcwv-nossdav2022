@@ -11,7 +11,7 @@ import os
 import argparse
 import json
 
-def count_oscillations(values): # returns the number of oscillations in the value list (cwnd)
+def count_oscillations_cwnd(values): # returns the number of oscillations in the value list (cwnd)
     changes = 0
     if(len(values) < 2):
         return 0
@@ -29,6 +29,19 @@ def count_oscillations(values): # returns the number of oscillations in the valu
         
     return changes
 
+
+def count_oscillations_bitrates(values):
+    changes = 0
+    if len(values) < 2:
+        return 0
+
+    current = values[0][1]
+    for idx in range(1, len(values) -1):
+        if values[idx + 1][1] != current:
+            changes += 1
+        current = values[idx + 1][1]
+    
+    return changes
 
 def gen_plot(plot_info, root='.'):
     cwnd_info = plot_info['cwnds']
