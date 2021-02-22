@@ -38,6 +38,7 @@
             metrics.frameRate = [];
             metrics.reportedBitrate = [];
             metrics.currentTime = [];
+            metrics.eventLog = [];
 
             (function(){
                 var url = "http://10.0.0.1/data/bbb.mpd";
@@ -48,6 +49,14 @@
 
                 player.initialize(document.querySelector("#videoPlayer"), url, true);
             })();
+
+
+            function recordEvent(e)
+            {
+                metrics.eventLog.push(e.message);
+            }
+
+            player.on(dashjs.MediaPlayer.events['LOG'], recordEvent);
 
 
             var player_element = document.getElementById("videoPlayer");

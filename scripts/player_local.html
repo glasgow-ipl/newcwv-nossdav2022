@@ -39,6 +39,7 @@
             metrics.frameRate = [];
             metrics.reportedBitrate = [];
             metrics.currentTime = [];
+            metrics.eventLog = [];
 
             (function(){
                 var url = "http://localhost/data/bbb.mpd";
@@ -49,13 +50,21 @@
 
                 console.log(metrics.ABRStrategy);
 
-                var xmlHttp = new XMLHttpRequest();
-                xmlHttp.open("GET", "http://localhost/" + metrics.ABRStrategy, false);
-                xmlHttp.send(null);
+//                var xmlHttp = new XMLHttpRequest();
+//                xmlHttp.open("GET", "http://localhost/" + metrics.ABRStrategy, false);
+//                xmlHttp.send(null);
 
                 video = document.querySelector("#videoPlayer")
                 player.initialize(video, url, true);
             })();
+
+            function recordEvent(e)
+            {
+                metrics.eventLog.push(e.message);
+            }
+
+            player.on(dashjs.MediaPlayer.events['LOG'], recordEvent);
+            // player.on(dashjs.MediaPlayer.events['PLAYBACK_STARTED'], showEvent);
 
 
             var player_element = document.getElementById("videoPlayer");
