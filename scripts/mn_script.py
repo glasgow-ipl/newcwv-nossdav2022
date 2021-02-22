@@ -156,6 +156,11 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None):
     user = os.getlogin()
     server_ip = server.IP()
 
+
+    # Clear previous kernel logs
+    server.cmd('echo "" > /var/log/kern.log')
+    print("Kernel logs cleared")
+
     # Create server config
     #server_log_name = os.path.join(time_stamp, "nginx_access.log")
     server_log_name = os.path.join(pcap_path, "nginx_access.log")
@@ -250,6 +255,8 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None):
     else:
         print("Dash metrics not found")
 
+    # copy kernel logs
+    os.system('sudo cp /var/log/kern.log %s' % pcap_path)
 
     logger_path = os.path.join(pcap_path, 'events.log')
     logger = '\n'.join(logger)
