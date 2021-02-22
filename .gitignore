@@ -132,3 +132,7 @@ plotter/
 
 # Ignore any non-essential scripts
 scripts/scratch/**
+
+# Compiled Linux images
+linux-image-*
+linux-headers-*
