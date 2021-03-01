@@ -71,9 +71,11 @@
             var player_element = document.getElementById("videoPlayer");
             player_element.onended = function() {
                 
+                let estimates = player.getSettings().streaming.abr.estimates;
                 // clear polling for events
-                clearInterval(eventPoller)
+                clearInterval(eventPoller);
 
+                metrics.estimates = estimates;
                 // var xmlHttp = new XMLHttpRequest();
                 // xmlHttp.open("GET", "http://10.0.0.1:8000/end", false);
                 // xmlHttp.send(null);

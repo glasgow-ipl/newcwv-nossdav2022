@@ -49444,6 +49444,8 @@ function ThroughputHistory(config) {
             latencyHalfLife: { fast: EWMA_LATENCY_FAST_HALF_LIFE_COUNT, slow: EWMA_LATENCY_SLOW_HALF_LIFE_COUNT }
         };
 
+        settings.get().streaming.abr.estimates = []
+
         reset();
     }
 
@@ -49476,6 +49478,10 @@ function ThroughputHistory(config) {
         }
 
         var throughput = Math.round(8 * downloadBytes / throughputMeasureTime); // bits/ms = kbits/s
+
+        let estimate = '[' + mediaType + '] Calculated tput for: ' + httpRequest.url + ' is ' + throughput;
+        settings.get().streaming.abr.estimates.push(estimate);
+        // console.log(estimate);
 
         checkSettingsForMediaType(mediaType);
 
@@ -49572,6 +49578,7 @@ function ThroughputHistory(config) {
 
         arr = arr.slice(-sampleSize); // still works if sampleSize too large
         // arr.length >= 1
+        
         return arr.reduce(function (total, elem) {
             return total + elem;
         }) / arr.length;
