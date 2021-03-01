@@ -45,7 +45,15 @@
                 var url = "http://localhost/data/bbb.mpd";
                 player = dashjs.MediaPlayer().create();
 
-                player.updateSettings({'streaming': {'abr': {'ABRStrategy': 'abrThroughput'}}})
+                player.updateSettings(
+                    {'streaming': 
+                        {'abr': 
+                            {
+                                'ABRStrategy': 'abrThroughput',
+                                'movingAverageMethod': 'ewma'
+                            }
+                        }
+                    });
                 metrics.ABRStrategy = player.getSettings().streaming.abr.ABRStrategy;
 
                 console.log(metrics.ABRStrategy);

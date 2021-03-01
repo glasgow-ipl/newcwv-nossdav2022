@@ -44,7 +44,16 @@
                 var url = "http://10.0.0.1/data/bbb.mpd";
                 player = dashjs.MediaPlayer().create();
 
-                player.updateSettings({'streaming': {'abr': {'ABRStrategy': 'abrThroughput'}}})
+                player.updateSettings(
+                    {'streaming': 
+                        {'abr': 
+                            {
+                                'ABRStrategy': 'abrThroughput',
+                                'movingAverageMethod': 'ewma'
+                            }
+                        }
+                    }); // Changing MovingAverage Method to EWMA, default is Sliding window
+
                 metrics.ABRStrategy = player.getSettings().streaming.abr.ABRStrategy;   
 
                 player.initialize(document.querySelector("#videoPlayer"), url, true);
