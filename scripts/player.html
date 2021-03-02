@@ -49,7 +49,6 @@
                         {'abr': 
                             {
                                 'ABRStrategy': 'abrThroughput',
-                                'movingAverageMethod': 'ewma'
                             }
                         }
                     }); // Changing MovingAverage Method to EWMA, default is Sliding window
@@ -71,14 +70,22 @@
             var player_element = document.getElementById("videoPlayer");
             player_element.onended = function() {
                 
-                let estimates = player.getSettings().streaming.abr.estimates;
                 // clear polling for events
                 clearInterval(eventPoller);
 
-                metrics.estimates = estimates;
+//		metrics = {};
+		let est_json = {};
+                let estimates = player.getSettings().streaming.abr.estimates;
+                est_json.estimates = estimates;
                 // var xmlHttp = new XMLHttpRequest();
                 // xmlHttp.open("GET", "http://10.0.0.1:8000/end", false);
                 // xmlHttp.send(null);
+
+		fetch("http://10.0.0.1:8000/estimates", {
+			method: "POST",
+			body: JSON.stringify(est_json)
+			}).then( res => {
+		});
 
                 fetch("http://10.0.0.1:8000/end", {
                     method: "POST", 

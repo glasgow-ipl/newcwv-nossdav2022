@@ -49479,7 +49479,7 @@ function ThroughputHistory(config) {
 
         var throughput = Math.round(8 * downloadBytes / throughputMeasureTime); // bits/ms = kbits/s
 
-        let estimate = '[' + mediaType + '] Calculated tput for: ' + httpRequest.url + ' is ' + throughput;
+        let estimate = '[' + mediaType + '] Calculated tput for: ' + httpRequest.url + ' is ' + ' ' + throughputMeasureTime + ' ' + downloadBytes + ' ' + throughput;
         settings.get().streaming.abr.estimates.push(estimate);
         // console.log(estimate);
 
@@ -49579,9 +49579,14 @@ function ThroughputHistory(config) {
         arr = arr.slice(-sampleSize); // still works if sampleSize too large
         // arr.length >= 1
         
-        return arr.reduce(function (total, elem) {
+	let result = [arr, arr.reduce(function (total, elem) {
             return total + elem;
-        }) / arr.length;
+        }) / arr.length];
+	result.push(result[1] * 0.9 * 1000)
+
+        settings.get().streaming.abr.estimates.push(result);
+
+        return result[1];
     }
 
     function getAverageEwma(isThroughput, mediaType) {
@@ -51041,7 +51046,8 @@ function ThroughputRule(config) {
     var dashMetrics = config.dashMetrics;
 
     var instance = undefined,
-        logger = undefined;
+        logger = undefined,
+	prev_switch = undefined;
 
     function setup() {
         logger = (0, _coreDebug2['default'])(context).getInstance().getLogger(instance);
@@ -51082,6 +51088,13 @@ function ThroughputRule(config) {
             if (bufferStateVO.state === _constantsMetricsConstants2['default'].BUFFER_LOADED || isDynamic) {
                 switchRequest.quality = abrController.getQualityForBitrate(mediaInfo, throughput, latency);
                 scheduleController.setTimeToLoadDelay(0);
+		if(prev_switch){
+			if (switchRequest.quality != prev_switch && switchRequest.quality < prev_switch)
+			{
+				logger.debug('[' + mediaType '] ignoring switch request for: ' + switchRequest.quality);
+			}
+		}
+		prev_switch = switchRequest.quality;
                 logger.debug('[' + mediaType + '] requesting switch to index: ', switchRequest.quality, 'Average throughput', Math.round(throughput), 'kbps');
                 switchRequest.reason = { throughput: throughput, latency: latency };
             }

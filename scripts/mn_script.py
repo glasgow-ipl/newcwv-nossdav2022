@@ -255,6 +255,14 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None):
     else:
         print("Dash metrics not found")
 
+    # Move dashjs_metrics file to relevant directory
+    if os.path.exists('dashjs_estimates.json'):
+        print("Saving dash estimates to %s" % pcap_path)
+        os.system('mv dashjs_estimates.json %s' % pcap_path)
+    else:
+        print("Dash estimates not found")
+
+
     # copy kernel logs
     os.system('sudo cp /var/log/kern.log %s' % pcap_path)
 

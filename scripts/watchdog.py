@@ -55,6 +55,13 @@ class MyHttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
             print("Stopping watchdog (POST)")
             self.server.server_close()
+        elif self.path == '/estimates':
+            self.data_string = self.rfile.read(int(self.headers['Content-Length']))
+            data = json.loads(self.data_string)
+            with open('dashjs_estimates.json', 'w') as f:
+                json.dump(data, f)
+
+            print("Got estimates", data)
 
 
 
