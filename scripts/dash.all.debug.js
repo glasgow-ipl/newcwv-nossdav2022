@@ -51091,7 +51091,7 @@ function ThroughputRule(config) {
 		if(prev_switch){
 			if (switchRequest.quality != prev_switch && switchRequest.quality < prev_switch)
 			{
-				logger.debug('[' + mediaType '] ignoring switch request for: ' + switchRequest.quality);
+				logger.debug('[' + mediaType + '] ignoring switch request for: ' + switchRequest.quality);
 			}
 		}
 		prev_switch = switchRequest.quality;
