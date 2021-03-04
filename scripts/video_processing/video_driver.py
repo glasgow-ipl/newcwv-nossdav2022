@@ -37,6 +37,8 @@ if __name__ == '__main__':
 
 	parser.add_argument('--extra_arg', help="Additional arguments to pass for encoder and segmenter actions to pick the correct representation")
 
+	parser.add_argument('--segment_duration', help="Segment duration length in seconds. Used by the encoder", type=int)
+
 	args = parser.parse_args()
 	
 	if args.prefix:
@@ -74,6 +76,11 @@ if __name__ == '__main__':
 		if not args.extra_arg:
 			print("Segment action requires an extra srgument to pick representation")
 			sys.exit(1)
+
+		if not args.segment_duration:
+			meta['segment_duration'] = 60
+		else:
+			meta['segment_duration'] = args.segment_duration * 60
 
 		idx = args.extra_arg
 		idx = int(idx)

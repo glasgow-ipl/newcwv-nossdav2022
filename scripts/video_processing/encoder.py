@@ -7,6 +7,7 @@ def encode(meta, idx):
 	source = meta['source']
 	bitrates = meta['bitrates']
 	framerate = meta['framerate']
+	segment_duration_frames = meta['segment_duration']
 
 	quality = resolutions[idx].split('x')[1]
 	destination = ( prefix if prefix else '' ) + '%s/bbb_%s_%s.mp4' % (quality, quality, framerate)
@@ -15,8 +16,10 @@ def encode(meta, idx):
 	if dst_dir:
 		check_and_create(dst_dir)
 
-	#print("ffmpeg -i " + source + " -vf scale=" + resolutions[idx] + "
-	cmd = "ffmpeg -i " + source + " -vf scale=" + resolutions[idx] + " -b:v " + str(bitrates[idx]) + "M -bufsize " + str(bitrates[idx]/2) + "M -c:v libx264 -x264opts 'keyint=60:min-keyint=60:no-scenecut' -c:a copy " + destination
+	print("Segmenting video in " + str(segment_duration_frames / 60) + " second long chunks")
+
+	print(segment_duration_frames, type(segment_duration_frames))
+	cmd = "ffmpeg -i " + source + " -vf scale=" + resolutions[idx] + " -b:v " + str(bitrates[idx]) + "M -bufsize " + str(bitrates[idx]/2) + "M -c:v libx264 -x264opts 'keyint=" + str(segment_duration_frames) + ":min-keyint=" + str(segment_duration_frames) + ":no-scenecut' -c:a copy " + destination
 	print("Encoding %s: " % cmd)
 	os.system(cmd)
 
