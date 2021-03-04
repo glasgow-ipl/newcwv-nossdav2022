@@ -32521,8 +32521,12 @@ function AbrController() {
             if (latency > fragmentDuration) {
                 return 0;
             } else {
-                var deadTimeRatio = latency / fragmentDuration;
-                bitrate = bitrate * (1 - deadTimeRatio);
+		// If we are using ABR Throughput, we have already calculated the bitrate and applied a safety factor
+		if (settings.get().streaming.abr.ABRStrategy !== "abrThroughput")
+		{
+                	var deadTimeRatio = latency / fragmentDuration;
+                	bitrate = bitrate * (1 - deadTimeRatio);
+		}
             }
         }
 
@@ -32530,6 +32534,7 @@ function AbrController() {
 
         for (var i = bitrateList.length - 1; i >= 0; i--) {
             var bitrateInfo = bitrateList[i];
+	    logger.debug('[selection] ' + bitrate * 1000 + ' ' + bitrateInfo.bitrate);
             if (bitrate * 1000 >= bitrateInfo.bitrate) {
                 return i;
             }
@@ -49762,7 +49767,7 @@ function ABRRulesCollection(config) {
             qualitySwitchRules.push((0, _InsufficientBufferRule2['default'])(context).create({
                 dashMetrics: dashMetrics
             }));
-            qualitySwitchRules.push((0, _SwitchHistoryRule2['default'])(context).create());
+            //qualitySwitchRules.push((0, _SwitchHistoryRule2['default'])(context).create());
             qualitySwitchRules.push((0, _DroppedFramesRule2['default'])(context).create());
             abandonFragmentRules.push((0, _AbandonRequestsRule2['default'])(context).create({
                 dashMetrics: dashMetrics,
@@ -51088,14 +51093,18 @@ function ThroughputRule(config) {
             if (bufferStateVO.state === _constantsMetricsConstants2['default'].BUFFER_LOADED || isDynamic) {
                 switchRequest.quality = abrController.getQualityForBitrate(mediaInfo, throughput, latency);
                 scheduleController.setTimeToLoadDelay(0);
+
 		if(prev_switch){
 			if (switchRequest.quality != prev_switch && switchRequest.quality < prev_switch)
 			{
 				logger.debug('[' + mediaType + '] ignoring switch request for: ' + switchRequest.quality);
 			}
 		}
+
+                logger.debug('[' + mediaType + '] requesting switch to index: ', switchRequest.quality, 'Average throughput', Math.round(throughput), throughput, 'kbps +_' + prev_switch + ' ' + switchRequest.quality);
+
 		prev_switch = switchRequest.quality;
-                logger.debug('[' + mediaType + '] requesting switch to index: ', switchRequest.quality, 'Average throughput', Math.round(throughput), 'kbps');
+
                 switchRequest.reason = { throughput: throughput, latency: latency };
             }
         }
