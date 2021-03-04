@@ -51,7 +51,7 @@ Vagrant.configure("2") do |config|
   config.ssh.forward_x11 = true
 
   config.vm.provider :virtualbox do |v|
-    v.customize ["modifyvm", :id, "--memory",                 "8192"]
+    v.customize ["modifyvm", :id, "--memory",                 "16384"]
     v.customize ["modifyvm", :id, "--cpus",                      "4"]
     v.customize ["modifyvm", :id, "--hwvirtex",                 "on"]
     v.customize ["modifyvm", :id, "--nestedpaging",             "on"]
