@@ -243,6 +243,10 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None):
 
     bw_manager.join()
 
+    print("Stopping firefox instances")
+    client.cmd("sudo killall firefox")
+
+
     print("Stopping server")
     server.cmd("sudo nginx -s stop")
     print("Closing...")
