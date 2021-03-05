@@ -29,7 +29,7 @@
             <span id="framerate"></span>
         </div>
 
-        <script src="http://10.0.0.1/scripts/dash.all.debug.js"></script>
+        <script src="http://10.0.0.1/scripts/dash.all.debug_3_1_3.js"></script>
         <script>
 
             var player;
@@ -70,22 +70,21 @@
             var player_element = document.getElementById("videoPlayer");
             player_element.onended = function() {
                 
-                // clear polling for events
-                clearInterval(eventPoller);
 
 //		metrics = {};
-		let est_json = {};
-                let estimates = player.getSettings().streaming.abr.estimates;
-                est_json.estimates = estimates;
+//		let est_json = {};
+//                let estimates = player.getSettings().streaming.abr.estimates;
+//                est_json.estimates = estimates;
                 // var xmlHttp = new XMLHttpRequest();
                 // xmlHttp.open("GET", "http://10.0.0.1:8000/end", false);
                 // xmlHttp.send(null);
-
+/*
 		fetch("http://10.0.0.1:8000/estimates", {
 			method: "POST",
 			body: JSON.stringify(est_json)
 			}).then( res => {
 		});
+*/
 
                 fetch("http://10.0.0.1:8000/end", {
                     method: "POST", 
@@ -94,33 +93,6 @@
                         
                 });
             };
-
-            var eventPoller = setInterval(function () {
-                var streamInfo = player.getActiveStream().getStreamInfo();
-                var dashMetrics = player.getDashMetrics();
-                var dashAdapter = player.getDashAdapter();
-
-                if (dashMetrics && streamInfo) {
-                    const periodIdx = streamInfo.index;
-                    var repSwitch = dashMetrics.getCurrentRepresentationSwitch('video', true);
-                    var bufferLevel = dashMetrics.getCurrentBufferLevel('video', true);
-                    var bitrate = repSwitch ? Math.round(dashAdapter.getBandwidthForRepresentation(repSwitch.to, periodIdx) / 1000) : NaN;
-                    var adaptation = dashAdapter.getAdaptationForType(periodIdx, 'video', streamInfo)
-                    var frameRate = adaptation.Representation_asArray.find(function (rep) {
-                        return rep.id === repSwitch.to
-                    }).frameRate;
-                    document.getElementById('bufferLevel').innerText = bufferLevel + " secs";
-                    metrics.bufferLevel.push(bufferLevel);
-                    document.getElementById('framerate').innerText = frameRate + " fps";
-                    metrics.frameRate.push(frameRate);
-                    document.getElementById('reportedBitrate').innerText = bitrate + " Kbps";
-                    metrics.reportedBitrate.push(bitrate);
-                    metrics.currentTime.push(new Date().getTime());
-
-                    //get stalls
-                }
-            }, 1000);
-
         </script>
     </body>
 </html>
