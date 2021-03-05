@@ -40,6 +40,12 @@
             metrics.currentTime = [];
             metrics.eventLog = [];
 
+            
+            metrics.startup_delay = null;
+            metrics.rebuffering_events = [];
+
+            freeze_time = null;
+            init_time = null;
             (function(){
                 var url = "http://10.0.0.1/data/bbb.mpd";
                 player = dashjs.MediaPlayer().create();
@@ -56,6 +62,7 @@
                 metrics.ABRStrategy = player.getSettings().streaming.abr.ABRStrategy;   
 
                 player.initialize(document.querySelector("#videoPlayer"), url, true);
+                init_time = window.performance.now();
             })();
 
 
@@ -64,7 +71,25 @@
                 metrics.eventLog.push(e.message);
             }
 
+
+            function recordPlayTime(e) {
+                var now = performance.window.now();
+                if (startup_delay === null) {
+                    metrics.startup_delay = now - init_time;
+                } else {
+                    // Startup delay has been recorded but video was frozen and is now playing again
+                    metrics.rebuffering_events.push(now - freeze_time);
+                }
+            }
+
+
+            function recordFreezeTime(e) {
+                freeze_time = performance.window.now();
+            }
+
             player.on(dashjs.MediaPlayer.events['LOG'], recordEvent);
+            player.on(dashjs.MediaPlayer.events['PLAYBACK_PLAYING'], recordPlayTime);
+            player.on(dashjs.MediaPlayer.events['PLAYBACK_WAITING'], recordFreezeTime);
 
 
             var player_element = document.getElementById("videoPlayer");
@@ -93,6 +118,7 @@
                         
                 });
             };
+            
         </script>
     </body>
 </html>
