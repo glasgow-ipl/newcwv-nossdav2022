@@ -58,7 +58,7 @@ def _calculate_bdp(bw, RTT):
 
 
 def changeLinkBw(ep1, ep2, in_bw, RTT, logger, out_bw=-1,):
-    msg = 'changing BW %s %s ' % (in_bw, datetime.datetime.now().strftime(precise_time_str))
+    msg = 'changing BW %s RTT %s %s ' % (in_bw, RTT, datetime.datetime.now().strftime(precise_time_str))
     print(msg)
     logger.append(msg)
     link = ep1.connectionsTo(ep2)
