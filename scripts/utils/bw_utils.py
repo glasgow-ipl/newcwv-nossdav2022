@@ -63,8 +63,8 @@ def changeLinkBw(ep1, ep2, in_bw, RTT, logger, out_bw=-1,):
     logger.append(msg)
     link = ep1.connectionsTo(ep2)
     bdp = _calculate_bdp(in_bw, RTT)
-    link[0][0].config(**{'bw': in_bw, 'max_queue_size': bdp})
-    link[0][1].config(**{'bw': out_bw if out_bw != -1 else in_bw, 'max_queue_size': bdp if out_bw == -1 else _calculate_bdp(out_bw, RTT)})
+    link[0][0].config(**{'bw': in_bw, 'max_queue_size': bdp, 'delay': '%sms' % (RTT / 2)})
+    link[0][1].config(**{'bw': out_bw if out_bw != -1 else in_bw, 'max_queue_size': bdp if out_bw == -1 else _calculate_bdp(out_bw, RTT), 'delay': '%sms' % (RTT / 2)})
 
 
 def config_bw(conf_file, ep1, ep2, logger):
