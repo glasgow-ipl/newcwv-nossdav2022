@@ -119,17 +119,17 @@ ${root}/data:
 
 ${root}/logs/%_bbr/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/scripts/network_config.json
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_1.json
 
 
 ${root}/logs/%_cubic/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/scripts/network_config.json
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/network_models/dash_if/network_config_1.json
 
 
 ${root}/logs/%_reno/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/scripts/network_config.json
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_1.json
 
 
 ${root}/logs/bw_cubic_%/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
