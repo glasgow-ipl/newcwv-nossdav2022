@@ -5,6 +5,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+import seaborn as sns
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, AutoMinorLocator
 import numpy as np
 import os
@@ -224,8 +225,7 @@ def parse_log_dir(path):
     print(f'Plots saved to {doc_root}')
 
 def calc_avg_bitrate_dir(dir_name):
-    avg_bitrates_bbr = []
-    avg_bitrates_cubic = []
+    avg_bitrates = {'bbr': [], 'cubic': [], 'reno': []}
     for root, dirs, files in os.walk(dir_name):
         # print(root, dirs, files)
         if 'nginx_access.log' in files:
@@ -233,14 +233,24 @@ def calc_avg_bitrate_dir(dir_name):
                 nginx_log_path = os.path.join(root, 'nginx_access.log')
                 avg_bitrate = calc_avg_bitrate(nginx_log_path)
                 if 'bbr' in root:
-                    avg_bitrates_bbr.append(avg_bitrate)
+                    avg_bitrates['bbr'].append(avg_bitrate)
                 elif 'cubic' in root:
-                    avg_bitrates_cubic.append(avg_bitrates_cubic)
+                    avg_bitrates['cubic'].append(avg_bitrate)
+                elif 'reno' in root:
+                    avg_bitrate['reno'].append(avg_bitrate)
             except:
                 pass
 
-    print(avg_bitrates_bbr)
-    print(avg_bitrates_cubic)
+    keys, values = zip(*avg_bitrates.items())
+
+    plt.clf()
+    plt.figure()
+
+    plt.violinplot(values)
+    plt.xticks(np.arange(1, len(keys) + 1), keys)
+
+    plt.savefig('/vagrant/violin.png')
+
 
 def calc_avg_bitrate(fname):
     print(f'working on {fname}')
