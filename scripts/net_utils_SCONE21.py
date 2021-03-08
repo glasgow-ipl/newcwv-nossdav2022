@@ -11,7 +11,12 @@ import os
 import argparse
 import json
 
+import functools
+import math
+
 kbps = [1410237, 3720740, 6961267, 11097137]
+
+quality_to_kbps_3s = {360: 1368193, 480: 3619359, 720: 6747721, 1080: 10660219}
 
 def count_oscillations(values): # returns the number of oscillations in the value list (cwnd)
     changes = 0
@@ -218,14 +223,54 @@ def parse_log_dir(path):
     gen_plot(plot_info, root=doc_root)
     print(f'Plots saved to {doc_root}')
 
+def calc_avg_bitrate_dir(dir_name):
+    avg_bitrates_bbr = []
+    avg_bitrates_cubic = []
+    for root, dirs, files in os.walk(dir_name):
+        # print(root, dirs, files)
+        if 'nginx_access.log' in files:
+            try:
+                nginx_log_path = os.path.join(root, 'nginx_access.log')
+                avg_bitrate = calc_avg_bitrate(nginx_log_path)
+                if 'bbr' in root:
+                    avg_bitrates_bbr.append(avg_bitrate)
+                elif 'cubic' in root:
+                    avg_bitrates_cubic.append(avg_bitrates_cubic)
+            except:
+                pass
+
+    print(avg_bitrates_bbr)
+    print(avg_bitrates_cubic)
+
+def calc_avg_bitrate(fname):
+    print(f'working on {fname}')
+    parsed = parse_nginx_log(fname)
+    qualities = np.array(parsed['qualities'])
+    qualities = qualities[:,1]
+    q_kbps = [quality_to_kbps_3s[q] for q in qualities]
+
+    # print(q_kbps)
+
+    print("average bitrate: %f" % np.average(q_kbps))
+
+    avg_osc = functools.reduce(lambda i, j: abs(i - j), q_kbps) / (len(kbps) - 1)
+    print("Average oscillation: %f" % avg_osc)
+
+    return np.average(q_kbps)
+
 
 if __name__ == '__main__':
 
-    if len(sys.argv) == 1: # script was run with no arguments
-        parse_dash_metrics('/vagrant/logs/10-12-1307/dashjs_metrics.json')
+    # if len(sys.argv) == 1: # script was run with no arguments
+        # parse_dash_metrics('/vagrant/logs/10-12-1307/dashjs_metrics.json')
         # plot_info = parse_logs('/vagrant/logs/10-12-1307')
         # gen_plot(plot_info)
-        sys.exit(1)
+        # sys.exit(1)
+
+    calc_avg_bitrate_dir('/vagrant/logs')
+
+
+    sys.exit()
 
     parser = argparse.ArgumentParser(description='Collection of functions that handle graph plotting')
     parser.add_argument('--source', help='single log file to be parsed')
