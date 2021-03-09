@@ -5,7 +5,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
-import seaborn as sns
+#import seaborn as sns
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, AutoMinorLocator
 import numpy as np
 import os
@@ -237,7 +237,7 @@ def calc_avg_bitrate_dir(dir_name):
                 elif 'cubic' in root:
                     avg_bitrates['cubic'].append(avg_bitrate)
                 elif 'reno' in root:
-                    avg_bitrate['reno'].append(avg_bitrate)
+                    avg_bitrates['reno'].append(avg_bitrate)
             except:
                 pass
 
@@ -249,7 +249,10 @@ def calc_avg_bitrate_dir(dir_name):
     plt.violinplot(values)
     plt.xticks(np.arange(1, len(keys) + 1), keys)
 
-    plt.savefig('/vagrant/violin.png')
+    save_path = os.path.join(dir_name, 'avg_bitrate_distribution.png')
+
+    print(f"Saving result to {save_path}")
+    plt.savefig(save_path)
 
 
 def calc_avg_bitrate(fname):
@@ -277,7 +280,10 @@ if __name__ == '__main__':
         # gen_plot(plot_info)
         # sys.exit(1)
 
-    calc_avg_bitrate_dir('/vagrant/logs')
+    base = os.path.join('/', 'vagrant', 'logs', 'throughput')
+    for i in range(12):
+        profile_path = os.path.join(base, str(i+1))
+        calc_avg_bitrate_dir(profile_path)
 
 
     sys.exit()
