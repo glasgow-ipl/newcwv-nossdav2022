@@ -13,6 +13,7 @@ CONG_ALGS = bbr cubic reno
 NGINX_LOGS   = $(foreach alg, $(CONG_ALGS), $(foreach profile, $(NETWORK_PROFILES), $(foreach run, $(RUN_NUMBERS), ${root}/logs/$(profile)/$(run)_$(alg)/nginx_access.log)))
 OUTPUT_PLOTS = $(foreach alg, $(CONG_ALGS), $(foreach run, $(RUN_NUMBERS), ${root}/doc/$(run)_$(alg)/fig.pdf))
 
+
 #setup
 ${bbb_hd}:
 	@echo 'running setup'
@@ -52,6 +53,34 @@ ${out_dir}/1080/bbb_1080_60.mp4: ${bbb_hd} ${root}/scripts/video_processing/enco
 	@echo 'Encoder executed'
 
 
+#encoder 360 DASH-IF
+${out_dir}/dash-if/360/bbb_360_60.mp4: ${bbb_hd} ${root}/scripts/video_processing/encoder.py ${root}/scripts/video_processing/video_driver.py
+	@echo 'running 360 encoder'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/dash-if --action encode --source ${bbb_hd} --extra_arg 0 --segment_duration 3 --use_yt_bitrates False
+	@echo 'Encoder executed'
+
+
+#encoder 480 DASH-IF
+${out_dir}/dash-if/480/bbb_480_60.mp4: ${bbb_hd} ${root}/scripts/video_processing/encoder.py ${root}/scripts/video_processing/video_driver.py
+	@echo 'running 480 encoder'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/dash-if --action encode --source ${bbb_hd} --extra_arg 1 --segment_duration 3 --use_yt_bitrates False
+	@echo 'Encoder executed'
+
+
+#encoder 720 DASH-IF
+${out_dir}/dash-if/720/bbb_720_60.mp4: ${bbb_hd} ${root}/scripts/video_processing/encoder.py ${root}/scripts/video_processing/video_driver.py
+	@echo 'running 720 encoder'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/dash-if --action encode --source ${bbb_hd} --extra_arg 2 --segment_duration 3 --use_yt_bitrates False
+	@echo 'Encoder executed'
+
+
+#encoder 1080 DASH-IF
+${out_dir}/dash-if/1080/bbb_1080_60.mp4: ${bbb_hd} ${root}/scripts/video_processing/encoder.py ${root}/scripts/video_processing/video_driver.py
+	@echo 'running 1080 encoder'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/dash-if --action encode --source ${bbb_hd} --extra_arg 3 --segment_duration 3 --use_yt_bitrates False
+	@echo 'Encoder executed'
+
+
 # # # # # # #
 # Segmenter #
 # # # # # # #
@@ -84,6 +113,34 @@ ${out_dir}/1080/out/output.mpd: ${out_dir}/1080/bbb_1080_60.mp4 ${root}/scripts/
 	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir} --action segment --source ${bbb_hd} --extra_arg 1920x1080
 	@echo 'Done segmenting'
 
+
+#segmenter 360 DASH-IF
+${out_dir}/dash-if/360/out/output.mpd: ${out_dir}/dash-if/360/bbb_360_60.mp4 ${root}/scripts/video_processing/segmenter.py ${root}/scripts/video_processing/video_driver.py
+	@echo 'Segmenting 360'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/dash-if --action segment --source ${bbb_hd} --extra_arg 640x360
+	@echo 'Done segmenting'
+
+
+#segmenter 480 DASH-IF
+${out_dir}/dash-if/480/out/output.mpd: ${out_dir}/dash-if/480/bbb_480_60.mp4 ${root}/scripts/video_processing/segmenter.py ${root}/scripts/video_processing/video_driver.py
+	@echo 'Segmenting 480'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/dash-if --action segment --source ${bbb_hd} --extra_arg 854x480
+	@echo 'Done segmenting'
+
+
+#segmenter 720 DASH-IF
+${out_dir}/dash-if/720/out/output.mpd: ${out_dir}/dash-if/720/bbb_720_60.mp4 ${root}/scripts/video_processing/segmenter.py ${root}/scripts/video_processing/video_driver.py
+	@echo 'Segmenting 720'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/dash-if --action segment --source ${bbb_hd} --extra_arg 1280x720
+	@echo 'Done segmenting'
+
+
+#segmenter 1080 DASH-IF
+${out_dir}/dash-if/1080/out/output.mpd: ${out_dir}/dash-if/1080/bbb_1080_60.mp4 ${root}/scripts/video_processing/segmenter.py ${root}/scripts/video_processing/video_driver.py
+	@echo 'Segmenting 1080'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/dash-if --action segment --source ${bbb_hd} --extra_arg 1920x1080
+	@echo 'Done segmenting'
+	
 # # # # # # # # #
 # MPD generator #
 # # # # # # # # #
@@ -92,11 +149,19 @@ ${out_dir}/1080/out/output.mpd: ${out_dir}/1080/bbb_1080_60.mp4 ${root}/scripts/
 stage1-mpd: ${out_dir}/bbb.mpd
 	@echo 'Generating mpd'
 
+stage1-dash-if-mpd: ${out_dir}/dash-if/bbb.mpd
+	@echo 'Generating dash-if MPD'
+
 
 #MPD generator
 ${out_dir}/bbb.mpd: ${out_dir}/360/out/output.mpd ${out_dir}/480/out/output.mpd ${out_dir}/720/out/output.mpd ${out_dir}/1080/out/output.mpd ${root}/scripts/video_processing/video_driver.py ${root}/scripts/video_processing/mpd_generator.py
 	@echo 'stitching mpds'
 	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir} --action mpd --source ${bbb_hd} --media_prefix ../data
+
+#MPD generator
+${out_dir}/dash-if/bbb.mpd: ${out_dir}/dash-if/360/out/output.mpd ${out_dir}/dash-if/480/out/output.mpd ${out_dir}/dash-if/720/out/output.mpd ${out_dir}/dash-if/1080/out/output.mpd ${root}/scripts/video_processing/video_driver.py ${root}/scripts/video_processing/mpd_generator.py
+	@echo 'stitching mpds'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/dash-if --action mpd --source ${bbb_hd} --media_prefix ../data/dash-if
 
 
 stage2-test: ${root}/scripts/experiment_test.py
