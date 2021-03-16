@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
 	parser.add_argument('--segment_duration', help="Segment duration length in seconds. Used by the encoder", type=int)
 
-	parser.add_argument('--use_yt_bitrates', help="True if youtube bitrates should be used, False for dash-if bitrates", default=True, type=bool)
+	parser.add_argument('--use_yt_bitrates', help="1 if youtube bitrates should be used, 0 for dash-if bitrates", default=1, type=int)
 
 	args = parser.parse_args()
 	
