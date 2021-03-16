@@ -16,7 +16,8 @@ from segmenter import main_segment
 # the -min_seg_duration flag, forces segments to be split on every I-frame. The intention of this flag is NOT this and it is DEPRECATED! read more on this
 
 resolutions=['640x360', '854x480', '1280x720', '1920x1080']#, '2560x1440']
-bitrates=[1.5, 4, 7.5, 12]#, 24]
+bitrates_yt=[1.5, 4, 7.5, 12]#, 24] # taken from https://support.google.com/youtube/answer/1722171?hl=en#zippy=%2Cbitrate%2Cresolution-and-aspect-ratio
+bitrates_dash_if=[1.5, 2.5, 4.1, 7.7] # taken from https://web.archive.org/web/20150110225002/dashif.org/testvectors#MRMR
 
 source = 'bbb_sunflower_2160p_60fps_normal.mp4'
 prefix = '/vagrant/'
@@ -39,6 +40,8 @@ if __name__ == '__main__':
 
 	parser.add_argument('--segment_duration', help="Segment duration length in seconds. Used by the encoder", type=int)
 
+	parser.add_argument('--use_yt_bitrates', help="True if youtube bitrates should be used, False for dash-if bitrates", default=True, type=bool)
+
 	args = parser.parse_args()
 	
 	if args.prefix:
@@ -59,7 +62,7 @@ if __name__ == '__main__':
 	meta['media_prefix'] = media_prefix
 	meta['framerate'] = framerate
 	meta['source'] = source
-	meta['bitrates'] = bitrates
+	meta['bitrates'] = bitrates_yt if args.use_yt_bitrates else bitrates_dash_if
 	meta['resolutions'] = resolutions
 	meta['prefix'] = prefix
 
