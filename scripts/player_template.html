@@ -1,0 +1,124 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Dash.js Rocks</title>
+        <style>
+            video {
+                width: 640px;
+                height: 360px;
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <video id="videoPlayer" controls muted autoplay=""></video>
+        </div>
+
+        <div>
+            <strong>Reported bitrate:</strong>
+            <span id="reportedBitrate"></span>
+            <br/>
+            <strong>Buffer level:</strong>
+            <span id="bufferLevel"></span>
+            <div id="chrome-only">
+                <strong>Calculated bitrate:</strong>
+                <span id="calculatedBitrate"></span>
+            </div>
+            <strong>Framerate:</strong>
+            <span id="framerate"></span>
+        </div>
+
+        <script src="http://10.0.0.1/scripts/dash.all.debug_3_1_3.js"></script>
+        <script>
+
+            var player;
+            var metrics = {};
+            metrics.bufferLevel = [];
+            metrics.frameRate = [];
+            metrics.reportedBitrate = [];
+            metrics.currentTime = [];
+            metrics.eventLog = [];
+
+            
+            metrics.startup_delay = null;
+            metrics.rebuffering_events = [];
+
+            freeze_time = null;
+            init_time = null;
+            (function(){
+                var url = "http://10.0.0.1/<<MPD_LOCATION>>";
+                player = dashjs.MediaPlayer().create();
+
+                player.updateSettings(
+                    {'streaming': 
+                        {'abr': 
+                            {
+                                'ABRStrategy': '<<DASH_ALG>>',
+                            }
+                        }
+                    }); // Changing MovingAverage Method to EWMA, default is Sliding window
+
+                metrics.ABRStrategy = player.getSettings().streaming.abr.ABRStrategy;   
+
+                player.initialize(document.querySelector("#videoPlayer"), url, true);
+                init_time = window.performance.now();
+            })();
+
+
+            function recordEvent(e)
+            {
+                metrics.eventLog.push(e.message);
+            }
+
+
+            function recordPlayTime(e) {
+                var now = performance.window.now();
+                if (startup_delay === null) {
+                    metrics.startup_delay = now - init_time;
+                } else {
+                    // Startup delay has been recorded but video was frozen and is now playing again
+                    metrics.rebuffering_events.push(now - freeze_time);
+                }
+            }
+
+
+            function recordFreezeTime(e) {
+                freeze_time = performance.window.now();
+            }
+
+            player.on(dashjs.MediaPlayer.events['LOG'], recordEvent);
+            player.on(dashjs.MediaPlayer.events['PLAYBACK_PLAYING'], recordPlayTime);
+            player.on(dashjs.MediaPlayer.events['PLAYBACK_WAITING'], recordFreezeTime);
+
+
+            var player_element = document.getElementById("videoPlayer");
+            player_element.onended = function() {
+                
+
+//		metrics = {};
+//		let est_json = {};
+//                let estimates = player.getSettings().streaming.abr.estimates;
+//                est_json.estimates = estimates;
+                // var xmlHttp = new XMLHttpRequest();
+                // xmlHttp.open("GET", "http://10.0.0.1:8000/end", false);
+                // xmlHttp.send(null);
+/*
+		fetch("http://10.0.0.1:8000/estimates", {
+			method: "POST",
+			body: JSON.stringify(est_json)
+			}).then( res => {
+		});
+*/
+
+                fetch("http://10.0.0.1:8000/end", {
+                    method: "POST", 
+                    body: JSON.stringify(metrics)
+                    }).then(res => {
+                        
+                });
+            };
+            
+        </script>
+    </body>
+</html>

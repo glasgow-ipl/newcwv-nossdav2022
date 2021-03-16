@@ -15,6 +15,7 @@ import sys
 import server
 import math
 import argparse
+import generate_player
 
 import subprocess
 
@@ -85,7 +86,7 @@ def test_change_bw():
 
     setLogLevel('info')
 
-def doSimulation(log_root=None, cong_alg=None, network_model_file=None):
+def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_location=None, dash_alg=None):
     "Create network and run simple performance test"
 
     # Create a list to keep logging events
@@ -179,6 +180,9 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None):
     # Start HTTP server
     server_out = server.cmd("sudo nginx -c " + wd + "/nginx-conf.conf &")
 
+    # Create player.html
+    generate_player.generate_player(mpd_location=mpd_location, dash_alg=dash_alg)
+
     time.sleep(3)
 
     bw_manager = Thread(target=bw_utils.config_bw, args=(network_model_file, s1, s2, logger))
@@ -270,6 +274,9 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None):
     # copy kernel logs
     os.system('sudo cp /var/log/kern.log %s' % pcap_path)
 
+    # remove player.html
+    # os.remove('player.html')
+
     logger_path = os.path.join(pcap_path, 'events.log')
     logger = '\n'.join(logger)
     with open(logger_path, 'w') as f:
@@ -286,6 +293,10 @@ if __name__ == '__main__':
 
     parser.add_argument('--network_model', help="A JSON file, that contains data for BW and RTT changes required during the experiment")
 
+    parser.add_argument('--dash_alg', help="DASH algorithm to be used by the player {abrThroughput, abrDynamic, abrBola}", default='abrThroughput')
+
+    parser.add_argument('--mpd_location', help="MPD location relative to the web server's root (/vagrant)", default='data/bbb.mpd')
+
     args = parser.parse_args()
     log_dir = args.log_dir
 
@@ -293,5 +304,9 @@ if __name__ == '__main__':
 
     network_model_file = args.network_model
 
+    dash_alg = args.dash_alg
+
+    mpd_location = args.mpd_location
+
     setLogLevel( 'info' )
-    doSimulation(log_root=log_dir, cong_alg=cong_alg, network_model_file=network_model_file)
+    doSimulation(log_root=log_dir, cong_alg=cong_alg, network_model_file=network_model_file, dash_alg=dash_alg, mpd_location=mpd_location)

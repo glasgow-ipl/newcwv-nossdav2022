@@ -1,13 +1,13 @@
 {
     "changes": [
-        {"time": 0, "bw": 1.5, "rtt": 200},
-        {"time": 30, "bw": 2, "rtt": 176},
-        {"time": 60, "bw": 3, "rtt": 150},
-        {"time": 90, "bw": 4, "rtt": 100},
-        {"time": 120, "bw": 5, "rtt": 76},
-        {"time": 150, "bw": 4, "rtt": 100},
-        {"time": 180, "bw": 3, "rtt": 150},
-        {"time": 210, "bw": 2, "rtt": 176}
+        {"time": 0, "bw": 1.5, "rtt": 200, "loss": 0.12},
+        {"time": 30, "bw": 2, "rtt": 176, "loss": 0.09},
+        {"time": 60, "bw": 3, "rtt": 150, "loss": 0.06},
+        {"time": 90, "bw": 4, "rtt": 100, "loss": 0.08},
+        {"time": 120, "bw": 5, "rtt": 76, "loss": 0.09},
+        {"time": 150, "bw": 4, "rtt": 100, "loss": 0.08},
+        {"time": 180, "bw": 3, "rtt": 150, "loss": 0.06},
+        {"time": 210, "bw": 2, "rtt": 176, "loss": 0.09}
         ],
     "repeat": "True",
     "pause": 30,
