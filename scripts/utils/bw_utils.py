@@ -63,11 +63,14 @@ def changeLinkBw(ep1, ep2, in_bw, RTT, logger, out_bw=-1, loss=None):
     logger.append(msg)
     link = ep1.connectionsTo(ep2)
     bdp = _calculate_bdp(in_bw, RTT)
-    link[0][0].config(**{'bw': in_bw, 'max_queue_size': bdp, 'delay': '%sms' % (RTT / 2), 'loss': loss})
+    link_prop = {'bw': in_bw, 'max_queue_size': bdp, 'delay': '%sms' % (RTT / 2)}
+    if loss:
+        link_prop['loss'] = loss
+    link[0][0].config(**link_prop)
     link[0][1].config(**{'bw': out_bw if out_bw != -1 else in_bw, 'max_queue_size': bdp if out_bw == -1 else _calculate_bdp(out_bw, RTT), 'delay': '%sms' % (RTT / 2)})
 
 
-def config_bw(conf_file, ep1, ep2, logger):
+def config_bw(conf_file, ep1, ep2, logger, ignore_link_loss):
     delta_time = 0
     with open(conf_file) as f:
         conf = json.load(f)
@@ -84,7 +87,9 @@ def config_bw(conf_file, ep1, ep2, logger):
                 if total_time > conf['duration']: # Check if we should exit
                     return
 
-                loss = entry['loss'] if entry['loss'] else None
+                loss = None
+                if not ignore_link_loss:
+                    loss = entry.get('loss')
                 # Change BW
                 changeLinkBw(ep1, ep2, entry['bw'], entry['rtt'], logger, loss=loss)
                 delta_time = entry['time']
@@ -112,7 +117,7 @@ def test():
     s1, s2 = net.get('s1', 's2')
     logger = []
 
-    t = threading.Thread(target=config_bw, args=('/vagrant/network_models/dash_if/network_config_1.json', s1, s2, logger))
+    t = threading.Thread(target=config_bw, args=('/vagrant/network_models/dash_if/network_config_1.json', s1, s2, logger, 0))
     t.start()
 
     t.join()

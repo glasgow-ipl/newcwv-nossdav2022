@@ -86,7 +86,7 @@ def test_change_bw():
 
     setLogLevel('info')
 
-def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_location=None, dash_alg=None):
+def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_location=None, dash_alg=None, ignore_link_loss=None):
     "Create network and run simple performance test"
 
     # Create a list to keep logging events
@@ -185,7 +185,7 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
 
     time.sleep(3)
 
-    bw_manager = Thread(target=bw_utils.config_bw, args=(network_model_file, s1, s2, logger))
+    bw_manager = Thread(target=bw_utils.config_bw, args=(network_model_file, s1, s2, logger, ignore_link_loss))
     bw_manager.start()
     time.sleep(1)
 
@@ -297,6 +297,8 @@ if __name__ == '__main__':
 
     parser.add_argument('--mpd_location', help="MPD location relative to the web server's root (/vagrant)", default='data/bbb.mpd')
 
+    parser.add_argument('--ignore_link_loss', help="1 if link loss characteristics should be ignored 0 to apply them. Default 0", default=0, type=int)
+
     args = parser.parse_args()
     log_dir = args.log_dir
 
@@ -308,5 +310,7 @@ if __name__ == '__main__':
 
     mpd_location = args.mpd_location
 
+    ignore_link_loss = args.ignore_link_loss
+
     setLogLevel( 'info' )
-    doSimulation(log_root=log_dir, cong_alg=cong_alg, network_model_file=network_model_file, dash_alg=dash_alg, mpd_location=mpd_location)
+    doSimulation(log_root=log_dir, cong_alg=cong_alg, network_model_file=network_model_file, dash_alg=dash_alg, mpd_location=mpd_location, ignore_link_loss=ignore_link_loss)
