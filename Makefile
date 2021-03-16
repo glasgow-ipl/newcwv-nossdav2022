@@ -16,6 +16,7 @@ CONG_ALGS = bbr cubic reno
 NGINX_LOGS   = $(foreach alg, $(CONG_ALGS), $(foreach profile, $(NETWORK_PROFILES), $(foreach run, $(RUN_NUMBERS), ${root}/logs/$(profile)/$(run)_$(alg)/nginx_access.log)))
 OUTPUT_PLOTS = $(foreach alg, $(CONG_ALGS), $(foreach run, $(RUN_NUMBERS), ${root}/doc/$(run)_$(alg)/fig.pdf))
 
+IGNORE_LINK_LOSS = 0
 
 #setup
 ${bbb_hd}:
@@ -189,159 +190,159 @@ ${root}/data:
 
 ${root}/logs/%_bbr/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_1.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_1.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 
 ${root}/logs/1/%_bbr/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_1.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_1.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/2/%_bbr/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_2.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_2.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/3/%_bbr/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_3.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_3.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/4/%_bbr/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_4.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_4.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/5/%_bbr/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_5.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_5.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/6/%_bbr/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_6.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_6.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/7/%_bbr/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_7.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_7.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/8/%_bbr/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_8.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_8.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/9/%_bbr/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_9.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_9.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/10/%_bbr/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_10.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_10.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/11/%_bbr/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_11.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_11.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/12/%_bbr/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_12.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg bbr --network_model /vagrant/network_models/dash_if/network_config_12.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 
 ${root}/logs/%_reno/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_1.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)  --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_1.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)  --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 
 ${root}/logs/1/%_reno/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_1.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_1.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/2/%_reno/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_2.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_2.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/3/%_reno/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_3.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_3.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/4/%_reno/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_4.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_4.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/5/%_reno/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_5.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_5.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/6/%_reno/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_6.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_6.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/7/%_reno/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_7.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_7.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/8/%_reno/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_8.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_8.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/9/%_reno/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_9.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_9.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/10/%_reno/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_10.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_10.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/11/%_reno/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_11.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_11.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/12/%_reno/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_12.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/dash_if/network_config_12.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 
 ${root}/logs/1/%_cubic/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/network_models/dash_if/network_config_1.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/network_models/dash_if/network_config_1.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/2/%_cubic/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/network_models/dash_if/network_config_2.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/network_models/dash_if/network_config_2.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/3/%_cubic/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/network_models/dash_if/network_config_3.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/network_models/dash_if/network_config_3.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/4/%_cubic/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/network_models/dash_if/network_config_4.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/network_models/dash_if/network_config_4.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/5/%_cubic/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/network_models/dash_if/network_config_5.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/network_models/dash_if/network_config_5.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/6/%_cubic/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/network_models/dash_if/network_config_6.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/network_models/dash_if/network_config_6.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/7/%_cubic/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/network_models/dash_if/network_config_7.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/network_models/dash_if/network_config_7.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/8/%_cubic/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/network_models/dash_if/network_config_8.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/network_models/dash_if/network_config_8.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/9/%_cubic/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/network_models/dash_if/network_config_9.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/network_models/dash_if/network_config_9.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/10/%_cubic/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/network_models/dash_if/network_config_10.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/network_models/dash_if/network_config_10.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/11/%_cubic/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/network_models/dash_if/network_config_11.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/network_models/dash_if/network_config_11.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 ${root}/logs/12/%_cubic/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
-	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/network_models/dash_if/network_config_12.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG)
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg cubic --network_model /vagrant/network_models/dash_if/network_config_12.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --IGNORE_LINK_LOSS $(IGNORE_LINK_LOSS)
 
 
 
