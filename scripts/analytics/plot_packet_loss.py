@@ -66,8 +66,11 @@ def plot_packet_loss(res_root):
     plt.xlabel('Time (s)')
     plt.ylabel('Bandwidth (bps)')
 
-    fig.savefig('plot.png')
-    fig.savefig('plot.pdf')
+    bin_base = res_root.replace('/logs/', '/doc/')
+    os.makedirs(bin_base, exist_ok=True)
+
+    fig.savefig(os.path.join(bin_base, 'plot.png'))
+    fig.savefig(os.path.join(bin_base, 'plot.pdf'))
 
 if __name__ == '__main__':
 
