@@ -51,7 +51,7 @@ def main():
     with open('/vagrant/logs/tmp/result.json', 'w') as f:
         json.dump(estimates, f)
 
-def calculate_throughput(server_pcap_loc, init_time=None):
+def calculate_throughput(server_pcap_loc, init_time=None, interval=1):
     res = subprocess.run(f'tcpdump -n -r {server_pcap_loc}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     records = res.stdout.decode().split('\n')
@@ -70,10 +70,14 @@ def calculate_throughput(server_pcap_loc, init_time=None):
     for rec in server_records:
         timestmp = rec.split(' ', 1)[0]
         data_len = int(rec.split('length ')[1].split(':')[0])
-        data_len *= 8 # Make data in bits per second
-        tput_sec = math.ceil((datetime.datetime.strptime(timestmp, fmt) - init_time).total_seconds())
-        transferred = tput.get(tput_sec, 0)
-        tput[tput_sec] = transferred + data_len
+        data_len *= 8 # Make data in bits
+        data_len = data_len / interval # Make data in units per interval
+        tput_delta = (datetime.datetime.strptime(timestmp, fmt) - init_time).total_seconds()
+        tput_key = tput_delta / interval
+        tput_key = int(tput_key) # remove fractional part
+        tput_key += 1
+        transferred = tput.get(tput_key, 0)
+        tput[tput_key] = transferred + data_len
 
     # tput = {k: v*8 for k, v in tput.items()} # Make throughput in bits per second
 
