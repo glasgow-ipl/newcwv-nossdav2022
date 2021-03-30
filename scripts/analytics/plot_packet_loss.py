@@ -9,7 +9,7 @@ import argparse
 
 os.sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import detect_packet_loss
+import parse_pcap
 import verify_throughput
 import parse_event_log
 import parse_access_log
@@ -33,7 +33,7 @@ def plot_packet_loss(res_root):
 
     server_pcap_path = os.path.join(res_root, 'server.pcap')
     print('Analysing lost packets')
-    loss_times = detect_packet_loss.get_lost_packets(server_pcap_path)
+    loss_times = parse_pcap.get_lost_packets(server_pcap_path)
     init_time_ts = parse_event_log.get_initial_ts(event_path)
     init_time = datetime.datetime.strptime(init_time_ts, fmt_event_log)
 
@@ -95,12 +95,29 @@ def plot_packet_loss(res_root):
 
     plt.scatter(loss_deltas, loss_y, c='r', marker='x', label='Packet Loss')
 
+    downloads = parse_pcap.get_active_periods(os.path.join(res_root, 'server.pcap'))
+
+    active_periods = []
+    for d in downloads:
+        x1 = (datetime.datetime.strptime(d['start'], fmt_pcap) - init_time).total_seconds()
+        x2 = (datetime.datetime.strptime(d['end'], fmt_pcap) - init_time).total_seconds()
+        active_periods.append((x1, x2))
+    
+    inactive_periods = []
+    for i in range(len(downloads) - 1):
+        x1 = (datetime.datetime.strptime(downloads[i]['end'], fmt_pcap) - init_time).total_seconds()
+        x2 = (datetime.datetime.strptime(downloads[i+1]['start'], fmt_pcap) - init_time).total_seconds()
+        inactive_periods.append((x1, x2))
+
     plt.legend()
     plt.xlabel('Time (s)')
     plt.ylabel('Bandwidth (bps)')
     plt.xlim(left=0)
 
     ax2 = plt.subplot(211, sharex=ax1)
+
+    for i, active_p in enumerate(active_periods):
+        ax2.axvspan(active_p[0], active_p[1], alpha=0.5, color='red', label='Active Periods' if i == 0 else '_no_label_')
 
     time_cwnd = parse_access_log.get_cwnds(os.path.join(res_root, 'nginx_access.log'))
 
@@ -110,6 +127,7 @@ def plot_packet_loss(res_root):
 
     ax2.scatter(time, cwnd, marker='o')
     ax2.set_ylabel('CWND Size (# MTUs)')
+    ax2.legend()
 
     bin_base = res_root.replace('logs' + os.path.sep, 'doc' + os.path.sep)
     os.makedirs(bin_base, exist_ok=True)
@@ -126,3 +144,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     plot_packet_loss(args.source)
+    # plot_packet_loss('/vagrant/logs/tmp/no_loss/sample/1/1_reno')

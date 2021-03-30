@@ -50,8 +50,40 @@ def get_seq_number(pcap_line):
 def get_timestamp(pcap_line):
     return pcap_line.split(' ')[0]
 
-def foo():
-    print('hi')
+def get_active_periods(pcap_file):
+    out = subprocess.run(f'tshark -t a -Y http -r  {pcap_file}', shell=True, stdout=subprocess.PIPE)
+
+    not_found_quota = 1 # Browser request favicon. We do not have one. Ignore the first 404 response
+
+    req = {}
+
+    downloads = []
+
+    records = out.stdout.decode().strip().split('\n')
+    for rec in records:
+        if 'favicon.ico' in rec: # We do not care about this request
+            continue
+        if 'HTTP/1.1 404' in rec:
+            if not_found_quota:
+                not_found_quota -= 1
+                continue
+            else:
+                raise Exception("Analysing HTTP traffic: Too many 404s")
+        tokens = rec.split()
+        method = tokens[7]
+        timestamp = tokens[1]
+        if method == 'GET':
+            if req:
+                raise Exception("Analysing HTTP traffic: Got two consecutive HTTP GETs")
+            req = {'target': tokens[8], 'start': timestamp}
+        elif '200 OK' in rec:
+            # This is a reconstructed packet for the previous get request, record that
+            req['end'] = timestamp
+            downloads.append(req)
+            req = {}
+
+    return downloads
 
 if __name__ == '__main__':
-    get_lost_packets('/vagrant/logs/tmp/server.pcap')
+    # get_lost_packets('/vagrant/logs/tmp/server.pcap')
+    get_active_periods('/vagrant/logs/tmp/no_loss/sample/1/1_reno/server.pcap')
