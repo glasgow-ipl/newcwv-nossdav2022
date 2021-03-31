@@ -45,7 +45,7 @@ def calculate_avg_bitrate(qualities, q_kbps_lookup):
 
 def calculate_avg_oscillation(qualities, q_kbps_lookup):
     q_kbps = [q_kbps_lookup[q] for q in qualities]
-    avg_osc = functools.reduce(lambda i, j: abs(i - j), q_kbps) / (len(q_kbps_lookup) - 1)
+    avg_osc = functools.reduce(lambda i, j: abs(i - j), q_kbps) / (len(q_kbps) - 1)
     return avg_osc
 
 
@@ -54,5 +54,5 @@ if __name__ == '__main__':
     qualities = get_qualities('/vagrant/logs/tmp/no_loss/sample/1/1_reno/nginx_access.log')
     qualities = np.array(qualities)
     qualities = qualities[:,1]
-    print(f'{calculate_avg_bitrate(qualities, quality_to_kbps_3s):.4f}')
-    print(f'{calculate_avg_oscillation(qualities, quality_to_kbps_3s):.4f}')
+    print(f'{calculate_avg_bitrate(qualities, quality_to_kbps_3s) / 1000:.3f}')
+    print(f'{calculate_avg_oscillation(qualities, quality_to_kbps_3s) / 1000:.3f}')
