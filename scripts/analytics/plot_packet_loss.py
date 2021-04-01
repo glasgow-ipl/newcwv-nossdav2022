@@ -15,7 +15,8 @@ import parse_event_log
 import parse_access_log
 import parse_network_model
 import math
-
+import constants
+import parse_dash_log
 
 def plot_packet_loss(res_root):
     fmt_pcap = '%H:%M:%S.%f'
@@ -23,11 +24,11 @@ def plot_packet_loss(res_root):
     fmt_event_log = '%H:%M:%S:%f'
 
     event_path = os.path.join(res_root, 'events.log')
-    
-    fig = plt.gcf()
-    fig.set_size_inches((35, 5))
 
-    ax1 = plt.subplot(212)
+    fig = plt.gcf()
+    fig.set_size_inches((35, 8))
+
+    ax1 = plt.subplot(412)
 
     changes_zipped = parse_event_log.get_bw_changes(event_path)
 
@@ -95,7 +96,9 @@ def plot_packet_loss(res_root):
 
     plt.scatter(loss_deltas, loss_y, c='r', marker='x', label='Packet Loss')
 
+    print("Getting periods of activity")
     downloads = parse_pcap.get_active_periods(os.path.join(res_root, 'server.pcap'))
+    print("Done")
 
     active_periods = []
     for d in downloads:
@@ -110,16 +113,16 @@ def plot_packet_loss(res_root):
         inactive_periods.append((x1, x2))
 
     plt.legend()
-    plt.xlabel('Time (s)')
     plt.ylabel('Bandwidth (bps)')
-    plt.xlim(left=0)
 
-    ax2 = plt.subplot(211, sharex=ax1)
+    ax2 = plt.subplot(411, sharex=ax1)
 
     for i, active_p in enumerate(active_periods):
         ax2.axvspan(active_p[0], active_p[1], alpha=0.5, color='red', label='Active Periods' if i == 0 else '_no_label_')
 
+    print("Getting CWND values")
     time_cwnd = parse_access_log.get_cwnds(os.path.join(res_root, 'nginx_access.log'))
+    print("Done")
 
     time, cwnd = zip(*time_cwnd)
 
@@ -129,6 +132,62 @@ def plot_packet_loss(res_root):
     ax2.set_ylabel('CWND Size (# MTUs)')
     ax2.legend()
 
+    ax3 = plt.subplot(413, sharex=ax1)
+
+    print("Getting requested quality info")
+    time_quality = parse_access_log.get_qualities(os.path.join(res_root, 'nginx_access.log'))
+    print("Done")
+    time, qualities = zip(*time_quality)
+
+    time = [(datetime.datetime.fromtimestamp(t).replace(year=init_time.year, month=init_time.month, day=init_time.day) - init_time).total_seconds() for t in time]
+
+    qualities = [constants.QUALITY_TO_BPS_3S[q] for q in qualities]
+    
+    ax3.scatter(time, qualities, label='Requested Qualities')
+    ax3.set_yticks(sorted(list(constants.QUALITY_TO_BPS_3S.values())))
+    ax3.plot(change_time, change_cpacity, c='g', label='Bandwidth Capacity')
+
+    print("Getting client estimations")
+    time_estimate = parse_dash_log.get_client_estimations(os.path.join(res_root, 'dashjs_metrics.json'))
+    print("Done")
+    time, estimate = zip(*time_estimate)
+
+    time = [(datetime.datetime.fromtimestamp(t).replace(year=init_time.year, month=init_time.month, day=init_time.day) - init_time).total_seconds() for t in time]
+
+    ax3.plot(time, estimate, c='r', label='Client Bandwidth Estimations')
+
+
+    ax3.set_ylabel('Bandwidth (bps)')
+
+    ax3.legend()
+
+    ax4 = plt.subplot(414, sharex=ax1)
+
+    buffer_levels = parse_dash_log.get_buffer_levels(os.path.join(res_root, 'dashjs_metrics.json'))
+    time, levels = zip(*buffer_levels)
+
+    time = [(datetime.datetime.fromtimestamp(t).replace(year=init_time.year, month=init_time.month, day=init_time.day) - init_time).total_seconds() for t in time]
+
+    ax4.bar(time, levels, label="Buffer level")
+
+    stall_events = parse_dash_log.get_playback_stalls(os.path.join(res_root, 'dashjs_metrics.json'))
+    stall_events_scaled = [
+        (
+            (datetime.datetime.fromtimestamp(x).replace(year=init_time.year, month=init_time.month, day=init_time.day) - init_time).total_seconds(), 
+            (datetime.datetime.fromtimestamp(y).replace(year=init_time.year, month=init_time.month, day=init_time.day) - init_time).total_seconds()
+        )
+        for x, y in stall_events
+    ]
+
+    for i, stall_ev in enumerate(stall_events_scaled):
+        ax4.axvspan(stall_ev[0], stall_ev[1], alpha=0.5, color='red', label='Playback Stall Period' if i == 0 else '_no_label_')
+
+    ax4.legend()
+    ax4.set_ylabel('Buffer Level (s)')
+
+    ax4.set_xlabel('Time (s)')
+    plt.xlim(left=0)
+
     bin_base = res_root.replace('logs' + os.path.sep, 'doc' + os.path.sep)
     os.makedirs(bin_base, exist_ok=True)
     long_name = bin_base.split('doc' + os.path.sep)[1].replace(os.path.sep, '_')
@@ -137,11 +196,12 @@ def plot_packet_loss(res_root):
     fig.savefig(os.path.join(bin_base, f'{long_name}.pdf'))
 
 if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        parser = argparse.ArgumentParser(description='Plots packet loss over time')
+        parser.add_argument('--source', required=True, help='Root of log directory')
 
-    parser = argparse.ArgumentParser(description='Plots packet loss over time')
-    parser.add_argument('--source', required=True, help='Root of log directory')
+        args = parser.parse_args()
 
-    args = parser.parse_args()
-
-    plot_packet_loss(args.source)
-    # plot_packet_loss('/vagrant/logs/tmp/no_loss/sample/1/1_reno')
+        plot_packet_loss(args.source)
+    else: # We have called the script with no arguments
+        plot_packet_loss('/vagrant/logs/tmp/no_loss/sample/1/1_reno')
