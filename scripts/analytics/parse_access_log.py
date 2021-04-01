@@ -1,8 +1,8 @@
 import csv
 import functools
 import numpy as np
+import constants
 
-quality_to_kbps_3s = {360: 1368193, 480: 3619359, 720: 6747721, 1080: 10660219}
 
 def get_cwnds(access_log_path):
     ''' Returns a list of tuples containing unix timestamp and the measured CWND at that timestamp'''
@@ -54,5 +54,5 @@ if __name__ == '__main__':
     qualities = get_qualities('/vagrant/logs/tmp/no_loss/sample/1/1_reno/nginx_access.log')
     qualities = np.array(qualities)
     qualities = qualities[:,1]
-    print(f'{calculate_avg_bitrate(qualities, quality_to_kbps_3s) / 1000:.3f}')
-    print(f'{calculate_avg_oscillation(qualities, quality_to_kbps_3s) / 1000:.3f}')
+    print(f'{calculate_avg_bitrate(qualities, constants.QUALITY_TO_BPS_3S) / 1000:.3f}')
+    print(f'{calculate_avg_oscillation(qualities, constants.QUALITY_TO_BPS_3S) / 1000:.3f}')
