@@ -30,6 +30,8 @@ def get_qualities(access_log_path):
                 skip = False
             if skip:
                 continue
+            if 'favicon.ico' in rec[2]:
+                continue # in case favico request comes after video has started being downloaded
             quality = int(rec[2].split('/out')[0].split('/')[-1])
             timestamp = float(rec[1].strip())
             time_quality.append((timestamp, quality))
