@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import matplotlib.pyplot as plt
 
 import parse_dash_log
 import parse_access_log
@@ -85,10 +86,54 @@ def gen_dash_metrics_table(doc_root, sim_numbers, alg_names):
 #    print(table_content)
     return rows
 
+def get_avg_bitrate_f_stalls(doc_root, sim_numbers, alg_names):
+    bitrate_stalls = []
+
+    for sn in sim_numbers:
+        for alg in alg_names:
+            path = os.path.join(doc_root, sn)
+            avg_bitrate = get_avg_avg_bitrate(path, alg) / 1000 # bps
+            stall_time = get_avg_total_stall_time_sim(path, alg) # s
+            bitrate_stalls.append((avg_bitrate, stall_time))
+        
+    return bitrate_stalls
+
+
+def plot_bitrate_f_stalls(doc_root, sim_numbers):
+
+    bitrate_stalls_bbr = get_avg_bitrate_f_stalls(doc_root, sim_numbers, ['bbr'])
+
+    bitrate, stalls = zip(*bitrate_stalls_bbr)
+    plt.scatter(bitrate, stalls, c='r', label='bbr')
+    for i in range(bitrate_stalls_bbr):
+        plt.annotate(str(i+1), (bitrate[i], stalls[i]))
+
+
+    bitrate_stalls_cubic = get_avg_bitrate_f_stalls(doc_root, sim_numbers, ['cubic'])
+
+    bitrate, stalls = zip(*bitrate_stalls_cubic)
+    plt.scatter(bitrate, stalls, c='g', label='cubic')
+    for i in range(bitrate_stalls_bbr):
+        plt.annotate(str(i+1), (bitrate[i], stalls[i]))
+
+
+    bitrate_stalls_reno = get_avg_bitrate_f_stalls(doc_root, sim_numbers, ['reno'])
+
+    bitrate, stalls = zip(*bitrate_stalls_reno)
+    plt.scatter(bitrate, stalls, c='b', label='reno')
+    for i in range(bitrate_stalls_bbr):
+        plt.annotate(str(i+1), (bitrate[i], stalls[i]))
+
+    save_path = '.'
+    plt.savefig(os.path.join(save_path, 'fig.png'))
+    
+
 if __name__ == '__main__':
     sim_runs = [str(x+1) for x in range(12)]
     rows = gen_dash_metrics_table('/vagrant/logs/dash_if/no_loss/abrThroughput/', sim_runs, ['bbr', 'cubic', 'reno'])
     headers = ['Average Bit-rate (kbps)', 'Bit-rate Oscillation (kbps)', 'Total Stall Time (s)', 'Start-up Delay (ms)']
     for idx, row in enumerate(rows):
         print(headers[idx % len(headers)] + ' & ' + row + ' \\\\' + ('\\midrule' if (idx + 1) % len(headers) == 0 else ''))
+
+
  
