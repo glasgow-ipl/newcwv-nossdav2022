@@ -19,6 +19,9 @@ resolutions=['640x360', '854x480', '1280x720', '1920x1080']#, '2560x1440']
 bitrates_yt=[1.5, 4, 7.5, 12]#, 24] # taken from https://support.google.com/youtube/answer/1722171?hl=en#zippy=%2Cbitrate%2Cresolution-and-aspect-ratio
 bitrates_dash_if=[1.5, 2.5, 4.1, 7.7] # taken from https://web.archive.org/web/20150110225002/dashif.org/testvectors#MRMR
 
+resolutions_newcwv = ['1x200', '1x250', '1x300', '1x400','1x500','1x600','1x700']
+bitrates_newcwv=[0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7]
+
 source = 'bbb_sunflower_2160p_60fps_normal.mp4'
 prefix = '/vagrant/'
 framerate = 60
@@ -41,6 +44,8 @@ if __name__ == '__main__':
 	parser.add_argument('--segment_duration', help="Segment duration length in seconds. Used by the encoder", type=int)
 
 	parser.add_argument('--use_yt_bitrates', help="1 if youtube bitrates should be used, 0 for dash-if bitrates", default=1, type=int)
+
+	parser.add_argument('--newcwv', help='Generate dataset that matches the newcwv paper')
 
 	args = parser.parse_args()
 	
@@ -65,6 +70,10 @@ if __name__ == '__main__':
 	meta['bitrates'] = bitrates_yt if args.use_yt_bitrates else bitrates_dash_if
 	meta['resolutions'] = resolutions
 	meta['prefix'] = prefix
+
+	if args.newcwv:
+		meta['resolutions'] = resolutions_newcwv
+		meta['bitrates'] = bitrates_newcwv
 
 	print ('Running "%s" script with arguemnts: prefix(%s) source(%s) fps(%s)' % (args.action, prefix, source, framerate))
 	if args.action == 'segment':
