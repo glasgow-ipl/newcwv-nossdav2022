@@ -10,12 +10,19 @@ BW_SETTINGS := $(shell seq 1 117)
 
 BW_RUNS = $(foreach bw_set, $(BW_SETTINGS), ${root}/logs/bw_cubic_${bw_set}/nginx_access.log)
 
+ABR_ALGS = abrThroughput abrDynamic abrBola
+
 NETWORK_PROFILES = 1 2 3 4 5 6 7 8 9 10 11 12
 
 RUN_NUMBERS  = 1 2 3 4 5 6 7 8 9 10
 CONG_ALGS = bbr cubic reno
 NGINX_LOGS   = $(foreach alg, $(CONG_ALGS), $(foreach profile, $(NETWORK_PROFILES), $(foreach run, $(RUN_NUMBERS), ${root}/logs/$(profile)/$(run)_$(alg)/nginx_access.log)))
 OUTPUT_PLOTS = $(foreach alg, $(CONG_ALGS), $(foreach run, $(RUN_NUMBERS), ${root}/doc/$(run)_$(alg)/fig.pdf))
+
+
+
+NGINX_LOGS_DASH_IF_LOSS = $(foreach abrAlg, $(ABR_ALGS), $(foreach alg, $(CONG_ALGS), $(foreach profile, $(NETWORK_PROFILES), $(foreach run, $(RUN_NUMBERS), ${root}/logs/dash_if/loss/$(abrAlg)/$(profile)/$(run)_$(alg)/nginx_access.log))))
+OUTPUT_PLOTS_LOSS = $(foreach abrAlg, $(ABR_ALGS), $(foreach alg, $(CONG_ALGS), $(foreach profile, $(NETWORK_PROFILES), $(foreach run, $(RUN_NUMBERS), ${root}/doc/dash_if/loss/$(abrAlg)/$(profile)/$(run)_$(alg)/plot.pdf))))
 
 IGNORE_LINK_LOSS = 0
 
@@ -444,6 +451,9 @@ ${root}/doc/%/fig.pdf: ${root}/logs/%/nginx_access.log ${root}/scripts/net_utils
 	@echo $@
 	python3 /vagrant/scripts/net_utils.py --source $(<D)
 
+${root}/doc/dash_if/loss/%/plot.pdf: ${root}/logs/dash_if/loss/%/nginx_access.log
+	python3 /vagrant/scripts/analytics/plot_packet_loss.py --source $(<D)	
+
 stage3-run: ${NGINX_LOGS}
 	@echo 'Running experiments'
 
@@ -458,6 +468,8 @@ stage3-plot-all: ${root}/scripts/net_utils.py
 	@echo 'plotting data'
 	python3 /vagrant/scripts/net_utils.py --all
 
+stage3-plot-dash-if-loss: ${OUTPUT_PLOTS_LOSS}
+	@echo 'plotting dash-if loss'
 
 ${root}/doc:
 	@echo 'Creating doc directory'
@@ -466,4 +478,4 @@ ${root}/doc:
 test:
 	# @echo $(NGINX_LOGS)
 	$(eval DASH_ALG='abrDynamic')
-	@echo $(DASH_ALG) 
+	@echo $(DASH_ALG)
