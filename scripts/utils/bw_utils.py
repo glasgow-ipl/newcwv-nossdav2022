@@ -75,7 +75,11 @@ def config_bw(conf_file, ep1, ep2, logger, ignore_link_loss):
     with open(conf_file) as f:
         conf = json.load(f)
 
-    if conf.get('repeat'):
+    repeat = conf.get('repeat')
+    if repeat:
+        repeat = eval(repeat)
+
+    if repeat:
         total_time = 0
         pause = conf['pause']
         while(total_time < conf['duration']):
@@ -117,7 +121,8 @@ def test():
     s1, s2 = net.get('s1', 's2')
     logger = []
 
-    t = threading.Thread(target=config_bw, args=('/vagrant/network_models/dash_if/network_config_1.json', s1, s2, logger, 0))
+    t = threading.Thread(target=config_bw, args=('/vagrant/network_models/newcwv/newcwv.json', s1, s2, logger, 0))
+    t.daemon = True
     t.start()
 
     t.join()

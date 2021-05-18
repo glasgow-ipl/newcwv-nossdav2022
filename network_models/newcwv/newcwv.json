@@ -2,7 +2,7 @@
     "changes": [
         {"time": 0, "bw": 1, "rtt": 200, "loss": 0.00}
         ],
-    "repeat": "True",
+    "repeat": "False",
     "pause": 30,
     "duration": 640
 }
