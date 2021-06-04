@@ -145,7 +145,7 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
         net.stop()
         sys.exit(1)
     else:
-        os.mkdir(pcap_path)
+        os.makedirs(pcap_path)
 
 
     # Start pcaps on the client and the server
@@ -208,6 +208,7 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
     # CLI(net)
 
     client.cmd(client_cmd)
+    #client.cmdPrint('python /vagrant/scripts/scratch/start_chrome.py')
 
     # print('Waiting for 80 seconds')
     # time.sleep(80)

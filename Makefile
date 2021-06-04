@@ -485,17 +485,26 @@ test:
 	@echo $(DASH_ALG)
 
 rule_cwv:
-	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_newcwvh_05_13 --cong_alg newcwv --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
-#	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_newcwvh2 --cong_alg newcwv --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
-#	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_newcwvh3 --cong_alg newcwv --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
+	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_newcwvh_05_17 --cong_alg newcwv --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
+	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_newcwvh2_05_17 --cong_alg newcwv --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
+	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_newcwvh3_05_17 --cong_alg newcwv --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
+	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_newcwvh4_05_17 --cong_alg newcwv --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
+	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_newcwvh5_05_17 --cong_alg newcwv --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
+	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_newcwvh6_05_17 --cong_alg newcwv --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
 
 
 
 rule_cwv_reno:
-	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_renoh --cong_alg vreno --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
-	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_renoh2 --cong_alg vreno --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
-	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_renoh3 --cong_alg vreno --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
+	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_renoh_05_17 --cong_alg vreno --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
+	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_renoh2_05_17 --cong_alg vreno --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
+	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_renoh3_05_17 --cong_alg vreno --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
+	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_renoh4_05_17 --cong_alg vreno --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
 
 
 simulate_wget:
-	cd scripts/scratch && sudo python iperf_sim.py --log_dir /vagrant/logs/wget_sim_full_reno --cong_alg vreno
+	cd scripts/scratch && sudo python mn_sim.py --log_dir /vagrant/logs/ff_sim_05_14 --cong_alg newcwv
+
+rule_cwv_fcc:
+	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/fcc/newcwv_newcwvh_patched3 --cong_alg newcwv --network_model /vagrant/network_models/fcc/network_config_42.json --mpd_location data/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
+#	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/fcc/newcwv_renoh2_ripped --cong_alg vreno --network_model /vagrant/network_models/fcc/network_config_42.json --mpd_location data/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
+
