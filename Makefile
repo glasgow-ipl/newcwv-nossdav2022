@@ -100,45 +100,45 @@ ${out_dir}/dash-if/1080/bbb_1080_60.mp4: ${bbb_hd} ${root}/scripts/video_process
 
 #encoder 200 newcwv
 ${out_dir}/newcwv/200/bbb_200_60.mp4: ${bbb_360} ${root}/scripts/video_processing/encoder.py ${root}/scripts/video_processing/video_driver.py
-        @echo 'running 200 encoder'
-        python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action encode --source ${bbb_hd} --extra_arg 0 --segment_duration 2 --use_yt_bitrates 0
-        @echo 'Encoder executed'
+	@echo 'running 200 encoder'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action encode --source ${bbb_hd} --extra_arg 0 --segment_duration 2 --use_yt_bitrates 0 --newcwv
+	@echo 'Encoder executed'
 
 #encoder 250 newcwv
 ${out_dir}/newcwv/250/bbb_250_60.mp4: ${bbb_360} ${root}/scripts/video_processing/encoder.py ${root}/scripts/video_processing/video_driver.py
-        @echo 'running 250 encoder'
-        python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action encode --source ${bbb_hd} --extra_arg 1 --segment_duration 2 --use_yt_bitrates 0
-        @echo 'Encoder executed'
+	@echo 'running 250 encoder'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action encode --source ${bbb_hd} --extra_arg 1 --segment_duration 2 --use_yt_bitrates 0 --newcwv
+	@echo 'Encoder executed'
 
 #encoder 300 newcwv
 ${out_dir}/newcwv/300/bbb_300_60.mp4: ${bbb_360} ${root}/scripts/video_processing/encoder.py ${root}/scripts/video_processing/video_driver.py
-        @echo 'running 300 encoder'
-        python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action encode --source ${bbb_hd} --extra_arg 2 --segment_duration 2 --use_yt_bitrates 0
-        @echo 'Encoder executed'
+	@echo 'running 300 encoder'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action encode --source ${bbb_hd} --extra_arg 2 --segment_duration 2 --use_yt_bitrates 0 --newcwv
+	@echo 'Encoder executed'
 
 #encoder 400 newcwv
 ${out_dir}/newcwv/400/bbb_400_60.mp4: ${bbb_360} ${root}/scripts/video_processing/encoder.py ${root}/scripts/video_processing/video_driver.py
-        @echo 'running 400 encoder'
-        python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action encode --source ${bbb_hd} --extra_arg 3 --segment_duration 2 --use_yt_bitrates 0
-        @echo 'Encoder executed'
+	@echo 'running 400 encoder'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action encode --source ${bbb_hd} --extra_arg 3 --segment_duration 2 --use_yt_bitrates 0 --newcwv
+	@echo 'Encoder executed'
 
 #encoder 500 newcwv
 ${out_dir}/newcwv/500/bbb_500_60.mp4: ${bbb_360} ${root}/scripts/video_processing/encoder.py ${root}/scripts/video_processing/video_driver.py
-        @echo 'running 500 encoder'
-        python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action encode --source ${bbb_hd} --extra_arg 4 --segment_duration 2 --use_yt_bitrates 0
-        @echo 'Encoder executed'
+	@echo 'running 500 encoder'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action encode --source ${bbb_hd} --extra_arg 4 --segment_duration 2 --use_yt_bitrates 0 --newcwv
+	@echo 'Encoder executed'
 
 #encoder 600 newcwv
 ${out_dir}/newcwv/600/bbb_600_60.mp4: ${bbb_360} ${root}/scripts/video_processing/encoder.py ${root}/scripts/video_processing/video_driver.py
-        @echo 'running 600 encoder'
-        python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action encode --source ${bbb_hd} --extra_arg 5 --segment_duration 2 --use_yt_bitrates 0
-        @echo 'Encoder executed'
+	@echo 'running 600 encoder'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action encode --source ${bbb_hd} --extra_arg 5 --segment_duration 2 --use_yt_bitrates 0 --newcwv
+	@echo 'Encoder executed'
 
 #encoder 700 newcwv
 ${out_dir}/newcwv/700/bbb_700_60.mp4: ${bbb_360} ${root}/scripts/video_processing/encoder.py ${root}/scripts/video_processing/video_driver.py
-        @echo 'running 700 encoder'
-        python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action encode --source ${bbb_hd} --extra_arg 6 --segment_duration 2 --use_yt_bitrates 0
-        @echo 'Encoder executed'
+	@echo 'running 700 encoder'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action encode --source ${bbb_hd} --extra_arg 6 --segment_duration 2 --use_yt_bitrates 0 --newcwv
+	@echo 'Encoder executed'
 
 
 # # # # # # #
@@ -203,40 +203,40 @@ ${out_dir}/dash-if/1080/out/output.mpd: ${out_dir}/dash-if/1080/bbb_1080_60.mp4 
 
 
 #segmenter newcwv
-${out_dir}/newcwv/200/out.output.mpd: ${out_dir}/newcwv/200/bbb_200_60.mp4 ${root}/scripts/video_processing/segments.py ${root}/scripts/video_processing/cideo_driver.py
+${out_dir}/newcwv/200/out/output.mpd: ${out_dir}/newcwv/200/bbb_200_60.mp4 ${root}/scripts/video_processing/segmenter.py ${root}/scripts/video_processing/video_driver.py
 	@echo 'Segmenting 200'
-	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action segment --source ${bbb_hd} --extra_arg 1920x1080
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action segment --source ${bbb_hd} --extra_arg 480x200 --newcwv
 	@echo 'Done segmenting'
 
 
-${out_dir}/newcwv/250/out.output.mpd: ${out_dir}/newcwv/250/bbb_250_60.mp4 ${root}/scripts/video_processing/segments.py ${root}/scripts/video_processing/cideo_driver.py
+${out_dir}/newcwv/250/out/output.mpd: ${out_dir}/newcwv/250/bbb_250_60.mp4 ${root}/scripts/video_processing/segmenter.py ${root}/scripts/video_processing/video_driver.py
 	@echo 'Segmenting 250'
-	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action segment --source ${bbb_hd} --extra_arg 1920x1080
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action segment --source ${bbb_hd} --extra_arg 480x250 --newcwv
 	@echo 'Done segmenting'
 
-${out_dir}/newcwv/300/out.output.mpd: ${out_dir}/newcwv/300/bbb_300_60.mp4 ${root}/scripts/video_processing/segments.py ${root}/scripts/video_processing/cideo_driver.py
+${out_dir}/newcwv/300/out/output.mpd: ${out_dir}/newcwv/300/bbb_300_60.mp4 ${root}/scripts/video_processing/segmenter.py ${root}/scripts/video_processing/video_driver.py
 	@echo 'Segmenting 300'
-	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action segment --source ${bbb_hd} --extra_arg 1920x1080
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action segment --source ${bbb_hd} --extra_arg 480x300 --newcwv
 	@echo 'Done segmenting'
 
-${out_dir}/newcwv/400/out.output.mpd: ${out_dir}/newcwv/400/bbb_400_60.mp4 ${root}/scripts/video_processing/segments.py ${root}/scripts/video_processing/cideo_driver.py
+${out_dir}/newcwv/400/out/output.mpd: ${out_dir}/newcwv/400/bbb_400_60.mp4 ${root}/scripts/video_processing/segmenter.py ${root}/scripts/video_processing/video_driver.py
 	@echo 'Segmenting 400'
-	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action segment --source ${bbb_hd} --extra_arg 1920x1080
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action segment --source ${bbb_hd} --extra_arg 480x400 --newcwv
 	@echo 'Done segmenting'
 
-${out_dir}/newcwv/500/out.output.mpd: ${out_dir}/newcwv/500/bbb_500_60.mp4 ${root}/scripts/video_processing/segments.py ${root}/scripts/video_processing/cideo_driver.py
+${out_dir}/newcwv/500/out/output.mpd: ${out_dir}/newcwv/500/bbb_500_60.mp4 ${root}/scripts/video_processing/segmenter.py ${root}/scripts/video_processing/video_driver.py
 	@echo 'Segmenting 500'
-	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action segment --source ${bbb_hd} --extra_arg 1920x1080
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action segment --source ${bbb_hd} --extra_arg 480x500 --newcwv
 	@echo 'Done segmenting'
 
-${out_dir}/newcwv/600/out.output.mpd: ${out_dir}/newcwv/600/bbb_600_60.mp4 ${root}/scripts/video_processing/segments.py ${root}/scripts/video_processing/cideo_driver.py
+${out_dir}/newcwv/600/out/output.mpd: ${out_dir}/newcwv/600/bbb_600_60.mp4 ${root}/scripts/video_processing/segmenter.py ${root}/scripts/video_processing/video_driver.py
 	@echo 'Segmenting 600'
-	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action segment --source ${bbb_hd} --extra_arg 1920x1080
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action segment --source ${bbb_hd} --extra_arg 480x600 --newcwv
 	@echo 'Done segmenting'
 
-${out_dir}/newcwv/700/out.output.mpd: ${out_dir}/newcwv/700/bbb_700_60.mp4 ${root}/scripts/video_processing/segments.py ${root}/scripts/video_processing/cideo_driver.py
+${out_dir}/newcwv/700/out/output.mpd: ${out_dir}/newcwv/700/bbb_700_60.mp4 ${root}/scripts/video_processing/segmenter.py ${root}/scripts/video_processing/video_driver.py
 	@echo 'Segmenting 700'
-	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action segment --source ${bbb_hd} --extra_arg 1920x1080
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action segment --source ${bbb_hd} --extra_arg 480x700 --newcwv
 	@echo 'Done segmenting'
 
 # # # # # # # # #
@@ -263,6 +263,10 @@ ${out_dir}/dash-if/bbb.mpd: ${out_dir}/dash-if/360/out/output.mpd ${out_dir}/das
 	@echo 'stitching mpds'
 	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/dash-if --action mpd --source ${bbb_hd} --media_prefix ../dash-if
 
+#MPD generator newcwv
+${out_dir}/newcwv/bbb.mpd: ${out_dir}/newcwv/200/out/output.mpd ${out_dir}/newcwv/250/out/output.mpd ${out_dir}/newcwv/300/out/output.mpd ${out_dir}/newcwv/400/out/output.mpd ${out_dir}/newcwv/500/out/output.mpd ${out_dir}/newcwv/600/out/output.mpd ${out_dir}/newcwv/700/out/output.mpd ${root}/scripts/video_processing/video_driver.py ${root}/scripts/video_processing/mpd_generator.py
+	@echo 'stitching mpds'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/newcwv --action mpd --source ${bbb_hd} --media_prefix ../newcwv --newcwv
 
 stage2-test: ${root}/scripts/experiment_test.py
 	@echo 'Running unit tests'
@@ -479,3 +483,28 @@ test:
 	# @echo $(NGINX_LOGS)
 	$(eval DASH_ALG='abrDynamic')
 	@echo $(DASH_ALG)
+
+rule_cwv:
+	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_newcwvh_05_17 --cong_alg newcwv --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
+	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_newcwvh2_05_17 --cong_alg newcwv --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
+	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_newcwvh3_05_17 --cong_alg newcwv --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
+	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_newcwvh4_05_17 --cong_alg newcwv --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
+	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_newcwvh5_05_17 --cong_alg newcwv --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
+	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_newcwvh6_05_17 --cong_alg newcwv --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
+
+
+
+rule_cwv_reno:
+	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_renoh_05_17 --cong_alg vreno --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
+	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_renoh2_05_17 --cong_alg vreno --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
+	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_renoh3_05_17 --cong_alg vreno --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
+	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/newcwv_renoh4_05_17 --cong_alg vreno --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location data/newcwv/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
+
+
+simulate_wget:
+	cd scripts/scratch && sudo python mn_sim.py --log_dir /vagrant/logs/ff_sim_05_14 --cong_alg newcwv
+
+rule_cwv_fcc:
+	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/fcc/newcwv_newcwvh_patched3 --cong_alg newcwv --network_model /vagrant/network_models/fcc/network_config_42.json --mpd_location data/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
+#	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/fcc/newcwv_renoh2_ripped --cong_alg vreno --network_model /vagrant/network_models/fcc/network_config_42.json --mpd_location data/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
+

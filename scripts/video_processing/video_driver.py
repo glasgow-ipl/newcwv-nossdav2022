@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
 	parser.add_argument('--use_yt_bitrates', help="1 if youtube bitrates should be used, 0 for dash-if bitrates", default=1, type=int)
 
-	parser.add_argument('--newcwv', help='Generate dataset that matches the newcwv paper')
+	parser.add_argument('--newcwv', action="store_true", help='Generate dataset that matches the newcwv paper')
 
 	args = parser.parse_args()
 	
