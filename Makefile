@@ -508,3 +508,62 @@ rule_cwv_fcc:
 	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/fcc/newcwv_newcwvh_patched3 --cong_alg newcwv --network_model /vagrant/network_models/fcc/network_config_42.json --mpd_location data/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
 #	cd scripts && sudo python mn_script.py --log_dir /vagrant/logs/fcc/newcwv_renoh2_ripped --cong_alg vreno --network_model /vagrant/network_models/fcc/network_config_42.json --mpd_location data/bbb.mpd --dash_alg abrThroughput --ignore_link_loss 1
 
+/vagrant/logs/cwv_ver/2s/newcwv1/kern.log: 
+	sudo python scripts/scratch/mn_example.py --logdir ${@D} --cong_alg newcwv --case 2sec --disable_rto_reset 0
+/vagrant/logs/cwv_ver/2s/newcwv2/kern.log:
+	sudo python scripts/scratch/mn_example.py --logdir ${@D} --cong_alg newcwv --case 2sec --disable_rto_reset 0
+/vagrant/logs/cwv_ver/2s/newcwv3/kern.log:
+	sudo python scripts/scratch/mn_example.py --logdir ${@D} --cong_alg newcwv --case 2sec --disable_rto_reset 0
+
+/vagrant/logs/cwv_ver/2s/reno1/kern.log:
+	sudo python scripts/scratch/mn_example.py --logdir ${@D} --cong_alg vreno --case 2sec --disable_rto_reset 0
+/vagrant/logs/cwv_ver/2s/reno2/kern.log:
+	sudo python scripts/scratch/mn_example.py --logdir ${@D} --cong_alg vreno --case 2sec --disable_rto_reset 0
+/vagrant/logs/cwv_ver/2s/reno3/kern.log:
+	sudo python scripts/scratch/mn_example.py --logdir ${@D} --cong_alg vreno --case 2sec --disable_rto_reset 0
+
+/vagrant/logs/cwv_ver/tc/tc5/newcwv1/kern.log:
+	sudo python scripts/scratch/mn_example.py --logdir ${@D} --cong_alg newcwv --case tc5 --disable_rto_reset 1
+
+/vagrant/logs/cwv_ver/tc/tc5/newcwv2/kern.log:
+	sudo python scripts/scratch/mn_example.py --logdir ${@D} --cong_alg newcwv --case tc5 --disable_rto_reset 1
+
+/vagrant/logs/cwv_ver/tc/tc5/reno1/kern.log:
+	sudo python scripts/scratch/mn_example.py --logdir ${@D} --cong_alg vreno --case tc5 --disable_rto_reset 1
+
+/vagrant/logs/cwv_ver/tc/tc5/reno2/kern.log:
+	sudo python scripts/scratch/mn_example.py --logdir ${@D} --cong_alg vreno --case tc5 --disable_rto_reset 1
+
+/vagrant/logs/cwv_ver/tc/0/tc5/newcwv1/kern.log:
+	sudo python scripts/scratch/mn_example.py --logdir ${@D} --cong_alg newcwv --case tc5 --disable_rto_reset 0
+
+/vagrant/logs/cwv_ver/tc/0/tc5/newcwv2/kern.log:
+	sudo python scripts/scratch/mn_example.py --logdir ${@D} --cong_alg newcwv --case tc5 --disable_rto_reset 0
+
+/vagrant/logs/cwv_ver/tc/0/tc5/reno1/kern.log:
+	sudo python scripts/scratch/mn_example.py --logdir ${@D} --cong_alg vreno --case tc5 --disable_rto_reset 0
+
+/vagrant/logs/cwv_ver/tc/0/tc5/reno2/kern.log:
+	sudo python scripts/scratch/mn_example.py --logdir ${@D} --cong_alg vreno --case tc5 --disable_rto_reset 0
+
+
+rule_new:
+	sudo python scripts/scratch/mn_example.py --logdir /vagrant/logs/tmp/newcwv1 --cong_alg newcwv
+
+/vagrant/logs/cwv_ver/tc/2sec/newcwv1/kern.log:
+	sudo python scripts/scratch/mn_example.py --logdir ${@D} --cong_alg newcwv --case 2sec --disable_rto_reset 0
+
+/vagrant/logs/cwv_ver/tc/2sec/reno1/kern.log:
+	sudo python scripts/scratch/mn_example.py --logdir ${@D} --cong_alg vreno --case 2sec --disable_rto_reset 0
+
+rule_cwv_42: ${root}/logs/new_cwv/reno2/nginx_access.log ${root}/logs/new_cwv/newcwv2/nginx_access.log
+	echo 'done'
+
+${root}/logs/new_cwv/reno2/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
+	@echo $@
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg vreno --network_model /vagrant/network_models/fcc/network_config_42.json --mpd_location data/bbb.mpd --dash_alg abrThroughput --ignore_link_loss $(IGNORE_LINK_LOSS)
+
+${root}/logs/new_cwv/newcwv2/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
+	@echo $@
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/fcc/network_config_42.json --mpd_location data/bbb.mpd --dash_alg abrThroughput --ignore_link_loss $(IGNORE_LINK_LOSS)
+
