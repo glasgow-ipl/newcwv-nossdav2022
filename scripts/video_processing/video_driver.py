@@ -19,7 +19,7 @@ resolutions=['640x360', '854x480', '1280x720', '1920x1080']#, '2560x1440']
 bitrates_yt=[1.5, 4, 7.5, 12]#, 24] # taken from https://support.google.com/youtube/answer/1722171?hl=en#zippy=%2Cbitrate%2Cresolution-and-aspect-ratio
 bitrates_dash_if=[1.5, 2.5, 4.1, 7.7] # taken from https://web.archive.org/web/20150110225002/dashif.org/testvectors#MRMR
 
-resolutions_newcwv = ['1x200', '1x250', '1x300', '1x400','1x500','1x600','1x700']
+resolutions_newcwv = ['480x200', '480x250', '480x300', '480x400','480x500','480x600','480x700']
 bitrates_newcwv=[0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7]
 
 source = 'bbb_sunflower_2160p_60fps_normal.mp4'
