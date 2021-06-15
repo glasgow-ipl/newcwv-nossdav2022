@@ -7,6 +7,9 @@ data/
 #Vagrant config files
 .vagrant/
 
+#Project binaries
+bin/
+
 #Generated binaries
 *.pdf
 *.png
@@ -136,3 +139,9 @@ scripts/scratch/**
 # Compiled Linux images
 linux-image-*
 linux-headers-*
+
+# Network captures
+*.pcap
+
+# Temporary files
+tmp/

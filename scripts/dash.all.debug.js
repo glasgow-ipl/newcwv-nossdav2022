@@ -16829,6 +16829,8 @@ function Debug(config) {
         showLogTimestamp = true;
         showCalleeName = true;
         startTime = new Date().getTime();
+        // settings.get().streaming.startTime = startTime;
+        // console.log(startTime);
 
         if (typeof window !== 'undefined' && window.console) {
             logFn[LOG_LEVEL_FATAL] = getLogFn(window.console.error);

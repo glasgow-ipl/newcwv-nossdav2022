@@ -52075,6 +52075,8 @@ function ThroughputRule(config) {
         var latency = throughputHistory.getAverageLatency(mediaType);
         var useBufferOccupancyABR = rulesContext.useBufferOccupancyABR();
 
+        console.log('Throughput calculation: ' + throughput);
+
         if (isNaN(throughput) || !currentBufferState || useBufferOccupancyABR) {
             return switchRequest;
         }
@@ -52084,6 +52086,7 @@ function ThroughputRule(config) {
                 switchRequest.quality = abrController.getQualityForBitrate(mediaInfo, throughput, latency);
                 scheduleController.setTimeToLoadDelay(0);
                 logger.debug('[' + mediaType + '] requesting switch to index: ', switchRequest.quality, 'Average throughput', Math.round(throughput), 'kbps');
+                console.log('[' + mediaType + '] requesting switch to index: ', switchRequest.quality, 'Average throughput', Math.round(throughput), 'kbps');
                 switchRequest.reason = { throughput: throughput, latency: latency };
             }
         }
