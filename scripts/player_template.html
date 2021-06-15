@@ -62,6 +62,10 @@
                 metrics.ABRStrategy = player.getSettings().streaming.abr.ABRStrategy;   
 
                 player.initialize(document.querySelector("#videoPlayer"), url, true);
+                metrics.startTime = player.getSettings().streaming.startTime;
+
+                video = document.querySelector("#videoPlayer");
+
                 init_time = window.performance.now();
             })();
 
