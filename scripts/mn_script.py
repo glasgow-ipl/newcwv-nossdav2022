@@ -193,10 +193,6 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
 
     net.iperf((client, server))
 
-    msg = "starting client at: %s" % datetime.datetime.now().strftime(precise_time_str)
-    print(msg)
-    logger.append(msg)
-
     firefox_output = os.path.join(pcap_path, "browser_out.txt")
     firefox_log_format = "timestamp,rotate:200,nsHttp:5,cache2:5,nsSocketTransport:5,nsHostResolver:5,cookie:5"
     client_cmd = 'su - %s -c "firefox --headless --private http://%s/scripts/player.html --MOZ_LOG=%s --MOZ_LOG_FILE=%s &"' % (user, server_ip, firefox_log_format, firefox_output)
@@ -206,6 +202,10 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
     print ("Client cmd: %s " % client_cmd)
 
     # CLI(net)
+
+    msg = "starting client at: %s" % datetime.datetime.now().strftime(precise_time_str)
+    print(msg)
+    logger.append(msg)
 
     client.cmd(client_cmd)
     #client.cmdPrint('python /vagrant/scripts/scratch/start_chrome.py')
