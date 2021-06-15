@@ -9,7 +9,7 @@ def get_lost_packets(pcap_path):
 
     seqs = {}
     for rec in server_records:
-        client_port = get_client_port(rec)
+        client_port = get_port(rec, 1)
         seq = get_seq_number(rec)
         seqs[(client_port, seq)] = seqs.get((client_port, seq), 0) + 1
 
@@ -19,14 +19,14 @@ def get_lost_packets(pcap_path):
     return _get_lost_packets(server_records, lost_seqs)
 
 
-def _get_lost_packets(server_records, lost_seqs):
+def _get_lost_pahackets(server_records, lost_seqs):
     lost_pairs, _ = zip(*lost_seqs)
 
     lost_packets = []
     loss_times = []
 
     for rec in server_records:
-        client_port = get_client_port(rec)
+        client_port = get_port(rec, 1)
         seq = get_seq_number(rec)
         check_key = (client_port, seq)
         if lost_seqs.get(check_key, 0) > 1:
@@ -39,8 +39,8 @@ def _get_lost_packets(server_records, lost_seqs):
     return loss_times
 
 
-def get_client_port(pcap_line):
-    return int(pcap_line.split('> ')[1].split(': ')[0].split('.')[-1])
+def get_port(pcap_line, idx):
+    return int(pcap_line.split('> ')[idx].split(': ')[0].split('.')[-1])
 
 
 def get_seq_number(pcap_line):
@@ -84,6 +84,20 @@ def get_active_periods(pcap_file):
 
     return downloads
 
+
+def get_client_connection_ports(pcap_path):
+    client_ports = set()
+    out = subprocess.run(f'tcpdump -n -r {pcap_path}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    records = out.stdout.decode().split('\n')
+
+    server_records = [x for x in records if 'HTTP: GET ' in x and '.m4s'  in x]
+
+    for rec in server_records:
+        client_ports.add(get_port(rec, 0))
+    
+    return sorted(client_ports)
+
 if __name__ == '__main__':
     # get_lost_packets('/vagrant/logs/tmp/server.pcap')
-    get_active_periods('/vagrant/logs/tmp/no_loss/sample/1/1_reno/server.pcap')
+    # get_active_periods('/vagrant/logs/tmp/no_loss/sample/1/1_reno/server.pcap')
+    get_client_connection_ports('/vagrant/logs/tmp/newcwv/newcwv_newcwvh2/server.pcap')

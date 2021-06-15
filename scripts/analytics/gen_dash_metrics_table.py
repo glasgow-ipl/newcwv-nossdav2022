@@ -65,21 +65,30 @@ def gen_dash_metrics_table(doc_root, sim_numbers, alg_names):
         avg_bitrates = [int(sn)]
         for alg in alg_names:
             path = os.path.join(doc_root, sn)
-            avg_bitrates.append(get_avg_avg_bitrate(path, alg) / 1000)
+            avg_bitrate = get_avg_avg_bitrate(path, alg) / 1000
+            avg_bitrates.append(avg_bitrate)
         bitrate_oscs = [int(sn)]
         for alg in alg_names:
             path = os.path.join(doc_root, sn)
-            bitrate_oscs.append(get_avg_bitrate_oscillation(path, alg) / 1000)
+            avg_osc = get_avg_bitrate_oscillation(path, alg) / 1000
+            bitrate_oscs.append(avg_osc)
         total_stalls = [int(sn)]
         for alg in alg_names:
             path = os.path.join(doc_root, sn)
-            total_stalls.append(get_avg_total_stall_time_sim(path, alg))
+            avg_stall = get_avg_total_stall_time_sim(path, alg)
+            total_stalls.append(avg_stall)
         startup_delays = [int(sn)]
         for alg in alg_names:
             path = os.path.join(doc_root, sn)
-            startup_delays.append(get_avg_startup_delay_sim(path, alg))
+            startup_delay = get_avg_startup_delay_sim(path, alg)
+            startup_delays.append(startup_delay)
+            startup_delay /= 1000
+        
+        mpc_qoes = [int(sn)]
+        for i in range(1, len(avg_bitrates)):
+            mpc_qoes.append(calculate_MPC_QOE(avg_bitrates[i], bitrate_oscs[i], total_stalls[i], startup_delays[i]))
 
-        rows.extend(' & '.join([f'{el:.2f}' for el in x]) for x in [avg_bitrates, bitrate_oscs, total_stalls, startup_delays])
+        rows.extend(' & '.join([f'{el:.2f}' for el in x]) for x in [avg_bitrates, bitrate_oscs, total_stalls, startup_delays, mpc_qoes])
 
 
     table_content = '\n'.join(rows)
@@ -124,16 +133,28 @@ def plot_bitrate_f_stalls(doc_root, sim_numbers):
     for i in range(bitrate_stalls_bbr):
         plt.annotate(str(i+1), (bitrate[i], stalls[i]))
 
+    plt.legend()
     save_path = '.'
     plt.savefig(os.path.join(save_path, 'fig.png'))
-    
+    plt.savefig(os.path.join(save_path, 'fig.pdf'))
+
+
+def calculate_MPC_QOE(avg_bitrate, avg_osc, stall_time, startup_delay):
+    video_osc_factor = 1
+    rebuffering_factor = 3000
+
+    mpc_qoe = avg_bitrate - video_osc_factor * avg_osc - rebuffering_factor * stall_time - rebuffering_factor * startup_delay
+    return mpc_qoe
 
 if __name__ == '__main__':
-    sim_runs = [str(x+1) for x in range(12)]
-    rows = gen_dash_metrics_table('/vagrant/logs/dash_if/no_loss/abrThroughput/', sim_runs, ['bbr', 'cubic', 'reno'])
-    headers = ['Average Bit-rate (kbps)', 'Bit-rate Oscillation (kbps)', 'Total Stall Time (s)', 'Start-up Delay (ms)']
-    for idx, row in enumerate(rows):
-        print(headers[idx % len(headers)] + ' & ' + row + ' \\\\' + ('\\midrule' if (idx + 1) % len(headers) == 0 else ''))
+
+    calculate_MPC_QOE()
+
+    # sim_runs = [str(x+1) for x in range(12)]
+    # rows = gen_dash_metrics_table('/vagrant/logs/dash_if/no_loss/abrThroughput/', sim_runs, ['bbr', 'cubic', 'reno'])
+    # headers = ['Average Bit-rate (kbps)', 'Bit-rate Oscillation (kbps)', 'Total Stall Time (s)', 'Start-up Delay (ms)']
+    # for idx, row in enumerate(rows):
+    #     print(headers[idx % len(headers)] + ' & ' + row + ' \\\\' + ('\\midrule' if (idx + 1) % len(headers) == 0 else ''))
 
 
  
