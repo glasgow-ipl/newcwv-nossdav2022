@@ -556,8 +556,18 @@ rule_new:
 /vagrant/logs/cwv_ver/tc/2sec/reno1/kern.log:
 	sudo python scripts/scratch/mn_example.py --logdir ${@D} --cong_alg vreno --case 2sec --disable_rto_reset 0
 
-rule_cwv_42: ${root}/logs/new_cwv/reno2/nginx_access.log ${root}/logs/new_cwv/newcwv2/nginx_access.log
+rule_cwv_42: ${root}/logs/new_cwv/reno1/nginx_access.log ${root}/logs/new_cwv/newcwv1/nginx_access.log ${root}/logs/new_cwv/reno2/nginx_access.log ${root}/logs/new_cwv/newcwv2/nginx_access.log
 	echo 'done'
+
+
+${root}/logs/new_cwv/reno1/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
+	@echo $@
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg vreno --network_model /vagrant/network_models/fcc/network_config_42.json --mpd_location data/bbb.mpd --dash_alg abrThroughput --ignore_link_loss $(IGNORE_LINK_LOSS)
+
+${root}/logs/new_cwv/newcwv1/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
+	@echo $@
+	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/fcc/network_config_42.json --mpd_location data/bbb.mpd --dash_alg abrThroughput --ignore_link_loss $(IGNORE_LINK_LOSS)
+
 
 ${root}/logs/new_cwv/reno2/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
 	@echo $@
