@@ -70,6 +70,34 @@ ${out_dir}/1080/bbb_1080_60.mp4: ${bbb_hd} ${root}/scripts/video_processing/enco
 	@echo 'Encoder executed'
 
 
+#encoder 360 3s
+${out_dir}/3s/360/bbb_360_60.mp4: ${bbb_hd} ${root}/scripts/video_processing/encoder.py ${root}/scripts/video_processing/video_driver.py
+	@echo 'running 360 encoder'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/3s --action encode --source ${bbb_hd} --extra_arg 0 --segment_duration 3
+	@echo 'Encoder executed'
+
+
+#encoder 480 3s
+${out_dir}/3s/480/bbb_480_60.mp4: ${bbb_hd} ${root}/scripts/video_processing/encoder.py ${root}/scripts/video_processing/video_driver.py
+	@echo 'running 480 encoder'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/3s --action encode --source ${bbb_hd} --extra_arg 1 --segment_duration 3
+	@echo 'Encoder executed'
+
+
+#encoder 720 3s
+${out_dir}/3s/720/bbb_720_60.mp4: ${bbb_hd} ${root}/scripts/video_processing/encoder.py ${root}/scripts/video_processing/video_driver.py
+	@echo 'running 720 encoder'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/3s --action encode --source ${bbb_hd} --extra_arg 2 --segment_duration 3
+	@echo 'Encoder executed'
+
+
+#encoder 1080 3s
+${out_dir}/3s/1080/bbb_1080_60.mp4: ${bbb_hd} ${root}/scripts/video_processing/encoder.py ${root}/scripts/video_processing/video_driver.py
+	@echo 'running 1080 encoder'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/3s --action encode --source ${bbb_hd} --extra_arg 3 --segment_duration 3
+	@echo 'Encoder executed'
+
+
 #encoder 360 DASH-IF
 ${out_dir}/dash-if/360/bbb_360_60.mp4: ${bbb_hd} ${root}/scripts/video_processing/encoder.py ${root}/scripts/video_processing/video_driver.py
 	@echo 'running 360 encoder'
@@ -174,6 +202,34 @@ ${out_dir}/1080/out/output.mpd: ${out_dir}/1080/bbb_1080_60.mp4 ${root}/scripts/
 	@echo 'Done segmenting'
 
 
+#segmenter 360 3s
+${out_dir}/3s/360/out/output.mpd: ${out_dir}/3s/360/bbb_360_60.mp4 ${root}/scripts/video_processing/segmenter.py ${root}/scripts/video_processing/video_driver.py
+	@echo 'Segmenting 360'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/3s --action segment --source ${bbb_hd} --extra_arg 640x360
+	@echo 'Done segmenting'
+
+
+#segmenter 480 3s
+${out_dir}/3s/480/out/output.mpd: ${out_dir}/3s/480/bbb_480_60.mp4 ${root}/scripts/video_processing/segmenter.py ${root}/scripts/video_processing/video_driver.py
+	@echo 'Segmenting 480'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/3s --action segment --source ${bbb_hd} --extra_arg 854x480
+	@echo 'Done segmenting'
+
+
+#segmenter 720 3s
+${out_dir}/3s/720/out/output.mpd: ${out_dir}/3s/720/bbb_720_60.mp4 ${root}/scripts/video_processing/segmenter.py ${root}/scripts/video_processing/video_driver.py
+	@echo 'Segmenting 720'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/3s --action segment --source ${bbb_hd} --extra_arg 1280x720
+	@echo 'Done segmenting'
+
+
+#segmenter 1080 3s
+${out_dir}/3s/1080/out/output.mpd: ${out_dir}/3s/1080/bbb_1080_60.mp4 ${root}/scripts/video_processing/segmenter.py ${root}/scripts/video_processing/video_driver.py
+	@echo 'Segmenting 1080'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/3s --action segment --source ${bbb_hd} --extra_arg 1920x1080
+	@echo 'Done segmenting'
+
+
 #segmenter 360 DASH-IF
 ${out_dir}/dash-if/360/out/output.mpd: ${out_dir}/dash-if/360/bbb_360_60.mp4 ${root}/scripts/video_processing/segmenter.py ${root}/scripts/video_processing/video_driver.py
 	@echo 'Segmenting 360'
@@ -247,6 +303,9 @@ ${out_dir}/newcwv/700/out/output.mpd: ${out_dir}/newcwv/700/bbb_700_60.mp4 ${roo
 stage1-mpd: ${out_dir}/bbb.mpd
 	@echo 'Generating mpd'
 
+stage1-mpd-3s: ${out_dir}/3s/bbb.mpd
+	@echo 'Generating mpd'
+	
 stage1-dash-if-mpd: ${out_dir}/dash-if/bbb.mpd
 	@echo 'Generating dash-if MPD'
 
@@ -257,6 +316,11 @@ stage1-newcwv: ${out_dir}/newcwv/bbb.mpd
 ${out_dir}/bbb.mpd: ${out_dir}/360/out/output.mpd ${out_dir}/480/out/output.mpd ${out_dir}/720/out/output.mpd ${out_dir}/1080/out/output.mpd ${root}/scripts/video_processing/video_driver.py ${root}/scripts/video_processing/mpd_generator.py
 	@echo 'stitching mpds'
 	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir} --action mpd --source ${bbb_hd} --media_prefix ../data
+
+#MPD generator 3s
+${out_dir}/3s/bbb.mpd: ${out_dir}/3s/360/out/output.mpd ${out_dir}/3s/480/out/output.mpd ${out_dir}/3s/720/out/output.mpd ${out_dir}/3s/1080/out/output.mpd ${root}/scripts/video_processing/video_driver.py ${root}/scripts/video_processing/mpd_generator.py
+	@echo 'stitching mpds'
+	python3 ${root}/scripts/video_processing/video_driver.py --prefix ${out_dir}/3s --action mpd --source ${bbb_hd} --media_prefix ../data
 
 #MPD generator DASH-IF
 ${out_dir}/dash-if/bbb.mpd: ${out_dir}/dash-if/360/out/output.mpd ${out_dir}/dash-if/480/out/output.mpd ${out_dir}/dash-if/720/out/output.mpd ${out_dir}/dash-if/1080/out/output.mpd ${root}/scripts/video_processing/video_driver.py ${root}/scripts/video_processing/mpd_generator.py
@@ -557,7 +621,12 @@ rule_new:
 	sudo python scripts/scratch/mn_example.py --logdir ${@D} --cong_alg vreno --case 2sec --disable_rto_reset 0
 
 rule_cwv_42: ${root}/logs/new_cwv/reno1/nginx_access.log ${root}/logs/new_cwv/newcwv1/nginx_access.log ${root}/logs/new_cwv/reno2/nginx_access.log ${root}/logs/new_cwv/newcwv2/nginx_access.log
-	echo 'done'
+
+/vagrant/logs/cwv_ver/tc/2sec/short/newcwv1/kern.log:
+	sudo python scripts/scratch/mn_example.py --logdir ${@D} --cong_alg newcwv --case 2sec --disable_rto_reset 0
+
+/vagrant/logs/cwv_ver/tc/2sec/short/reno1/kern.log:
+	sudo python scripts/scratch/mn_example.py --logdir ${@D} --cong_alg vreno --case 2sec --disable_rto_reset 0
 
 
 ${root}/logs/new_cwv/reno1/nginx_access.log: ${root}/scripts/mn_script.py ${out_dir}/bbb.mpd | ${root}/logs
@@ -577,3 +646,10 @@ ${root}/logs/new_cwv/newcwv2/nginx_access.log: ${root}/scripts/mn_script.py ${ou
 	@echo $@
 	cd ${root}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/fcc/network_config_42.json --mpd_location data/bbb.mpd --dash_alg abrThroughput --ignore_link_loss $(IGNORE_LINK_LOSS)
 
+/vagrant/logs/cwv_ver/tc/2sec/short/newcwv2/kern.log:
+	sudo python scripts/scratch/mn_example.py --logdir ${@D} --cong_alg newcwv --case 2sec --disable_rto_reset 0
+
+/vagrant/logs/cwv_ver/tc/2sec/short/reno2/kern.log:
+	sudo python scripts/scratch/mn_example.py --logdir ${@D} --cong_alg vreno --case 2sec --disable_rto_reset 0
+
+2sec_short: /vagrant/logs/cwv_ver/tc/2sec/short/newcwv1/kern.log /vagrant/logs/cwv_ver/tc/2sec/short/reno1/kern.log /vagrant/logs/cwv_ver/tc/2sec/short/newcwv2/kern.log /vagrant/logs/cwv_ver/tc/2sec/short/reno2/kern.log
