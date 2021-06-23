@@ -30324,6 +30324,8 @@ function Stream(config) {
             }
         }
 
+        logger.debug('[ESTIMATE] precise:', JSON.stringify(settings.get()['estimations']));
+        console.log('[ESTIMATE] precise:', JSON.stringify(settings.get()['estimations']));
         logger.debug('onBufferingCompleted - trigger STREAM_BUFFERING_COMPLETED');
         eventBus.trigger(_coreEventsEvents2['default'].STREAM_BUFFERING_COMPLETED, {
             streamInfo: streamInfo
@@ -50486,7 +50488,10 @@ function ThroughputHistory(config) {
         }
 
         var throughput = Math.round(8 * downloadBytes / throughputMeasureTime); // bits/ms = kbits/s
-        logger.debug('[ESTIMATE] precise:', throughput);
+        if(!('estimations' in settings.get())) {
+          settings.get()['estimations'] = {'precise': []};
+        }
+        settings.get()['estimations']['precise'].push(throughput);
 
         checkSettingsForMediaType(mediaType);
 
@@ -52041,6 +52046,7 @@ function ThroughputRule(config) {
     config = config || {};
     var context = this.context;
     var dashMetrics = config.dashMetrics;
+    var settings = config.settings;
 
     var instance = undefined,
         logger = undefined;
@@ -52076,8 +52082,7 @@ function ThroughputRule(config) {
         var latency = throughputHistory.getAverageLatency(mediaType);
         var useBufferOccupancyABR = rulesContext.useBufferOccupancyABR();
 
-        logger.debug('[ESTIMATE] average', Math.round(throughput));
-        // console.log('Throughput calculation: ' + throughput);
+        logger.debug('[ESTIMATE] average:', Math.round(throughput));
 
         if (isNaN(throughput) || !currentBufferState || useBufferOccupancyABR) {
             return switchRequest;
