@@ -1,0 +1,8 @@
+{
+    "changes": [
+        {"time": 0, "bw": 10, "rtt": 40, "loss": 0}
+        ],
+    "repeat": "False",
+    "pause": 30,
+    "duration": 640
+}
