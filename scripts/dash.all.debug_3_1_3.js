@@ -30324,8 +30324,8 @@ function Stream(config) {
             }
         }
 
-        logger.debug('[ESTIMATE] precise:', JSON.stringify(settings.get()['estimations']));
-        console.log('[ESTIMATE] precise:', JSON.stringify(settings.get()['estimations']));
+        logger.debug('[ESTIMATE]:', JSON.stringify(settings.get()['estimations']));
+        console.log('[ESTIMATE]:', JSON.stringify(settings.get()['estimations']));
         logger.debug('onBufferingCompleted - trigger STREAM_BUFFERING_COMPLETED');
         eventBus.trigger(_coreEventsEvents2['default'].STREAM_BUFFERING_COMPLETED, {
             streamInfo: streamInfo
@@ -50489,9 +50489,9 @@ function ThroughputHistory(config) {
 
         var throughput = Math.round(8 * downloadBytes / throughputMeasureTime); // bits/ms = kbits/s
         if(!('estimations' in settings.get())) {
-          settings.get()['estimations'] = {'precise': []};
+          settings.get()['estimations'] = {'precise': {}, 'average': {}};
         }
-        settings.get()['estimations']['precise'].push(throughput);
+        settings.get()['estimations']['precise'][new Date().getTime()] = throughput;
 
         checkSettingsForMediaType(mediaType);
 
@@ -50615,6 +50615,7 @@ function ThroughputHistory(config) {
         var average = getAverageThroughput(mediaType, isDynamic);
         if (!isNaN(average)) {
             average *= settings.get().streaming.abr.bandwidthSafetyFactor;
+            settings.get()['estimations']['average'][new Date().getTime()] = average;
         }
         return average;
     }
