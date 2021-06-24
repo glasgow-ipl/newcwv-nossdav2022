@@ -201,13 +201,14 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
 
     print ("Client cmd: %s " % client_cmd)
 
-    # CLI(net)
+    print('1. Open xterm at the client. Run: xterm h2.\n2. In the newly opened terminal, open Firefox as a non-root user by running: su - %s -c "firefox"\n2. In firefox navigate to http://%s/scripts/player.html and wait for the video to playout' % (user, server_ip) )
+    CLI(net)
 
-    msg = "starting client at: %s" % datetime.datetime.now().strftime(precise_time_str)
-    print(msg)
-    logger.append(msg)
+    # msg = "starting client at: %s" % datetime.datetime.now().strftime(precise_time_str)
+    # print(msg)
+    # logger.append(msg)
 
-    client.cmd(client_cmd)
+    # client.cmd(client_cmd)
     #client.cmdPrint('python /vagrant/scripts/scratch/start_chrome.py')
 
     # print('Waiting for 80 seconds')
@@ -233,11 +234,11 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
     # net.iperf((client, server))
     # time.sleep(80)
     
-    msg = "Waiting for server to finish %s" % datetime.datetime.now().strftime(precise_time_str)
-    print(msg)
-    logger.append(msg)
+    # msg = "Waiting for server to finish %s" % datetime.datetime.now().strftime(precise_time_str)
+    # print(msg)
+    # logger.append(msg)
 
-    server.cmd("wait %s " % watchdog_pid)
+    # server.cmd("wait %s " % watchdog_pid)
 
     logger.append("terminating")
 

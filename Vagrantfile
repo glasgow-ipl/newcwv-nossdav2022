@@ -18,8 +18,14 @@ $RUN_PROBE = <<SCRIPT
 	apt-get install -y python2
 	apt-get install -y net-tools
 
+  apt-get install -y xterm
+
 	sudo update-alternatives --install /usr/bin/python python /usr/bin/python2 2
 	sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 1
+
+  # Get pip 2, so that mininet installation later is happy
+  curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
+  sudo python2 get-pip.py
 
 	git clone git://github.com/mininet/mininet
 #	cd mininet && git tag && git checkout 2.3.0d6 && cd util && rm install.sh && wget https://gist.githubusercontent.com/janev94/c443075986ec344359904c9ceba93f2b/raw/99c9146940450beb155a31cb5b30c38643466b46/install.sh && chmod u+x install.sh && cd ../..
@@ -28,17 +34,7 @@ $RUN_PROBE = <<SCRIPT
 	# Cannot use -a flag on install.sh as pox requires python-scapy package which is no longer supported in 20.04
 	sudo mininet/util/install.sh -fnv
 	apt-get install -y nginx
-	apt-get install -y iperf3
-
-  # Create virtual envrionment for plotting results
-#	apt-get install -y python3-venv
-#	apt-get install -y virtualenv
-#	cd /vagrant && virtualenv plotter -p python3 --always-copy && plotter/bin/pip install -r deps/requirements.txt 
-	apt-get install -y python3-pip
-	cd /vagrant && pip3 install -r deps/requirements.txt
-  
-  #DNS does not work on some machines, unless some traffic has gone out already
-  #ping -c 3 google.com 
+	apt-get install -y iperf3 
 SCRIPT
 
 
@@ -72,10 +68,10 @@ Vagrant.configure("2") do |config|
     v.customize ["modifyvm", :id, "--usbehci",                 "off"]
     v.customize ["modifyvm", :id, "--usbxhci",                 "off"]
     v.customize ["modifyvm", :id, "--usbcardreader",           "off"]
-#    v.customize ["modifyvm", :id, "--accelerate2dvideo",        "on"]
+    v.customize ["modifyvm", :id, "--accelerate2dvideo",        "on"]
 #    v.customize ["modifyvm", :id, "--accelerate3d",             "on"]
     v.customize ["modifyvm", :id, "--vram",                    "256"]
-#    v.customize ["modifyvm", :id, "--graphicscontroller", "VBoxSVGA"]
+    v.customize ["modifyvm", :id, "--graphicscontroller", "VBoxSVGA"]
   end
 
   config.vm.provision "shell", privileged: true, inline: $RUN_PROBE 
