@@ -62,6 +62,12 @@ class MyHttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 json.dump(data, f)
 
             print("Got estimates", data)
+        elif self.path == '/recordLog':
+            self.data_string = self.rfile.read(int(self.headers['Content-Length']))
+            data = json.loads(self.data_string)
+            print("got data %s" % data)
+            with open('event_log.json', 'w') as f:
+                json.dump(data, f)
 
 
 

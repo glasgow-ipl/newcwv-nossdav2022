@@ -197,18 +197,18 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
     firefox_log_format = "timestamp,rotate:200,nsHttp:5,cache2:5,nsSocketTransport:5,nsHostResolver:5,cookie:5"
     client_cmd = 'su - %s -c "firefox --headless --private http://%s/scripts/player.html --MOZ_LOG=%s --MOZ_LOG_FILE=%s &"' % (user, server_ip, firefox_log_format, firefox_output)
 
-    client_cmd = 'su - %s -c "firefox --headless --private http://%s/scripts/player.html&"' % (user, server_ip)
+    client_cmd = 'su - %s -c "xvfb-run firefox --private http://%s/scripts/player.html&"' % (user, server_ip)
 
     print ("Client cmd: %s " % client_cmd)
 
-    print('1. Open xterm at the client. Run: xterm h2.\n2. In the newly opened terminal, open Firefox as a non-root user by running: su - %s -c "firefox"\n2. In firefox navigate to http://%s/scripts/player.html and wait for the video to playout' % (user, server_ip) )
-    CLI(net)
+    # print('1. Open xterm at the client. Run: xterm h2.\n2. In the newly opened terminal, open Firefox as a non-root user by running: su - %s -c "firefox"\n2. In firefox navigate to http://%s/scripts/player.html and wait for the video to playout' % (user, server_ip) )
+    # CLI(net)
 
     # msg = "starting client at: %s" % datetime.datetime.now().strftime(precise_time_str)
     # print(msg)
     # logger.append(msg)
 
-    # client.cmd(client_cmd)
+    client.cmd(client_cmd)
     #client.cmdPrint('python /vagrant/scripts/scratch/start_chrome.py')
 
     # print('Waiting for 80 seconds')
@@ -234,11 +234,11 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
     # net.iperf((client, server))
     # time.sleep(80)
     
-    # msg = "Waiting for server to finish %s" % datetime.datetime.now().strftime(precise_time_str)
-    # print(msg)
-    # logger.append(msg)
+    msg = "Waiting for server to finish %s" % datetime.datetime.now().strftime(precise_time_str)
+    print(msg)
+    logger.append(msg)
 
-    # server.cmd("wait %s " % watchdog_pid)
+    server.cmd("wait %s " % watchdog_pid)
 
     logger.append("terminating")
 
@@ -285,6 +285,11 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
         f.write(logger)
 
     os.system('su - %s -c "/vagrant/scripts/quitff.sh"' % user)
+
+    # if we got to here everything is good, remove the event_log.json we do not need it anymore
+    if os.path.exists("event_log.json"):
+        print("Removing ebent log")
+        os.remove("event.log")
 
 
 if __name__ == '__main__':
