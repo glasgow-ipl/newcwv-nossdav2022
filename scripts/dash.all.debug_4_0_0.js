@@ -56467,6 +56467,10 @@ function ThroughputHistory(config) {
     if (throughputMeasureTime !== 0) {
       throughput = Math.round(8 * downloadBytes / throughputMeasureTime); // bits/ms = kbits/s
     }
+    if(!('estimations' in settings.get())) {
+      settings.get()['estimations'] = {'precise': {}, 'average': {}};
+    }
+    settings.get()['estimations']['precise'][new Date().getTime()] = throughput;
 
     checkSettingsForMediaType(mediaType);
 
@@ -56592,6 +56596,7 @@ function ThroughputHistory(config) {
 
     if (!isNaN(average)) {
       average *= settings.get().streaming.abr.bandwidthSafetyFactor;
+      settings.get()['estimations']['average'][new Date().getTime()] = average;
     }
 
     return average;
@@ -58582,8 +58587,6 @@ function ThroughputRule(config) {
     var throughput = throughputHistory.getSafeAverageThroughput(mediaType, isDynamic);
     var latency = throughputHistory.getAverageLatency(mediaType);
     var useBufferOccupancyABR = rulesContext.useBufferOccupancyABR();
-
-    logger.debug('[ESTIMATE] average:', Math.round(throughput));
 
     if (isNaN(throughput) || !currentBufferState || useBufferOccupancyABR) {
       return switchRequest;
