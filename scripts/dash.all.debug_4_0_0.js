@@ -33586,6 +33586,9 @@ function Stream(config) {
       }
     }
 
+    logger.debug('[ESTIMATE]:', JSON.stringify(settings.get()['estimations']));
+    console.log('[ESTIMATE]:', JSON.stringify(settings.get()['estimations']));
+
     logger.debug('onBufferingCompleted - trigger STREAM_BUFFERING_COMPLETED');
     hasFinishedBuffering = true;
     eventBus.trigger(_core_events_Events__WEBPACK_IMPORTED_MODULE_6__["default"].STREAM_BUFFERING_COMPLETED, {
@@ -58579,6 +58582,8 @@ function ThroughputRule(config) {
     var throughput = throughputHistory.getSafeAverageThroughput(mediaType, isDynamic);
     var latency = throughputHistory.getAverageLatency(mediaType);
     var useBufferOccupancyABR = rulesContext.useBufferOccupancyABR();
+
+    logger.debug('[ESTIMATE] average:', Math.round(throughput));
 
     if (isNaN(throughput) || !currentBufferState || useBufferOccupancyABR) {
       return switchRequest;
