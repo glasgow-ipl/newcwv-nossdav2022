@@ -51,12 +51,16 @@
                 player = dashjs.MediaPlayer().create();
 
                 player.updateSettings(
-                    {'streaming': 
-                        {'abr': 
-                            {
-                                'ABRStrategy': '<<DASH_ALG>>',
+                    {
+                        'debug': {
+                            'dispatchEvent': true,
+                        },
+                        'streaming': 
+                            {'abr': 
+                                {
+                                    'ABRStrategy': '<<DASH_ALG>>',
+                                }
                             }
-                        }
                     }); // Changing MovingAverage Method to EWMA, default is Sliding window
 
                 metrics.ABRStrategy = player.getSettings().streaming.abr.ABRStrategy;   
@@ -77,8 +81,8 @@
 
 
             function recordPlayTime(e) {
-                var now = performance.window.now();
-                if (startup_delay === null) {
+                var now = performance.now();
+                if (metrics.startup_delay === null) {
                     metrics.startup_delay = now - init_time;
                 } else {
                     // Startup delay has been recorded but video was frozen and is now playing again
@@ -88,7 +92,7 @@
 
 
             function recordFreezeTime(e) {
-                freeze_time = performance.window.now();
+                freeze_time = performance.now();
             }
 
             player.on(dashjs.MediaPlayer.events['LOG'], recordEvent);
