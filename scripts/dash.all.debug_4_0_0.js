@@ -32728,6 +32728,14 @@ function SourceBufferSink(config) {
         if (nextChunk.data.bytes.byteLength === 0) {
           afterSuccess.call(this);
         } else {
+          if ('buffers' in settings.get())
+          {
+            settings.get()['buffers'][nextChunk.data.index] = nextChunk.data.bytes.byteLength;
+          } else {
+            settings.get()['buffers'] = {}
+            settings.get()['buffers'][nextChunk.data.index] = nextChunk.data.bytes.byteLength;
+          }
+
           if (buffer.appendBuffer) {
             buffer.appendBuffer(nextChunk.data.bytes);
           } else {
