@@ -19,6 +19,7 @@ $RUN_PROBE = <<SCRIPT
 	apt-get install -y net-tools
 
   apt-get install -y xterm
+  apt-get install -y xvfb
 
 	sudo update-alternatives --install /usr/bin/python python /usr/bin/python2 2
 	sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 1
