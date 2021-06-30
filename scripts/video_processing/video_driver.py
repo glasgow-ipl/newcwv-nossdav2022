@@ -22,6 +22,9 @@ bitrates_dash_if=[1.5, 2.5, 4.1, 7.7] # taken from https://web.archive.org/web/2
 resolutions_newcwv = ['480x200', '480x250', '480x300', '480x400','480x500','480x600','480x700']
 bitrates_newcwv=[0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7]
 
+resolutions_ietf = ['720x480', '1280x720', '1920x1080', '3840x2160']
+bitrates_ietf = [.5, 3, 5.5, 15] # https://datatracker.ietf.org/doc/html/draft-ietf-mops-streaming-opcons-05#section-2.1
+
 source = 'bbb_sunflower_2160p_60fps_normal.mp4'
 prefix = '/vagrant/'
 framerate = 60
@@ -43,7 +46,7 @@ if __name__ == '__main__':
 
 	parser.add_argument('--segment_duration', help="Segment duration length in seconds. Used by the encoder", type=int)
 
-	parser.add_argument('--use_yt_bitrates', help="1 if youtube bitrates should be used, 0 for dash-if bitrates", default=1, type=int)
+	parser.add_argument('--use_dataset', help="0 for dash-if bitrates, 1 for youtube bitrates, 2 for ietf bitrates", default=1, type=int)
 
 	parser.add_argument('--newcwv', action="store_true", help='Generate dataset that matches the newcwv paper')
 
@@ -67,8 +70,14 @@ if __name__ == '__main__':
 	meta['media_prefix'] = media_prefix
 	meta['framerate'] = framerate
 	meta['source'] = source
-	meta['bitrates'] = bitrates_yt if args.use_yt_bitrates else bitrates_dash_if
+	meta['bitrates'] = bitrates_yt
 	meta['resolutions'] = resolutions
+	if args.use_dat_aset == 0:
+		meta['bitrates'] = bitrates_dash_if
+	elif args.use_dataset == 2:
+		meta['bitrates'] = bitrates_ietf
+		meta['resolutions'] = resolutions_ietf
+		
 	meta['prefix'] = prefix
 
 	if args.newcwv:
