@@ -72,12 +72,12 @@ if __name__ == '__main__':
 	meta['source'] = source
 	meta['bitrates'] = bitrates_yt
 	meta['resolutions'] = resolutions
-	if args.use_dat_aset == 0:
+	if args.use_dataset == 0:
 		meta['bitrates'] = bitrates_dash_if
 	elif args.use_dataset == 2:
 		meta['bitrates'] = bitrates_ietf
 		meta['resolutions'] = resolutions_ietf
-		
+
 	meta['prefix'] = prefix
 
 	if args.newcwv:
