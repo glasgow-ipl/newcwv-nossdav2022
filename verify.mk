@@ -1,7 +1,7 @@
 ROOT:=/vagrant
 
 DASH_ALG=abrThroughput
-MPD_LOCATION=data/bbb.mpd
+MPD_LOCATION=data/ietf/bbb.mpd
 OUT_DIR=${ROOT}/data
 IGNORE_LINK_LOSS=0
 
