@@ -127,7 +127,7 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
     else:
         pcap_path = os.path.normpath(log_root)
 
-    print('tcpdump -w %s' % os.path.join(pcap_path, 'server.pcap'))
+    print('tcpdump -s 200 -w %s' % os.path.join(pcap_path, 'server.pcap'))
 
     s_name = os.path.join(pcap_path, 'server.pcap')
     c_name = os.path.join(pcap_path, 'client.pcap')
@@ -149,9 +149,9 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
 
 
     # Start pcaps on the client and the server
-    server_pcap = server.popen('tcpdump -w %s -z gzip' % s_name)
+    server_pcap = server.popen('tcpdump -s 200 -w %s -z gzip' % s_name)
     print(type(server_pcap))
-    client_pcap = client.popen('tcpdump -w %s -z gzip' % c_name)
+    client_pcap = client.popen('tcpdump -s 200 -w %s -z gzip' % c_name)
     # Get server/client config settings
     wd = str(server.cmd('pwd'))[:-2]
     user = os.getlogin()
@@ -288,8 +288,8 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
 
     # if we got to here everything is good, remove the event_log.json we do not need it anymore
     if os.path.exists("event_log.json"):
-        print("Removing ebent log")
-        os.remove("event.log")
+        print("Removing event log")
+        os.remove("event_log.json")
 
 
 if __name__ == '__main__':
