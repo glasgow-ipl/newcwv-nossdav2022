@@ -29,10 +29,9 @@
             <span id="framerate"></span>
         </div>
 
-        <script src="http://localhost/scripts/dash.all.debug.js"></script>
+        <script src="http://localhost/scripts/dash.all.debug_4_0_0.js"></script>
         <script>
 
-            var video;
             var player;
             var metrics = {};
             metrics.bufferLevel = [];
@@ -41,49 +40,108 @@
             metrics.currentTime = [];
             metrics.eventLog = [];
 
+            
+            metrics.startup_delay = null;
+            metrics.rebuffering_events = [];
+
+            freeze_time = null;
+            metrics.init_time = null;
+
+	        metrics.play_time = undefined;
+	        metrics.total_delay = 0;
+
+            end_time = 0;
+
             (function(){
-                var url = "http://localhost/data/bbb.mpd";
+                var url = "http://localhost/data/ietf/bbb.mpd";
                 player = dashjs.MediaPlayer().create();
 
                 player.updateSettings(
-                    {'streaming': 
-                        {'abr': 
-                            {
-                                'ABRStrategy': 'abrThroughput',
-                                'movingAverageMethod': 'ewma'
+                    {
+                        'debug': {
+                            'dispatchEvent': true,
+                        },
+                        'streaming': 
+                            {'abr': 
+                                {
+                                    'ABRStrategy': 'abrThroughput',
+                                },
+			     'buffer':
+                                {
+                                    'stableBufferTime': 12, 'bufferTimeAtTopQuality': 12, 'bufferTimeAtTopQualityLongForm': 12
+                                }
                             }
-                        }
-                    });
-                metrics.ABRStrategy = player.getSettings().streaming.abr.ABRStrategy;
+                    }); // Changing MovingAverage Method to EWMA, default is Sliding window
 
-                console.log(metrics.ABRStrategy);
+                metrics.ABRStrategy = player.getSettings().streaming.abr.ABRStrategy;   
 
-//                var xmlHttp = new XMLHttpRequest();
-//                xmlHttp.open("GET", "http://localhost/" + metrics.ABRStrategy, false);
-//                xmlHttp.send(null);
+                player.initialize(document.querySelector("#videoPlayer"), url, true);
+                metrics.startTime = player.getSettings().streaming.startTime;
 
-                video = document.querySelector("#videoPlayer")
-                player.initialize(video, url, true);
+                video = document.querySelector("#videoPlayer");
+
             })();
+
 
             function recordEvent(e)
             {
                 metrics.eventLog.push(e.message);
             }
 
-            player.on(dashjs.MediaPlayer.events['LOG'], recordEvent);
-            // player.on(dashjs.MediaPlayer.events['PLAYBACK_STARTED'], showEvent);
 
+            function recordPlayTime(e) {
+                var now = new Date().getTime();
+                if (metrics.startup_delay === null) {
+                    metrics.startup_delay = now - metrics.init_time;
+                } else {
+                    // Startup delay has been recorded but video was frozen and is now playing again
+                    var delay = now - freeze_time;
+                    metrics.rebuffering_events.push(delay);
+		            metrics.total_delay += delay;
+                }
+            }
+
+
+            function recordFreezeTime(e) {
+                freeze_time = new Date().getTime();
+            }
+
+            player.on(dashjs.MediaPlayer.events['LOG'], recordEvent);
+            player.on(dashjs.MediaPlayer.events['PLAYBACK_PLAYING'], recordPlayTime);
+            player.on(dashjs.MediaPlayer.events['PLAYBACK_WAITING'], recordFreezeTime);
+			player.on(dashjs.MediaPlayer.events['BUFFER_LEVEL_UPDATED'], printBuffer);
+
+            player.on(dashjs.MediaPlayer.events['PLAYBACK_STARTED'], recordStartTime);
+            player.on(dashjs.MediaPlayer.events['PLAYBACK_ENDED'], recordEndTime);
+
+            function recordStartTime() {
+                metrics.init_time = new Date().getTime();
+            }
+
+            function recordEndTime() {
+                end_time = new Date().getTime()
+            }
+
+			function printBuffer(e) 
+			{
+				if(e.mediaType === "video" && e.bufferLevel < 10)
+				{
+					be = {};
+					be['time'] = new Date().getTime();
+					be['level'] = e.bufferLevel;
+					metrics.bufferLevel.push(be);
+					console.log(JSON.stringify(be));
+				}
+			}
 
             var player_element = document.getElementById("videoPlayer");
             player_element.onended = function() {
-                
-                // clear polling for events
-                clearInterval(eventPoller)
+                if (end_time == 0)
+                {
+                    end_time = new Date().getTime();
+                }
 
-                // var xmlHttp = new XMLHttpRequest();
-                // xmlHttp.open("GET", "http://10.0.0.1:8000/end", false);
-                // xmlHttp.send(null);
+                metrics.play_time = end_time - metrics.init_time;
 
                 fetch("http://localhost:8000/end", {
                     method: "POST", 
@@ -93,73 +151,15 @@
                 });
             };
 
-            var eventPoller = setInterval(function () {
-                var streamInfo = player.getActiveStream().getStreamInfo();
-                var dashMetrics = player.getDashMetrics();
-                var dashAdapter = player.getDashAdapter();
-
-                if (dashMetrics && streamInfo) {
-                    const periodIdx = streamInfo.index;
-                    var repSwitch = dashMetrics.getCurrentRepresentationSwitch('video', true);
-                    var bufferLevel = dashMetrics.getCurrentBufferLevel('video', true);
-                    var bitrate = repSwitch ? Math.round(dashAdapter.getBandwidthForRepresentation(repSwitch.to, periodIdx) / 1000) : NaN;
-                    var adaptation = dashAdapter.getAdaptationForType(periodIdx, 'video', streamInfo)
-                    var frameRate = adaptation.Representation_asArray.find(function (rep) {
-                        return rep.id === repSwitch.to
-                    }).frameRate;
-                    document.getElementById('bufferLevel').innerText = bufferLevel + " secs";
-                    metrics.bufferLevel.push(bufferLevel);
-                    document.getElementById('framerate').innerText = frameRate + " fps";
-                    metrics.frameRate.push(frameRate);
-                    document.getElementById('reportedBitrate').innerText = bitrate + " Kbps";
-                    metrics.reportedBitrate.push(bitrate);
-                    metrics.currentTime.push(new Date().getTime());
-
-                    //get stalls
-                }
-            }, 1000);
-
-            // var player_element = document.getElementById("videoPlayer");
-            // player_element.onended = function() {
-                
-            //     // clear polling for events
-            //     clearInterval(eventPoller)
-            //     clearInterval(bitrateCalculator)
-
-            //     var xmlHttp = new XMLHttpRequest();
-            //     // xmlHttp.open("GET", "http://10.0.0.1:8000/end", false);
-            //     xmlHttp.send(null);
-            // };
-
-            // var eventPoller = setInterval(function () {
-            //     var streamInfo = player.getActiveStream().getStreamInfo();
-            //     var dashMetrics = player.getDashMetrics();
-            //     var dashAdapter = player.getDashAdapter();
-
-            //     if (dashMetrics && streamInfo) {
-            //         const periodIdx = streamInfo.index;
-            //         var repSwitch = dashMetrics.getCurrentRepresentationSwitch('video', true);
-            //         var bufferLevel = dashMetrics.getCurrentBufferLevel('video', true);
-            //         var bitrate = repSwitch ? Math.round(dashAdapter.getBandwidthForRepresentation(repSwitch.to, periodIdx) / 1000) : NaN;
-            //         var adaptation = dashAdapter.getAdaptationForType(periodIdx, 'video', streamInfo)
-            //         var frameRate = adaptation.Representation_asArray.find(function (rep) {
-            //             return rep.id === repSwitch.to
-            //         }).frameRate;
-            //         document.getElementById('bufferLevel').innerText = bufferLevel + " secs";
-            //         document.getElementById('framerate').innerText = frameRate + " fps";
-            //         document.getElementById('reportedBitrate').innerText = bitrate + " Kbps";
-            //     }
-            // }, 1000);
-
-            // var lastDecodedByteCount = 0;
-            // const bitrateInterval = 1;
-            // var bitrateCalculator = setInterval(function () {
-            //     var calculatedBitrate = (((video.webkitVideoDecodedByteCount - lastDecodedByteCount) / 1000) * 8) / bitrateInterval;
-            //     console.log(video.webkitVideoDecodedByteCount);
-            //     document.getElementById('calculatedBitrate').innerText = Math.round(calculatedBitrate) + " Kbps";
-            //     lastDecodedByteCount = video.webkitVideoDecodedByteCount;
-            // }, bitrateInterval * 1000);
-
+            setInterval(() => {
+                fetch("http://localhost:8000/recordLog", {
+                    method: "POST", 
+                    body: JSON.stringify(metrics)
+                    }).then(res => {
+                        
+                }); 
+            }, 360000);
+            // 6 minutes
         </script>
     </body>
 </html>
