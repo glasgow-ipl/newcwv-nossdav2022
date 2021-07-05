@@ -45,10 +45,12 @@
             metrics.rebuffering_events = [];
 
             freeze_time = null;
-            init_time = null;
+            metrics.init_time = null;
 
-	    metrics.play_time = undefined;
-	    metrics.total_delay = 0;
+	        metrics.play_time = undefined;
+	        metrics.total_delay = 0;
+
+            end_time = 0;
 
             (function(){
                 var url = "http://10.0.0.1/<<MPD_LOCATION>>";
@@ -78,7 +80,6 @@
 
                 video = document.querySelector("#videoPlayer");
 
-                init_time = performance.now();
             })();
 
 
@@ -89,26 +90,37 @@
 
 
             function recordPlayTime(e) {
-                var now = performance.now();
+                var now = new Date().getTime();
                 if (metrics.startup_delay === null) {
-                    metrics.startup_delay = now - init_time;
+                    metrics.startup_delay = now - metrics.init_time;
                 } else {
                     // Startup delay has been recorded but video was frozen and is now playing again
                     var delay = now - freeze_time;
                     metrics.rebuffering_events.push(delay);
-		    metrics.total_delay += delay;
+		            metrics.total_delay += delay;
                 }
             }
 
 
             function recordFreezeTime(e) {
-                freeze_time = performance.now();
+                freeze_time = new Date().getTime();
             }
 
             player.on(dashjs.MediaPlayer.events['LOG'], recordEvent);
             player.on(dashjs.MediaPlayer.events['PLAYBACK_PLAYING'], recordPlayTime);
             player.on(dashjs.MediaPlayer.events['PLAYBACK_WAITING'], recordFreezeTime);
 			player.on(dashjs.MediaPlayer.events['BUFFER_LEVEL_UPDATED'], printBuffer);
+
+            player.on(dashjs.MediaPlayer.events['PLAYBACK_STARTED'], recordStartTime);
+            player.on(dashjs.MediaPlayer.events['PLAYBACK_ENDED'], recordEndTime);
+
+            function recordStartTime() {
+                metrics.init_time = new Date().getTime();
+            }
+
+            function recordEndTime() {
+                end_time = new Date().getTime()
+            }
 
 			function printBuffer(e) 
 			{
@@ -124,22 +136,12 @@
 
             var player_element = document.getElementById("videoPlayer");
             player_element.onended = function() {
-                
-		metrics.play_time = (performance.now() - init_time);
-//		metrics = {};
-//		let est_json = {};
-//                let estimates = player.getSettings().streaming.abr.estimates;
-//                est_json.estimates = estimates;
-                // var xmlHttp = new XMLHttpRequest();
-                // xmlHttp.open("GET", "http://10.0.0.1:8000/end", false);
-                // xmlHttp.send(null);
-/*
-		fetch("http://10.0.0.1:8000/estimates", {
-			method: "POST",
-			body: JSON.stringify(est_json)
-			}).then( res => {
-		});
-*/
+                if (end_time == 0)
+                {
+                    end_time = new Date().getTime();
+                }
+
+                metrics.play_time = end_time - metrics.init_time;
 
                 fetch("http://10.0.0.1:8000/end", {
                     method: "POST", 
