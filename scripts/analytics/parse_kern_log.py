@@ -3,7 +3,7 @@ import os
 import parse_pcap
 
 
-def get_cwnds(kern_log_path, unique=True, video_only=True):
+def get_cwnds(kern_log_path, unique=True, video_only=True, disconnect=None):
     cwnds = {}
     fmt = '%Y-%m-%dT%H:%M:%S.%f'
 
@@ -26,6 +26,8 @@ def get_cwnds(kern_log_path, unique=True, video_only=True):
                     cwnds_con.append((ts, cwnd))
                 
                 cwnds[c_port] = cwnds_con
+            if ("CWND_RESTART" in line or "Reset count:" in line) and disconnect:
+                cwnds_con.append((disconnect, disconnect))
                 
     # By now we have captured multiple connections being made to the server. The DASH connection requesting video is the one with most ACKs
 
@@ -37,7 +39,28 @@ def get_cwnds(kern_log_path, unique=True, video_only=True):
 
         cwnds = [(k, v) for k, v in cwnds.items() if k in ports]
 
-    return cwnds            
+    return cwnds
+
+def get_cwnds_disconnected(kern_log_path, unique=True, video_only=False, disconnect=None):
+    cwnds_list = get_cwnds(kern_log_path, unique=unique, video_only=False, disconnect=-1)
+
+    disconnected = []
+    print(sorted(cwnds_list.items())[0][1][0][0])
+    first_ack = sorted(cwnds_list.items())[0][1][0][0]
+    for k, v in cwnds_list.items():
+        # time, size = zip(*v)
+        tmp = []
+        for time, size in v:
+            if time != disconnect:
+                tmp.append(((time - first_ack).total_seconds(), size))
+            else:
+                disconnected.append(tmp)
+                tmp = []
+        
+        if tmp:
+            disconnected.append(tmp)
+
+    return disconnected            
 
 def get_packet_loss(kern_log_path):
     lost_packets = []

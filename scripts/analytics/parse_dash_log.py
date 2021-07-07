@@ -111,11 +111,34 @@ def get_total_stall_time(dash_log_file):
     return total_stall_time
 
 
+def get_throughput_estimates(dash_log_file):
+    with open(dash_log_file) as f:
+        dash_log = json.load(f)['eventLog']
+    
+    for msg in dash_log:
+        if '[ESTIMATE]:' in msg:
+            estimates = msg
+            break
+    
+    estimates_json = json.loads(estimates.split(": ")[1])
+    return {'precise': estimates_json['precise'], 'safe': estimates_json['average']}
+
+
 if __name__ == '__main__':
     # get_client_estimations('/vagrant/logs/tmp/no_loss/sample/1/1_reno/dashjs_metrics.json')
     # get_startup_delay('/vagrant/logs/tmp/no_loss/sample/1/1_reno/dashjs_metrics.json')
     # get_playback_stalls('/vagrant/logs/tmp/no_loss/sample/1/1_reno/dashjs_metrics.json')
     # get_buffer_levels('/vagrant/logs/tmp/no_loss/sample/1/1_reno/dashjs_metrics.json')
-    x = get_total_stall_time('/vagrant/logs/tmp/no_loss/sample/1/1_reno/dashjs_metrics.json')
-    print(x)
-    
+    # x = get_total_stall_time('/vagrant/logs/tmp/no_loss/sample/1/1_reno/dashjs_metrics.json')
+    # print(x)
+    from pathlib import Path
+    files = list(Path('/vagrant/logs/tmp/curtis/').rglob('dashjs_metrics.json'))
+    import numpy as np
+
+    for file in files:
+        print(file.as_posix())
+        (_, precise), (_, safe) = get_throughput_estimates(file.as_posix()).items()
+        precise_list = list(precise.values())
+        safe_list = list(safe.values())
+        print(f"Precise avg: {np.average(precise_list)} {len(precise_list)}")
+        print(f"Safe avg: {np.average(safe_list)} {len(safe_list)}")

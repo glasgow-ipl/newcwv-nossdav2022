@@ -22,6 +22,8 @@ def get_cwnds(access_log_path):
 def get_qualities(access_log_path):
     ''' Returns a list of tuples containing unix timestamp and the requested quality at that time e.g., 360, 480 etc'''
     time_quality = []
+    quality_dic = {}
+
     with open(access_log_path) as f:
         skip = True
         reader = csv.reader(f)
@@ -33,8 +35,17 @@ def get_qualities(access_log_path):
             if 'favicon.ico' in rec[2]:
                 continue # in case favico request comes after video has started being downloaded
             quality = int(rec[2].split('/out')[0].split('/')[-1])
+            chunk = rec[2].split('/out')[1].split('-')[1].split('.')[0]
             timestamp = float(rec[1].strip())
-            time_quality.append((timestamp, quality))
+
+            if chunk == 'init':
+                continue
+            else:
+                # Ensures that if a follow-up request for the same chunk is made, we will record that
+                quality_dic[int(chunk)] = (timestamp, quality)
+
+
+    time_quality = [value for _key, value in sorted(quality_dic.items())]
 
     return time_quality
 
