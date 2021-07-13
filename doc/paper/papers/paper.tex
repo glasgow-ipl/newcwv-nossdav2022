@@ -1,0 +1,964 @@
+%==================================================================================================
+% LaTeX paper template - use as a starting point for structuring a research paper.
+%
+% Written by Colin Perkins (https://csperkins.org/)
+% 2002-2018
+%
+% To the extent possible under law, the author(s) have dedicated all copyright and
+% related and neighbouring rights to this software to the public domain worldwide.
+% This template is distributed without any warranty.
+%
+% You should have received a copy of the CC0 Public Domain Dedication along with
+% this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
+%
+% NOTE: The above Public Domain Dedication applies only to the LaTeX paper
+% template distributed from https://github.com/csperkins/project-template
+% in the file papers/example.tex. Unless explicitly stated, modifications 
+% or additions to that template are copyright by their respective authors.
+%==================================================================================================
+
+%==================================================================================================
+% General advice on technical writing:
+%  - George Gopen and Judith Swan, "The Science of Scientific Writing",
+%    American Scientist, Nov/Dec 1990. 
+%    http://www.americanscientist.org/issues/num2/the-science-of-scientific-writing/1
+%  - Stephen Pinker, "The Sense of Style: The Thinking Person's Guide to
+%    Writing in the 21st Century", Penguin, Sept 2014. ISBN 0525427929.
+%
+% The paper writing advice in the comments is derived from talks and articles
+% by Simon Peyton-Jones, Jim Kurose, Henning Schulzrinne, and Jim Bednar: 
+%  - http://research.microsoft.com/~simonpj/papers/giving-a-talk/giving-a-talk.htm
+%  - http://research.microsoft.com/~simonpj/papers/giving-a-talk/writing-a-paper-slides.pdf
+%  - http://gaia.cs.umass.edu/kurose/talks/top_10_tips_for_writing_a_paper.ppt
+%  - http://www-net.cs.umass.edu/kurose/writing/intro-style.html
+%  - http://www.cs.columbia.edu/~hgs/etc/writing-style.html
+%  - http://homepages.inf.ed.ac.uk/jbednar/writingtips.html
+%  - http://www.gabbay.org.uk/blog/paper-writing.html
+%  - http://homes.cs.washington.edu/~mernst/advice/write-technical-paper.html
+%  - http://dx.doi.org/10.1371/journal.pcbi.1005619
+%
+% LaTeX usage notes:
+%  - http://www.read.seas.harvard.edu/~kohler/latex.html
+%
+%==================================================================================================
+
+%==================================================================================================
+% The \documentclass{} macro specifies the overall style. For computer
+% networking papers, common options are:
+%
+%   \documentclass[twocolumn,a4paper]{article}  % Base LaTeX style
+%   \documentclass[conference]{IEEEtran}        % IEEE Conference
+%   \documentclass[10pt,sigconf]{acmart}        % ACM SIGCOMM conference
+%
+% The IEEE and ACM templates are included in the lib/tex/inputs directory,
+% but check for updates and use the version specified by the conference or
+% journal to which you're submitting.
+
+\documentclass[10pt,sigconf]{acmart}
+\graphicspath{{figures/}{/vagrant/doc/paper/}}
+
+% The following packages are recommended, and should be available in most
+% standard LaTeX installations (or from https://www.ctan.org/). Note that 
+% the order in which packages are loaded is significant.
+
+% Basic extensions recommended for all LaTeX documents:
+%   nag        Warn about common problems with LaTeX files
+%   inputenc   Specify the character set used in .tex files
+%   babel      Language-specific typography and hyphenation
+%   microtype  Improved typography when generating PDF files
+
+\usepackage[l2tabu,orthodox]{nag}
+\usepackage[utf8x]{inputenc}
+\usepackage[british]{babel}
+\usepackage{ifpdf}
+\ifpdf
+  \usepackage{microtype}
+\fi
+
+% The AMS mathematics library greatly extends and improves mathematics
+% support in LaTeX (see http://ctan.org/pkg/amsmath for details). When
+%  preparing multi-line numbered equations, be sure to use:
+%
+%   \begin{align}
+%     ...
+%   \end{align} 
+%
+% rather than:
+%
+%   \begin{eqnarray}
+%     ...
+%   \end{eqnarray}.  
+%
+% when this package is loaded, to ensure they formatting is consistent
+% (see https://tug.org/pracjourn/2006-4/madsen/madsen.pdf for details).
+
+\usepackage{amsmath}
+\usepackage[all]{onlyamsmath}
+
+% Use Times, Helvetica, and Courier fonts, rather than Computer Modern:
+
+\makeatletter
+\@ifclassloaded{acmart}{
+  % The ACM article style sets the fonts internally
+}{
+  \usepackage{newtxtext}
+  \usepackage{newtxmath}
+}
+\makeatother
+
+% Add support for sub-figures within a figure, as follows:
+%
+%   \begin{figure}
+%     \centering
+%     \subfloat[caption for 1st subfloat]{
+%       \includegraphics{...}
+%       \label{...}
+%     }
+%     \\
+%     \subfloat[caption for 2nd subfloat]{
+%       \includegraphics{...}
+%       \label{...}
+%     }
+%     \caption{caption for entire figure}
+%     \label{...}
+%   \end{figure*}
+%
+% The subfig package obsoletes the older subfigure package, and is itself
+% deprecated in favour of the subcaption package. However, as of April 2015
+% subcaption doesn't work with ACM or IEEE style files (this is also the
+% reason for the [caption=false] option).
+
+\usepackage[caption=false]{subfig}
+
+% Improve formatting of tables. To produce nice looking tables:
+%
+%   - avoid vertical lines;
+%   - avoid double horizontal lines;
+%   - use horizontal lines above and below the table, and to separate the
+%     header from the body of the table, but not elsewhere; and
+%   - if in doubt, align columns to the left (columns of numbers should
+%     align to the decimal point)
+%
+% This translates to a tabular environment that looks something like the
+% following:
+%
+%   \begin{tabular}{lll}
+%     \toprule
+%        Header1 & Header2 & Header3 \\
+%     \midrule
+%        Line1   & ...     & ...     \\
+%        Line2   & ...     & ...     \\
+%        Line3   & ...     & ...     \\
+%        Line4   & ...     & ...     \\
+%     \bottomrule
+%   \end{tabular}
+
+\usepackage{booktabs}
+
+% Improve formatting for quote marks in verbatim mode:
+\usepackage{upquote}
+
+% Improve support for graphics:
+\usepackage{graphicx}
+
+% Add support for URLs using \url{...}. This formats the URL in typewriter
+% font, and makes it a hyperlink if the hyperref package is also loaded.
+\usepackage{url}
+
+% Add support for drawing packet headers. For instructions, see
+% http://ctan.org/tex-archive/macros/latex/contrib/bytefield
+\usepackage{bytefield}
+
+% Add support for typesetting program source code. You can either include
+% code in-line:
+%
+%   \begin{lstlisting}[language=Python]
+%   Source code goes here
+%   \end{lstlisting}
+%
+% or include a source file:
+%
+%  \lstinputlisting[language=Python]{source_filename.py}
+%
+% This package is highly customisable and supports a range of languages.
+% See package documentation at https://ctan.org/pkg/listings for details.
+\usepackage{listings}
+
+% Generated PDF files can include hyperlinks for URLs and cross-references
+% using the hyperref package. This package, however, can interact poorly
+% with others. Known issues include:
+%
+%  - Papers typeset without page numbers gives warnings of the form:
+%      "pdfTeX warning (ext4): destination with the same identifier 
+%      (name{page.}) has been already used, duplicate ignored".
+%    since hyperref tries to refer to the page number.
+%  - The algorithmic package uses the same line-numbering scheme for each
+%    algorithm, and can cause duplicate identifier warnings if you have
+%    several algorithms with line numbers (this may have been fixed with 
+%    recent versions of algorithmic...).
+%  - If using the algorithm package with hyperref, you need to load packages
+%    in the following order (see README in hyperref documentation):
+%      \usepackage{float}
+%      \usepackage{hyperref}
+%      \usepackage{algorithm}
+% For these reasons, hyperref is best to avoid for most papers, however if
+% needed, uncomment the following two lines:
+%  \usepackage{float}
+%  \usepackage{hyperref}
+
+% The algorithm package defines the algorithm environment. This is used in
+% the same way as the figure and table environments, to include algorithms
+% in a paper. The algpseudocode package provides the ability to typeset the
+% algorithms: http://ctan.org/tex-archive/macros/latex/contrib/algorithmicx
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{color}
+
+
+% By default, LaTeX adds extra space after punctuation. The \frenchspacing
+% command disables this. This creates tighter looking, more even, text and
+% avoids inconsistencies if you forget to use '\ ' to suppress the spacing
+% after in-sentence punctuation.
+\frenchspacing
+
+% Prevent hyphenation of all upper case words:
+\uchyph=0
+
+% The ACM style needs \maketitle after the abstract, but the other styles
+% want it before; these macros hide the difference and are used below:
+\makeatletter
+\@ifclassloaded{acmart}{
+  \newcommand{\maketitleSTD}{}
+  \newcommand{\maketitleACM}{\maketitle}
+}{
+  \newcommand{\maketitleSTD}{\maketitle}
+  \newcommand{\maketitleACM}{}
+}
+\makeatother
+
+% Define a simple \todo{...} macro:
+\newcommand{\todo}[1]{\textbf{\textcolor{red}{To do: #1}}}
+
+\newcommand{\idea}[1]{{\textcolor{blue}{#1}}}
+
+%==================================================================================================
+\begin{document}
+% Specify the title of the document:
+
+\title{Does TCP's New Congestion Window Validation Improve HTTP Adaptive Streaming Performance?}
+
+% Specify the authors of the document. Unfortunately, there's no consistent
+% way to do this that works across the different document classes. 
+%
+% If using \documentclass{article}:
+%
+%   \author{
+%      A. N. Other\\University of Glasgow
+%   \and
+%      Colin Perkins\\University of Glasgow
+%   }
+%
+% If using \documentclass{IEEEtran}:
+%
+%   \author{
+%     \IEEEauthorblockN{A. N. Other}
+%     \IEEEauthorblockA{University of Glasgow}
+%   \and
+%     \IEEEauthorblockN{Colin Perkins}
+%     \IEEEauthorblockA{University of Glasgow}
+%   }
+%
+% If using \documentclass{acmart} add a block like the following per author:
+%
+%   \author{Colin Perkins}
+%   \orcid{0000-0002-3404-8964}
+%   \affiliation{
+%     \institution{University of Glasgow}
+%     \streetaddress{School of Computing Science}
+%     \city{Glasgow}
+%     \postcode{G12 8QQ}
+%     \country{UK}
+%   }
+%   \email{csp@csperkins.org}
+%
+% If you don't have an ORCID identifier, sign up for one at https://orcid.org
+
+\author{Mihail Yanev}
+    %\orcid{0000-0002-3404-8964}
+    \affiliation{
+      \institution{University of Glasgow}
+      \streetaddress{School of Computing Science}
+      \city{Glasgow}
+      \postcode{G12 8QQ}
+      \country{UK}
+    }
+    \email{m.yanev.1@research.gla.ac.uk}
+
+
+\author{Stephen McQuistin}
+    % \orcid{0000-0002-3404-8964}
+    \affiliation{
+    \institution{University of Glasgow}
+    \streetaddress{School of Computing Science}
+    \city{Glasgow}
+    \postcode{G12 8QQ}
+    \country{UK}
+    }
+    \email{}
+
+\author{Colin Perkins}
+  \orcid{0000-0002-3404-8964}
+  \affiliation{
+    \institution{University of Glasgow}
+    \streetaddress{School of Computing Science}
+    \city{Glasgow}
+    \postcode{G12 8QQ}
+    \country{UK}
+  }
+  \email{csp@csperkins.org}
+
+
+
+% Specify metadata about the paper. Again, what is required depends on the
+% document class. If using \documentclass{acmart}, specify the following:
+%
+%   \acmYear{2018}
+%   \copyrightyear{2018}
+%   \setcopyright{acmcopyright}
+%   \acmConference{CoNEXT '18}{December 4--7, 2018}{Heraklion/Crete, Greece}
+%   \acmPrice{15.00}
+%   \acmDOI{10.1145/3284850.3284856}
+%   \acmISBN{978-1-4503-6082-1/18/12}
+%
+% The complete metadata is likely only available when preparing the final,
+% camera ready, version of the paper.
+
+\acmYear{2021}
+\copyrightyear{2021}
+\setcopyright{acmcopyright}
+\acmConference{MMSys '21}
+% {December 4--7, 2018}{Heraklion/Crete, Greece}
+\acmPrice{15.00}
+% \acmDOI{10.1145/3284850.3284856}
+% \acmISBN{978-1-4503-6082-1/18/12}
+
+%==================================================================================================
+\maketitleSTD
+\begin{abstract}
+  % Four sentences:
+  %  - State the problem
+  %  - Say why it's an interesting problem
+  %  - Say what your solution achieves
+  %  - Say what follows from your solution
+
+In HTTP video streaming playback stability is an important metric contributing to the user's quality of experience. Throughput adaptive algorithms are known to achieve lower levels of playback stability than their counterparts. New congestion window validation is a proposal aiming to keep the transport's transfer rate more stable. This paper shows how more stable transfer rate reflects to the playback stability. We find that while new congestion window validation stabilises the transfer rate in the transport layer this does not translate to a significant difference in the application's playback stability. 
+
+\end{abstract}
+\maketitleACM
+
+
+\section{Introduction}
+
+% A good paper introduction is fairly formulaic. If you follow a simple set
+% of rules, you can write a very good introduction. The following outline can
+% be varied. For example, you can use two paragraphs instead of one, or you
+% can place more emphasis on one aspect of the intro than another. But in all
+% cases, all of the points below need to be covered in an introduction, and
+% in most papers, you don't need to cover anything more in an introduction.
+%
+
+
+% Paragraph 1: Motivation. At a high level, what is the problem area you
+% are working in and why is it important? It is important to set the larger
+% context here. Why is the problem of interest and importance to the larger
+% community?
+
+Video playback stability is one of the key components contributing to user experience.
+
+% Paragraph 2: What is the specific problem considered in this paper? This
+% paragraph narrows down the topic area of the paper. In the first
+% paragraph you have established general context and importance. Here you
+% establish specific context and background.
+
+In DASH's reference implementation, one of the main adaptive algorithms - throughput is known to have lower stability score than the other algorithms. One  reason for the reduced metric might be because the underlying transport also uses unstable transfer rates. New CWV is a proposal that meant to keep a more stable network transfer rate.
+
+% Paragraph 3: "In this paper, we show that...". This is the key paragraph
+% in the introduction - you summarize, in one paragraph, what are the main
+% contributions of your paper, given the context established in paragraphs
+% 1 and 2. What's the general approach taken? Why are the specific results
+% significant? The story is not what you did, but rather:
+%  - what you show, new ideas, new insights
+%  - why interesting, important?
+% State your contributions: these drive the entire paper.  Contributions
+% should be refutable claims, not vague generic statements.
+
+In this paper we show whether New CWV increases the video's playback stability and the overall video QoE. To demonstrate this, we compare video streams using TCP Reno with and without New CWV enabled. To measure video stability we collect standard video performance metrics such as Average bit-rate and Average bit-rate oscillation. Additionally, in order to show the effect of New CWV on the estimated client throughput, we keep a record of the client's probes.
+
+
+% Paragraph 4: What are the differences between your work, and what others
+% have done? Keep this at a high level, as you can refer to future sections
+% where specific details and differences will be given, but it is important
+% for the reader to know what is new about this work compared to other work
+% in the area.
+
+To the best of our knowledge, this is the first paper that informs about New CWV's application performance. Nazir et al. \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv} proposed New CWV and examined its effects in the transport layer. Other related work proposed new application algorithms to control video representation choices. In contrast, we evaluate how a transport modification would impact the video stream.
+
+% Paragraph 5: "We structure the remainder of this paper as follows." Give
+% the reader a road-map for the rest of the paper. Try to avoid redundant
+% phrasing, "In Section 2, In section 3, ..., In Section 4, ... ", etc.
+
+We structure the remainder of this paper as follows. In section 2, we introduce previous work that motivates this paper, Section 3 describes our experimental setup. Section 4 discusses the obtained results. Chapter 5 lists other related work and finally chapter 6 concludes the paper.
+
+\section{Background}
+\label{sec:background}
+
+% \begin{figure*}
+%     \centering
+%     \includegraphics[width=\linewidth]{figures/idle_periods_cwnd_RTO.pdf}
+%     \caption{Idle Period CWND effect}
+%     \label{fig:idle_cwnd_rto}
+% \end{figure*}
+
+\begin{figure*}
+    \centering
+    \includegraphics{figures/cwv_idle.pdf}
+    \caption{Idle Period CWND effect}
+    \label{fig:idle_effect}
+\end{figure*}
+
+\begin{itemize}
+    \item Congestion Window Validation
+    \item New Congestion Window Validation
+    \item DASH Throughput
+\end{itemize}
+
+% Test case1:
+
+% During init, connection is set to valid phase and pipeACK is set to undefined value.
+
+% \textbf{Code}
+
+
+% Test case 2:
+
+% Sender updates pipeACK at least once every RTT.
+
+% \textbf{Updated, every time cong\_avoid function is called, i.e., on every non-dubious ACK}
+
+% Test case 3:
+
+% PipeACK is set to undefined after loss recovery.
+
+% \textbf{Init is called at the end of recovery. It sets PA to undefined}
+
+
+% Test case 4:
+
+% During validated phase, New CWV increases its CWND as a standard CC algorithm (e.g., Reno).
+
+% \textbf{During VP New CWV reuses Reno's code}
+
+% Test case 5:
+
+% New CWV enters Non-validated phase when pipeACK < 1/2 * CWND
+
+% \textbf{Demonstrated by sending traffic to build big enough CC, then halting sending and then sending with rate less than allowed by half CWND.}
+
+% Test case 6:
+
+% New CWV exits non-validated phase when pipeACK >= 1/2 * CWND
+
+% \textbf{Upon init, as PA grows larger than half CWND, New CWV enters a valid phase} 
+
+% Test case 7:
+
+% Non-validated phase does not exceed 5 minutes
+
+% \begin{table}[]
+% \begin{tabular}{ll}
+% \hline
+% \multicolumn{1}{|l|}{Test Case}   & \multicolumn{1}{l|}{Verified}   \\ \hline
+% \multicolumn{1}{|l|}{Test Case 1} & \multicolumn{1}{l|}{1} \\ \hline
+% \multicolumn{1}{|l|}{Test Case 2} & \multicolumn{1}{l|}{1} \\ \hline
+% \multicolumn{1}{|l|}{Test Case 3} & \multicolumn{1}{l|}{1} \\ \hline
+% \multicolumn{1}{|l|}{Test Case 4} & \multicolumn{1}{l|}{1} \\ \hline
+% \multicolumn{1}{|l|}{Test Case 5} & \multicolumn{1}{l|}{1} \\ \hline
+% \multicolumn{1}{|l|}{Test Case 6} & \multicolumn{1}{l|}{1} \\ \hline
+% \multicolumn{1}{|l|}{Test Case 7} & \multicolumn{1}{l|}{} \\ \hline
+% \end{tabular}
+% \end{table}
+
+% Idle periods longer than the RTO reset the CWND value. This forces TCP Reno to re-enter slow-start. Known as Congestion Window Validation (Figure \ref{fig:idle_cwnd_rto}). The effect of CWND validation in Reno and CWND is shown on Figure \ref{fig:idle_effect}.
+
+% New CWV is a refinement of CWV that addresses the following issue.
+
+% Throughput algorithms continuously measure the available bandwidth. High CWND fluctuations, (f.e., as a result of an RTO idle reset) could be picked up by the application algorithm. This could lead to requesting representations that are not fully using or overload network's available capacity. In either case, this would lead to an increased number of representation switches, which is shown to reduce user's QoE.
+
+
+The problem of TCP not being designed to carry long bursty traffic, such as HTTP video is well known. Even before that, there were proposals to optimise TCP for application limited traffic.
+
+In standard window based congestion control algorithms, the transfer is network bound if the sender is fully utilising its congestion window capacity. The behaviour of that is well known, (e.g., during the slow-start the window will double every RTT until it sees loss and during the congestion avoidance phase the window will increase by 1 MSS packet every RTT). However, not all applications that use TCP would fully use their window capacity. In this case they are considered to be application limited, i.e., the application does not have enough data to send with a rate that the network currently offers. It has been found that during such phases the RTT could grow unrealistically large, as for example, TCP would continue to grow the window by 1 every RTT until it sees loss. In cases where the application cannot send as fast as the network allows it, the chances of observing loss due to high sending rate is low.
+
+Another issue might arise if the application sends data in bursts over the same connection. In such cases, the value that the internal TCP connection had for the window might not be representative of the network state anymore, depending on the duration of the idling period. For example, consider a single TCP application sending data over a 10Mbps link with no cross traffic. Then that connection could fully utilise the available capacity. But if the connection had began the transfer, then paused and during the pause two more such application joined the network. Then the fair share if the first application resumed would be 3.3Mbps, but its internal state might be closer to the previously measured capacity of 10.
+
+To overcome these issues RFC 2861 - Congestion window validation (CWV) was proposed \cite{rfc2861-2000-padhye-congestion-window-validation}. It does not allow the congestion window to grow during application limited periods and re-sets the TCP state after an idle period longer than the connection's retransmission timeout (RTO) ,i.e., reduces the window down to its initial value and forces new slow-start.
+
+Since its proposal RFC 2861 has been adopted by the Linux kernel. However, research found that while beneficial for the network, the TCP modifications proposed by that congestion window validation were sometimes too conservative \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}. The authors discuss that particularly for HTTP adaptive streaming CWV negatively affects the stream performance, so they propose New Congestion Window Validation in RFC 7661 \cite{rfc7661-2015-fairhurst-new-cwnd-validation}. However, the authors show that New Congestion Window Validation normalises the TCP stream from the network's point of view and do not report on performance as seen by the application layer.
+
+New Congestion Window Validation reuses the ideas of RFC 2861 with the main difference that it does not differentiate between application limited and long idle periods. It combines them in one state, which the authors call non-validated period. In it the congestion window will not grow beyond its slow-start threshold until the transfer becomes limited by the network or a loss is observed. Furthermore, New Congestion Window Validation does not allow this period to exceed 5 minutes. RFC 7661 has an experimental status and has not seen wide deployment.
+
+The most notable difference between RFCs 2861 and 7661 is the reaction after an idle period (Figure \ref{fig:idle_effect}). An RFC 2861 validated connection would re-enter slow-start and thus temporary overwhelm the network to figure out the capacity limit. In contrast, an RFC 7661 connection would enter slow-start until it reaches its old slow-start threshold and begin congestion avoidance phase. For short bursty traffic such as video chunks in HTTP adaptive streaming. The lack of this initial window spike could mean more accurate capacity estimations for applications that performed this dividing the artifact's size by the transfer period.
+
+In HTTP adaptive streaming's dash.js, the throughput algorithm does exactly that. Dash.js is a reference implementation provided by the DASH industry forum \cite{online-dashif}. The throughput algorithm is one of the three main adaptive strategies provided by dash.js. It is also currently a component of the default streaming strategy. In summary, the throughput algorithm selects appropriate bit-rate representation to request by measuring the throughput for the currently downloaded video chunks. It estimates the throughput by dividing the receive time by the size of the received element. Therefore, the throughput algorithm benefits greatly from having accurate bandwidth estimations. Currently throughput is not the default strategy but a part of it, as relying solely on the bandwidth might force the player to switch to a lower representation much earlier than needed to reflect some temporary congestion on the link. However, the throughput algorithm is essential component of the current default strategy and also is being heavily used for streams that cannot provide sufficient buffer ahead of time (e.g., live-streaming). Therefore improving the performance of the throughput algorithm benefits the whole streaming ecosystem.
+
+\begin{itemize}
+    \item This means that using New Congestion Window Validation, it could obtain more accurate results.
+\end{itemize}
+
+\hspace{3in}
+
+\section{Experiment}
+
+To evaluate whether New CWV results in more accurate bandwidth measurements and to asses their impact on the application layer, we design an experiment, using dumbbell topology. We then use one of the far ends as the server and the other as the client. The server is Nginx, the client is Firefox using dash.js 3.1.3. The adaptation algorithm is set to throughput, so the obtained bandwidth measurements have the biggest impact on the player stability. The RTT of the connection is 40 ms, which is an average value that we measured from our residential network to a Netflix CDN. The routers are configured with queue size equal to the bandwidth delay product.
+
+We chose 3 different bandwidth capacities that represent DSLv2, FTTC, and FTTP as seen in the United Kingdom \cite{online-ofcom-report} (Table \ref{tab:experiments-network}). For all instances, we run two sets of simulations. One using TCP Reno without New Congestion Window Validation and one using Reno with it. We then repeat these experiments 5 times and report the average values to reduce the statistical noise.
+
+The streamed video is Blender's Big Buck Bunny \cite{online-bbb}.
+
+For each congestion control algorithm we collect the client's bandwidth estimations so we can compare them. Additionally, we keep a record of what video representations have been requested in order, so we can calculate the average bit-rate and the average bit-rate oscillations. Finally, we also monitor the buffer levels of the player, so we can detect any stalling events and measure their length. In summary, to measure the impact of New Congestion Window Validation's effect on playback stability, we gather information to produce standard video streaming performance metrics, namely, average bit-rate, bit-rate oscillation, and re-buffer ratio \cite{Spiteri-2019-from-theory-to-practice-sabre, Yin-2015-a-control-theoritic-approach, Dobrian-2013-understanding-the-impact-of-video-quality}. Also, to evaluate the accuracy change with respect to client bandwidth estimations, we collect these as well.
+
+% To evaluate whether the hypothesis that more precise bandwidth estimations could improve streaming stability and to demonstrate to what extent inaccurate measurements contribute to playback instability when using the throughput algorithm we perform an experiment that emulates DSL and FTTC links.
+% The link speeds were taken from Ofcom's ``Home Broadband Performance'' and FCC's ``Measuring broadband America'' annual reports (Table \ref{tab:experiments-network}). In all experiments the router queue size was set to the BDP for the connection and the latency was set at 50ms, reported by FCC and observed from our residential link to a Netflix's CDN.
+
+
+
+% Experiment plan:
+% \begin{itemize}
+%     \item New CWV achieves higher precision for obtained bandwidth probes
+%     \item If we run an experiment with link speeds close to the required by the player New CWV should stabilise the requesting sooner than non New CWV connections.
+%     \item Specific values for link speed and representation should not matter much as this behaviour would occur every time when link capacity is close to the player's request switching threshold. With current technologies this could occur for connections of up to 95 Mbps for 4k HDR video
+% \end{itemize}
+
+
+\begin{table}[]
+    \centering
+    \begin{tabular}{c|c|c|c}
+    \toprule
+        Number & Type & Bandwidth (Mbps)  & Latency (ms)  \\
+    \midrule
+         1 & DSL  & 10  & 40 \\
+    \midrule
+         2 & FTTC & 50  & 40 \\
+    \midrule
+         3 & FTTP & 145 & 40 \\
+    \bottomrule
+    \end{tabular}
+    \caption{Experiments' network characteristics}
+    \label{tab:experiments-network}
+\end{table}
+
+\begin{table}[]
+    \centering
+    \begin{tabular}{c|c|c}
+    \toprule
+         Encoding & Bandwidth Required & Segment Duration \\
+     \midrule
+        480  & 0.44  Mbps & 3 s \\
+        720  & 2.64  Mbps & 3 s \\
+        1080 & 4.82  Mbps & 3 s \\
+        2160 & 12.96 Mbps & 3 s \\
+
+    \bottomrule
+    \end{tabular}
+    \caption{Experiment's Video characteristics}
+    \label{tab:experiments-video}
+\end{table}
+
+\begin{figure}
+    \centering
+    \includegraphics{figures/average_bitrate.pdf}
+    \caption{Average Bit-rate}
+    \label{fig:avg-bitrate}
+\end{figure}
+
+% \begin{itemize}
+%     \item Figure \ref{fig:avg-bitrate} notes:
+%     \item Based on the encodings I expect that the results for DSL and FTTP to be the same.
+%     \item Where New CWV might make a difference is to achieve higher average bitrate for the FTTC scenario, since the encoding rate is close to the link capacity.
+% \end{itemize}
+
+\begin{figure}
+    \centering
+    \includegraphics{figures/average_oscillations.pdf}
+    \caption{Bit-rate oscillation}
+    \label{fig:bitrate-oscillation}
+\end{figure}
+
+% \begin{itemize}
+%     \item Figure \ref{fig:bitrate-oscillation} notes:
+%     \item Again, for DSL and FTTP I expect oscillation to only occur at the beginning and otherwise be the same.
+%     \item For the FTTC scenario I would expect that both proposals will keep requesting the 1440 encoding, as dash.js would only switch to a higher quality if the average throughput goes beyond 52 Mbps. And neither of the algorithms overestimates the link capacity.
+% \end{itemize}
+
+
+\begin{figure}
+    \centering
+    \includegraphics{figures/calculated_throughput.pdf}
+    \caption{Estimated Throughput}
+    \label{fig:estimated-throughput}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics{figures/calculated_safe_throughput.pdf}
+    \caption{Estimated Safe Throughput}
+    \label{fig:estimated-throughput-safe}
+\end{figure}
+
+\begin{itemize}
+    \item Figure \ref{fig:estimated-throughput} notes:
+    \item This is where I expect to see the real difference between New CWV and non New CWV transport.
+    \item For all cases, I expect New CWV traffic to have an average estimate closer to the link rate.
+    \item However, as Figures \ref{fig:bitrate-oscillation} and \ref{fig:bitrate-oscillation} show, that difference on its own is not able to make a difference to improve playback stability.
+\end{itemize}
+
+\begin{itemize}
+    \item Additional notes:
+    \item For completeness, we can say that we have measured the re-buffer duration, which I also expect to be the same across all scenarios.
+\end{itemize}
+
+\begin{figure}
+    \centering
+    \includegraphics{figures/Throughput Precise_DSL.pdf}
+    \caption{Calculated Throughput DSL}
+    \label{fig:avg-bitrate}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics{figures/Throughput Precise_FTTC.pdf}
+    \caption{Calculated Throughput FTTC}
+    \label{fig:avg-bitrate}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics{figures/Throughput Precise_FTTP.pdf}
+    \caption{Calculated Throughput FTTP}
+    \label{fig:avg-bitrate}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics{figures/Throughput Safe_DSL.pdf}
+    \caption{Advertised Throughput DSL}
+    \label{fig:avg-bitrate}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics{figures/Throughput Safe_FTTC.pdf}
+    \caption{Advertised Throughput FTTC}
+    \label{fig:avg-bitrate}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics{figures/Throughput Safe_FTTP.pdf}
+    \caption{Advertised Throughput FTTP}
+    \label{fig:avg-bitrate}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics{figures/Average Bitrate_DSL.pdf}
+    \caption{Average Bit-rate DSL}
+    \label{fig:avg-bitrate}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics{figures/Average Bitrate_FTTC.pdf}
+    \caption{Average Bit-rate FTTC}
+    \label{fig:avg-bitrate}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics{figures/Average Bitrate_FTTP.pdf}
+    \caption{Average Bit-rate FTTP}
+    \label{fig:avg-bitrate}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics{figures/Average Oscillations_DSL.pdf}
+    \caption{ Bit-rate Oscillation DSL}
+    \label{fig:avg-bitrate}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics{figures/Average Oscillations_FTTC.pdf}
+    \caption{ Bit-rate Oscillation FTTC}
+    \label{fig:avg-bitrate}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics{figures/Average Oscillations_FTTP.pdf}
+    \caption{ Bit-rate Oscillation FTTP}
+    \label{fig:avg-bitrate}
+\end{figure}
+
+% For all experiments, we stream a 635 second long SDR video from an Nginx server. The client is a Firefox instance using dash.js 3.1.3 using default parameters and "abrThroughput" as its adaptive strategy. We chose to set this strategy as it is one of the three current main ones and would best reflect the impact of accurate link capacity estimations. The video is encoded in 3 second chunks as prior work identified this gives the best trade-off in optimising network load, while minimising video stalls. 
+
+% \begin{itemize}
+%     \item CSP Notes
+%     \item BBB video
+%     \item different link types
+% \end{itemize}
+
+% Therefore using properties from the aforementioned scenarios, we propose a set of experiments with network characteristics as shown in Table \ref{tab:experiments-network}. The video is encoded as shown in Table \ref{tab:experiments-video}. The video duration is 635 seconds and we use the default dash.js settings for the throughput algorithm with video buffer length set to 12s (default). This means that after the client has buffered 12 seconds of video, we expect to see long on-off periods equal to the segment duration (3 seconds). As discussed earlier, the specific details of the link capacity and encodings do not matter but we have chosen these values as the link capacityies resemble DSL (experiment \#1) and FTTC (experiment \#2) links. The video encoding rates are taken from YouTube's reference values and the connection RTT is set to a value representative of reported latency on DSL links to a measurement site in US.
+
+% We choose not to introduce cross traffic and change the link speed in order clear the observed results from any noise that could be introduces by either of these phenomena. Moreover, the scenario would be representative of a single user requesting video on a DSL connection.
+
+
+% \subsection{Setup}
+
+% \idea{
+% \begin{itemize}
+%     \item New CWV verification
+%     \item Kernels
+%     \item Adaptation algorithm
+%     \item Network setup
+% \end{itemize}
+% }
+
+% We would like to assess the effect that slow-start CWND spikes have with respect to the video's application performance. To demonstrate that, we compared Reno and New CWV as an example of two protocols, one affected by the issue and the other one non-affected by it.
+
+% To carry that study, we wrote New CWV for Linux kernel 5.4.x series, as the previous implementation was for 3.8.x. Then we verified that our implementation is correct by validating it against the RFC. With that setup and exposing additional state from the DASH.JS adaptive algorithm, we were able to collect information about the players' throughput estimates. We then tested both algorithms for cases where the network capacity is: (i) close the required capacity by one of the video representations, (ii) between two different video representation requirements, and finally (iii) much more than the highest representation requirement.
+
+% In cases where the link capacity is close to one of the representations, we expect it to either produce false positives or false negatives. Depending on whether the link capacity is under or over the required by the video representation. For cases that the link capacity is between two representation values, we do not expect to see significant difference, as a wrong bandwidth probe is likely to keep requesting the supported rate. Finally, for cases where the link capacity is much more than that required by the highest representation, we would again expect to see no difference as likely each video transfer would never exit the slow-start phase.
+
+% Furthermore, as we expect New CWV would to produce different results compared to Reno in only one of those three cases the benefits of using New CWV would be proportional to how likely that issue is to occur in a real network scenario. According to the recommended encoding rates by YouTube \url{https://support.google.com/youtube/answer/1722171?hl=en#zippy=%2Cbitrate%2Cresolution-and-aspect-ratio},
+% this issue would affect links with capacity of up to 24 or 30 Mbps for SDR and HDR for Full HD videos and up to 68 to 85 Mbps for Utra HD videos. However, most videos would be offered in up to 1080p quality as the users would not notice any difference than higher video, or the encoders did not produce it, or the network cannot support it (EU asking Netflix and Amazon to reduce their video quality because of COVID-19).
+
+
+% We ported New CWV for linux kernel 5.4.x series. To verify that the port was successful, we compared the performance of the ported New CWV and the authors' New CWV implementation for kernel 3.18.2. In both cases, we emulated the network conditions and dataset from \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash}. We then streamed that content on a Firefox client using dash.js's (v 3.1.3) throughput algorithm and we used nginx to serve the content.
+
+\section{Discussion}
+
+To verify whether New CWV's more accurate bandwidth estimations could improve playback stability, we would run three scenarios. Two with network link speed close to a representation requirement, and another sufficiently higher than a selected representation requirement.
+
+In other words, if we have requirement of $R$ bits per second to support given representation $X$ where $X$ is not the lowest representation in the set. The current reference player behaviour is to start requesting $X$, as soon its average bandwidth estimate becomes $R/C_{bsf}$, where $C_{bsf}$ is the bandwidth safety factor (default 0.9). In this scenario, the more accurate bandwidth probes that New CWV might produce would mean that the player would start requesting $X$, sooner than it would if the connection was not using New CWV.
+
+In specific, assume a video is encoded as shown in Table \ref{tab:video-requirements}. Then the average bandwidth estimate that the player would need to start requesting the 1080p representation would be 12.32 Mbps. Therefore, if we set the link speed at 13.55 ($12.32 + 10\% * 12.32$) we would expect the New CWV connection to attempt switching to the higher rate, whereas the non New CWV connection would keep requesting the 720p. Furthermore, for link speed of 14.78 ($12.32 + 20\%*12.32$), we would expect the New CWV to stably request the 1080p, whereas the non New CWV connection would be requesting a mix of 720 and 1080, depending on whether the average bandwidth probe exceeds 12.32 Mbps or not. Similarly, for link speed of 16.01 ($12.32 + 30\% 12.32$), we would expect both the New CWV enabled and the New CWV disabled connections to steadily request the higher 1080p representation. 
+
+In this scenario, the values for the link speed and encoding representations are not important. Rather, they show a pattern relating to any scenario with similar $X$ and $T$ values. In other words, while we use a specific example to demonstrate a problem here, it may arise for any connection with link capacity of up to 100 Mbps. \\(\url{https://support.google.com/youtube/answer/1722171?hl=en#zippy=%2Cbitrate%2Cresolution-and-aspect-ratio})
+
+\begin{itemize}
+    \item New Transport ideas
+    \item This chapter comes to the conclusion that while New CWV might be able to report more accurate results, in the scenarios for VoD streaming that we have today, they do not make a difference.
+    \item However, if there was a proposal that promised an even more accurate bandwidth reporting, then the application could use that to better determine if represenation $R$ is sustainable.
+\end{itemize}
+
+% Prior work evaluated New CWV against TCP Reno using a Linux kernel 3.14 implementation. Since then the Linux's Reno implementation has been a subject to both further optimisations (i.e., adoption of newer proposals) and API changes.
+
+% A comparison of the current Reno implementation with a decade old New CWV would be unfair and the observed results might be due to improvements in Reno. To overcome this issue we provide a New CWV port for the most modern long term supported kernel of Linux (5.4). To verify that the port is success full and represent behaves as expected, we created 7 test-cases taken from RFC7661 and verify that our implementation behaves as documented.
+
+% \section{Evaluation Metrics}
+
+% % One aspect that was not considered with New CWV's proposal was its impact on the application layer. As discussed in chapter \ref{sec:background} the HTTP video streaming community have converged to a set of metrics that are considered most impactful for a stream's quality of experience. We believe that the lack of adoption of New CWV can be explained by a lack of increase in any of these metrics. \textbf{Claim: }In other words, standard Reno and New CWV should produce results of non significant difference.
+
+% % To verify this claim, we compared the application layer results of Reno and New CWV. We used two network-data-set pairs for this experiment. For the first, we re-used the setup in \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash}, for the second, we used video bit-rate encodings recommended by YouTube \cite{} and represnetative network trace that we picked from \textit{``Measuring Broadband America''} \cite{}.
+
+% % Rk  , Bk and Ck represents the video bitrate, buffer occupancy and bandwidth capacity for chunk K respectively
+
+% \subsection{Client's throughput probes}
+
+% Since we assess that throughput algorithms that use New CWV as a transport should obtain more consistent results that closer match the effective available bandwidth, we collect all throughput samples reported by the client.
+
+
+% Then, to evaluate the application-level performance we use the following metrics, used by both industry and research.
+
+% \subsection{Average Bit-rate}
+
+% The average video bit-rate is the sum of the bit-rates of all played-out chunks divided by their number. However, measuring bit-rate alone is not enough to estimate the QoE. For this reason additional metrics, described below are also considered. In addition, bit-rate improvement is not always proportional to an increase in QoE. For example a video representation changing from 1 to 2 Mbps, will achieve higher QoE than another stream changing from 10 to 11 Mbps, even though the bit-rate increase was the same \cite{Spiteri-2019-from-theory-to-practice-sabre}.
+
+% \begin{equation*} \frac {1}{k}\sum _{k=1}^{K}q(R_{k}) \end{equation*}
+
+% \subsection{Average Bit-rate oscillation}
+
+% Mok et al show that frequent changes in the quality of the requested video is decremental to user's QoE \cite{Mok-2011-inferring-qoe}. The effective oscillation index can be computed using the average bit-rate oscillation formula. It measures the depth of the representation changes in the playout process. Proposals trying to optimise for this criterion exist \cite{Mok-2012-qdash, Huang-2012-confused-timid-qoe}.
+
+% \begin{equation*} \frac {1}{K-1}\sum _{k=1}^{K-1}|q(R_{k+1})-q(R_{k)}| \end{equation*}
+
+% \subsection{Startup delay \& Rebuffer Ratio} 
+
+% Startup delay is the observed latency from when a video play request has been issued (e.g., user clicks the play button) to the first video frame starting to play-out. Rebuffer events occur when the video has no available buffered content and has to stop playing in order to fill in the buffers. This occurs when the media download time is higher than the playout buffer level. Research has shown that high startup delays or long rebuffer events could lead to users abandoning the video or watching less of it cite \cite{Krishnan-2012-video-stream-quality-impacts}.
+
+% \begin{equation*} \sum _{k=1}^{K}\left ({\frac {d_{k}(R_{k})}{C_{k}}-B_{k}}\right)_{+} \end{equation*}
+
+% \subsection{Metrics Summary}
+
+% Striving for a single QoE metric has been an active research area. \cite{Yin-2015-a-control-theoritic-approach} aims to come up with a formula that uses the four metrics above, while \cite{Balachandran-2012-a-quest-for-internet-qoe} attempt to solve the problem by applying machine learning. However, no single such equation has been widely accepted. Instead, all work aiming to produce such equation relies on the same four metrics described above. 
+% \cite{Dobrian-2013-understanding-the-impact-of-video-quality} classifies them as the industry standard. 
+
+% \section{Evaluation}
+
+% In order to obtain the metrics introduced in the previous chapter, we would need to stream a video over a period of time. During the play-out, results of the reported throughput would be collected.
+
+% As an input for the experiment we would need to know how the network looks like, i.e.,
+% \begin{enumerate}
+%     \item what is the available bandwidth for the link
+%     \item what is the connection RTT
+%     \item Does the bandwidth change?
+% \end{enumerate}
+
+% I think here we can take a look at three main cases with respect to the available bandwidth:
+% \begin{enumerate}
+%     \item Link capacity is much more than the required bandwidth
+%     \item Link capacity is close to one of the bandwidths required by the representation
+%     \item Link capacity is between two different representation requirements.
+% \end{enumerate}
+
+% There was a study 2014 measuring Youtube's average RTT to be around 70, while netflix's 250. Stephen measured RTT to netflix of 50 yesterday so a value 50-70 ms is ``safe''.
+
+% I expect New CWV controlled application to report results closer to the link capacity at all times. However, due to the current practices in modern DASH algorithms, that may not necessarily result in a higher quality as they tend to apply a safety factor on the obtained bandwidth result.
+
+% To show how New CWV affects the application layer using the metrics explained above, we provide results from two network scenarios. The first, explained below re-uses the dataset and network properties as described in the original paper. The second one uses a more modern dataset, taken from youtube's video encoding recommendations and network traces derived from FCC's measuring broadband America 2018 study.
+
+% This way we can verify how impactful New CWV was at the time of its introduction and we will be able to track if the same trend preserved over the years. In other words, we would verify whether the need of CWV is still relevant after almost a decade of evolution in both the network infrastructure and the transport protocols.
+
+
+% Video: BigBuckBunny \\
+% Segment Duration: 2s \\
+% Video encodings: 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7 Mbps \\
+
+% Network: 200ms RTT, 1Mbps link capacity
+
+% \subsection{Scenario 2}
+
+% Video: BigBuckBunny \\
+% Segment Duration: 3s \\
+% Video encodings: 1.5, 4, 7.5, 12 Mbps \\
+
+% Network: Dynamic taken from FCC
+
+% \idea{
+% \begin{itemize}
+%     \item Verify New CWV's application impact
+% \end{itemize}
+% }
+
+% We now show what application layer performance New CWV would have had compared to Reno if the original dataset and link properties were used with a modern throughput-based algorithm. 
+
+% \begin{figure*}
+%     \centering
+%     \includegraphics[width=\textwidth]{figures/New CWV/cwnd_kernel.pdf}
+%     \caption{Congestion Window Progression}
+%     \label{fig:cwnd-reno-comparison}
+% \end{figure*}
+
+% Figure \ref{fig:cwnd-reno-comparison} compares the CWND evolution over time for Reno and New CWV. Since New CWV is based on Reno, we can see that during network-limited transfers they behave similar to one another (e.g., 100-400 second mark). Additionally New CWV does not grow its CWND to artificially large values during application-limited transfer. On the other hand, we can see Reno doing this after the 500th second mark. In other words, New CWV manages to keep the CWV more stable compared to Reno, by not overshooting its CWND value. In turn, this results in more consistent measurements at the client.
+
+% \begin{figure*}
+%     \centering
+%     \includegraphics[width=\textwidth]{figures/New CWV/app_metrics.pdf}
+%     \caption{Application Level Metrics}
+%     \label{fig:app_metrics}
+% \end{figure*}
+
+% After seing that New CWV manages to shape the CWND of application-limited transfers to behave as "standard" TCP congestion window, we take a look at the application-layer performance. Figure \ref{fig:app_metrics} shows the start-up delay, average bit-rate, and bit-rate oscillation achieved during our simulations. The last bar-pair depicts the average values across all simulations. In Section \ref{sec:background} we covered the little New CWV adoption. The results, shown in Figure \ref{fig:app_metrics} could be one reason for this. Even though New CWV does provide lower start-up delay and bit-rate oscillation and higher average throughput, the demonstrated gain is not really statistically significant.
+
+
+% \section{Future Work}
+
+% \idea{New CWV does not help application layer throughput measuring functions to achieve higher precision. }
+
+% New CWV does not show significantly different results from Reno. One way of improving this, would be by achieving lower average bit-rate oscillation. One way this could be achieved is by introducing TCP that leverages a steadier congestion window. This way, client algorithms measuring the throughput will be able to obtain rates that closer match the current network's capacity. In turn, this would lead to more consistent throughput measurements which are therefore less likely to request a rate that does not fully utilise the available bandwidth.
+
+% While New CWV alone does not improve application's performance metrics or user's QoE. It has the correct approach in helping towards a possible improvement in that area. For example, if all results obtained by the application did not need to be validated and normalised, it could mean that applications are able to detect changes in the network more reliably and to react faster.
+
+% The details
+
+% Describe results carefully:
+%  - clearly state assumptions
+%  - give enough information to allow the reader to recreate the results
+%  - ensure results are representative; statistically meaningful, etc.
+%  - don't overstate results
+%  - equally, don't understate them: consider the broader implications
+
+
+
+%==================================================================================================
+\section{Related Work}
+
+
+% This should come near the end, and focusing on discussing how your work
+% relates to that of others. Any relevant related work should have been
+% cited already, so this is not a list of related work, it's a discussion
+% of how that work relates.
+%
+% Why not put related work after the introduction? 1) because describing
+% alternative approaches gets between the reader and your idea; and 2)
+% because the reader knows nothing about the problem yet, so your
+% (carefully trimmed) description of various technical trade-offs is
+% absolutely incomprehensible.
+% 
+% When writing the related work:
+%  - Give credit to others where it's due; this doesn't diminish the
+%    credit you get from your paper. 
+%  - Acknowledge weaknesses in your approach.
+%  - Ensure related work is accurate and up-to-date
+
+
+
+%==================================================================================================
+\section{Conclusions}
+
+
+
+%==================================================================================================
+\section{Acknowledgements}
+
+% Acknowledge funding sources.
+
+%==================================================================================================
+% Set the bibliography style. Choose one of the following, depending on the
+% document class being used:
+%
+%   \bibliographystyle{abbrv}                 When using article class
+%   \bibliographystyle{IEEEtran}              When using IEEE style
+%   \bibliographystyle{ACM-Reference-Format}  When using ACM style
+
+\bibliographystyle{ACM-Reference-Format}
+
+% Load the bibliography file(s) for this paper:
+\bibliography{paper}
+
+%==================================================================================================
+% The following information gets written into the PDF file information:
+\ifpdf
+  \pdfinfo{
+    /Title        (...)
+    /Author       (...)
+    /Subject      (...)
+    /Keywords     (..., ..., ...)
+    /CreationDate (D:20150827110616Z)
+    /ModDate      (D:20150827110616Z)
+    /Creator      (LaTeX)
+    /Producer     (pdfTeX)
+  }
+  % Suppress unnecessary metadata, to ensure the PDF generated by pdflatex is
+  % identical each time it is built. This needs pdfTeX 3.14159265-2.6-1.40.17
+  % or later.
+  \ifdefined\pdftrailerid
+    \pdftrailerid{}
+    \pdfsuppressptexinfo=15
+  \fi
+\fi
+%==================================================================================================
+\end{document}
+% vim: set ts=2 sw=2 tw=75 et ai:

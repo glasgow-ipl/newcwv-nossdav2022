@@ -145,3 +145,22 @@ linux-headers-*
 
 # Temporary files
 tmp/
+
+# Paper figures
+doc/paper/figures/
+doc/paper/git-revision
+doc/paper/index.html
+# Tex build files
+doc/paper/papers/paper.aux
+doc/paper/papers/paper.log
+doc/paper/papers/paper.out
+doc/paper/papers/paper.pdf
+doc/paper/papers/paper.bbl
+doc/paper/papers/paper.blg
+doc/paper/papers/paper.dep
+doc/paper/papers/paper.fls
+doc/paper/papers/paper.fonts
+
+
+# Do NOT exclude the following
+!doc/paper/lib/
