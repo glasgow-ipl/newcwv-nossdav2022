@@ -1,10 +1,6 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# install mininet + firefox
-# install xterm (DEBUG ONLY)
-# install ffmpeg (required to play video)
-
 
 $RUN_PROBE = <<SCRIPT
 	service vboxguest enable
@@ -29,7 +25,6 @@ $RUN_PROBE = <<SCRIPT
   sudo python2 get-pip.py
 
 	git clone git://github.com/mininet/mininet
-#	cd mininet && git tag && git checkout 2.3.0d6 && cd util && rm install.sh && wget https://gist.githubusercontent.com/janev94/c443075986ec344359904c9ceba93f2b/raw/99c9146940450beb155a31cb5b30c38643466b46/install.sh && chmod u+x install.sh && cd ../..
 	echo `pwd`
 	export LC_ALL=C
 	# Cannot use -a flag on install.sh as pox requires python-scapy package which is no longer supported in 20.04
