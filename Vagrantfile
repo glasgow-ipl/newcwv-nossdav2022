@@ -30,7 +30,8 @@ $RUN_PROBE = <<SCRIPT
 	# Cannot use -a flag on install.sh as pox requires python-scapy package which is no longer supported in 20.04
 	sudo mininet/util/install.sh -fnv
 	apt-get install -y nginx
-	apt-get install -y iperf3 
+	apt-get install -y iperf3
+  cd /vagrant && python3 enable_high_precision.py 
 SCRIPT
 
 
