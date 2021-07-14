@@ -55,7 +55,7 @@
 % journal to which you're submitting.
 
 \documentclass[10pt,sigconf]{acmart}
-\graphicspath{{figures/}{/vagrant/doc/paper/}}
+\graphicspath{{figures/}{doc/paper/}}
 
 % The following packages are recommended, and should be available in most
 % standard LaTeX installations (or from https://www.ctan.org/). Note that 
@@ -527,6 +527,10 @@ The streamed video is Blender's Big Buck Bunny \cite{online-bbb}.
 
 For each congestion control algorithm we collect the client's bandwidth estimations so we can compare them. Additionally, we keep a record of what video representations have been requested in order, so we can calculate the average bit-rate and the average bit-rate oscillations. Finally, we also monitor the buffer levels of the player, so we can detect any stalling events and measure their length. In summary, to measure the impact of New Congestion Window Validation's effect on playback stability, we gather information to produce standard video streaming performance metrics, namely, average bit-rate, bit-rate oscillation, and re-buffer ratio \cite{Spiteri-2019-from-theory-to-practice-sabre, Yin-2015-a-control-theoritic-approach, Dobrian-2013-understanding-the-impact-of-video-quality}. Also, to evaluate the accuracy change with respect to client bandwidth estimations, we collect these as well.
 
+From Figures (\ref{fig:throughput-precise-DSL} - \ref{fig:avg-oscillation-FTTP}) we see that in the examined scenario New CWV behaves no different than Reno in terms of achieved video performance.
+
+Therefore the benefit of resuming the CWND after an idle period rather than re-entering slow start does not impact the application enough to be statistically significant.
+
 % To evaluate whether the hypothesis that more precise bandwidth estimations could improve streaming stability and to demonstrate to what extent inaccurate measurements contribute to playback instability when using the throughput algorithm we perform an experiment that emulates DSL and FTTC links.
 % The link speeds were taken from Ofcom's ``Home Broadband Performance'' and FCC's ``Measuring broadband America'' annual reports (Table \ref{tab:experiments-network}). In all experiments the router queue size was set to the BDP for the connection and the latency was set at 50ms, reported by FCC and observed from our residential link to a Netflix's CDN.
 
@@ -574,12 +578,12 @@ For each congestion control algorithm we collect the client's bandwidth estimati
     \label{tab:experiments-video}
 \end{table}
 
-\begin{figure}
-    \centering
-    \includegraphics{figures/average_bitrate.pdf}
-    \caption{Average Bit-rate}
-    \label{fig:avg-bitrate}
-\end{figure}
+% \begin{figure}
+%     \centering
+%     \includegraphics{figures/average_bitrate.pdf}
+%     \caption{Average Bit-rate}
+%     \label{fig:avg-bitrate}
+% \end{figure}
 
 % \begin{itemize}
 %     \item Figure \ref{fig:avg-bitrate} notes:
@@ -587,12 +591,12 @@ For each congestion control algorithm we collect the client's bandwidth estimati
 %     \item Where New CWV might make a difference is to achieve higher average bitrate for the FTTC scenario, since the encoding rate is close to the link capacity.
 % \end{itemize}
 
-\begin{figure}
-    \centering
-    \includegraphics{figures/average_oscillations.pdf}
-    \caption{Bit-rate oscillation}
-    \label{fig:bitrate-oscillation}
-\end{figure}
+% \begin{figure}
+%     \centering
+%     \includegraphics{figures/average_oscillations.pdf}
+%     \caption{Bit-rate oscillation}
+%     \label{fig:bitrate-oscillation}
+% \end{figure}
 
 % \begin{itemize}
 %     \item Figure \ref{fig:bitrate-oscillation} notes:
@@ -601,114 +605,114 @@ For each congestion control algorithm we collect the client's bandwidth estimati
 % \end{itemize}
 
 
-\begin{figure}
-    \centering
-    \includegraphics{figures/calculated_throughput.pdf}
-    \caption{Estimated Throughput}
-    \label{fig:estimated-throughput}
-\end{figure}
+% \begin{figure}
+%     \centering
+%     \includegraphics{figures/calculated_throughput.pdf}
+%     \caption{Estimated Throughput}
+%     \label{fig:estimated-throughput}
+% \end{figure}
 
-\begin{figure}
-    \centering
-    \includegraphics{figures/calculated_safe_throughput.pdf}
-    \caption{Estimated Safe Throughput}
-    \label{fig:estimated-throughput-safe}
-\end{figure}
+% \begin{figure}
+%     \centering
+%     \includegraphics{figures/calculated_safe_throughput.pdf}
+%     \caption{Estimated Safe Throughput}
+%     \label{fig:estimated-throughput-safe}
+% \end{figure}
 
-\begin{itemize}
-    \item Figure \ref{fig:estimated-throughput} notes:
-    \item This is where I expect to see the real difference between New CWV and non New CWV transport.
-    \item For all cases, I expect New CWV traffic to have an average estimate closer to the link rate.
-    \item However, as Figures \ref{fig:bitrate-oscillation} and \ref{fig:bitrate-oscillation} show, that difference on its own is not able to make a difference to improve playback stability.
-\end{itemize}
+% \begin{itemize}
+%     \item Figure \ref{fig:estimated-throughput} notes:
+%     \item This is where I expect to see the real difference between New CWV and non New CWV transport.
+%     \item For all cases, I expect New CWV traffic to have an average estimate closer to the link rate.
+%     \item However, as Figures \ref{fig:bitrate-oscillation} and \ref{fig:bitrate-oscillation} show, that difference on its own is not able to make a difference to improve playback stability.
+% \end{itemize}
 
-\begin{itemize}
-    \item Additional notes:
-    \item For completeness, we can say that we have measured the re-buffer duration, which I also expect to be the same across all scenarios.
-\end{itemize}
+% \begin{itemize}
+%     \item Additional notes:
+%     \item For completeness, we can say that we have measured the re-buffer duration, which I also expect to be the same across all scenarios.
+% \end{itemize}
 
 \begin{figure}
     \centering
     \includegraphics{figures/Throughput Precise_DSL.pdf}
     \caption{Calculated Throughput DSL}
-    \label{fig:avg-bitrate}
+    \label{fig:throughput-precise-DSL}
 \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics{figures/Throughput Precise_FTTC.pdf}
     \caption{Calculated Throughput FTTC}
-    \label{fig:avg-bitrate}
+    \label{fig:throughput-precise-FTTC}
 \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics{figures/Throughput Precise_FTTP.pdf}
     \caption{Calculated Throughput FTTP}
-    \label{fig:avg-bitrate}
+    \label{fig:throughput-precise-FTTP}
 \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics{figures/Throughput Safe_DSL.pdf}
     \caption{Advertised Throughput DSL}
-    \label{fig:avg-bitrate}
+    \label{fig:throughput-safe-DSL}
 \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics{figures/Throughput Safe_FTTC.pdf}
     \caption{Advertised Throughput FTTC}
-    \label{fig:avg-bitrate}
+    \label{fig:throughput-safe-FTTC}
 \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics{figures/Throughput Safe_FTTP.pdf}
     \caption{Advertised Throughput FTTP}
-    \label{fig:avg-bitrate}
+    \label{fig:throughput-safe-FTTP}
 \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics{figures/Average Bitrate_DSL.pdf}
     \caption{Average Bit-rate DSL}
-    \label{fig:avg-bitrate}
+    \label{fig:avg-bitrate-DSL}
 \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics{figures/Average Bitrate_FTTC.pdf}
     \caption{Average Bit-rate FTTC}
-    \label{fig:avg-bitrate}
+    \label{fig:avg-bitrate-FTTC}
 \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics{figures/Average Bitrate_FTTP.pdf}
     \caption{Average Bit-rate FTTP}
-    \label{fig:avg-bitrate}
+    \label{fig:avg-bitrate-FTTP}
 \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics{figures/Average Oscillations_DSL.pdf}
     \caption{ Bit-rate Oscillation DSL}
-    \label{fig:avg-bitrate}
+    \label{fig:avg-oscillation-DSL}
 \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics{figures/Average Oscillations_FTTC.pdf}
     \caption{ Bit-rate Oscillation FTTC}
-    \label{fig:avg-bitrate}
+    \label{fig:avg-oscillation-FTTC}
 \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics{figures/Average Oscillations_FTTP.pdf}
     \caption{ Bit-rate Oscillation FTTP}
-    \label{fig:avg-bitrate}
+    \label{fig:avg-oscillation-FTTP}
 \end{figure}
 
 % For all experiments, we stream a 635 second long SDR video from an Nginx server. The client is a Firefox instance using dash.js 3.1.3 using default parameters and "abrThroughput" as its adaptive strategy. We chose to set this strategy as it is one of the three current main ones and would best reflect the impact of accurate link capacity estimations. The video is encoded in 3 second chunks as prior work identified this gives the best trade-off in optimising network load, while minimising video stalls. 
