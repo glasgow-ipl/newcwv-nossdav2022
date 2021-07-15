@@ -164,3 +164,4 @@ doc/paper/papers/paper.fonts
 
 # Do NOT exclude the following
 !doc/paper/lib/
+!doc/paper/bin/
