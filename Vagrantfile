@@ -31,7 +31,7 @@ $RUN_PROBE = <<SCRIPT
 	sudo mininet/util/install.sh -fnv
 	apt-get install -y nginx
 	apt-get install -y iperf3
-  cd /vagrant && python3 enable_high_precision.py 
+  cd /vagrant/deps && python3 enable_high_precision.py 
 SCRIPT
 
 
