@@ -531,6 +531,16 @@ From Figures (\ref{fig:throughput-precise-DSL} - \ref{fig:avg-oscillation-FTTP})
 
 Therefore the benefit of resuming the CWND after an idle period rather than re-entering slow start does not impact the application enough to be statistically significant.
 
+\idea{Next, I am planning on investigating the effect of the idle periods.\\
+In specific:\\
+\begin{itemize}
+    \item How many idle periods are there during a simulation for a particular algorithm
+    \item How long are the idle periods on average; For how long is the connection idle, i.e., sum of all idle periods
+    \item What throughput is being reported before and after the idle period. Is the throughput before stable and the throughput after unstable? How long does it take to stabilize?
+\end{itemize}}
+
+
+
 % To evaluate whether the hypothesis that more precise bandwidth estimations could improve streaming stability and to demonstrate to what extent inaccurate measurements contribute to playback instability when using the throughput algorithm we perform an experiment that emulates DSL and FTTC links.
 % The link speeds were taken from Ofcom's ``Home Broadband Performance'' and FCC's ``Measuring broadband America'' annual reports (Table \ref{tab:experiments-network}). In all experiments the router queue size was set to the BDP for the connection and the latency was set at 50ms, reported by FCC and observed from our residential link to a Netflix's CDN.
 
