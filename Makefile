@@ -328,6 +328,7 @@ git-revision: doc/paper/bin/git-revision.sh
 	@sh   $(PAPER_BUILD)/bin/latex-build.sh $<
 	@perl $(PAPER_BUILD)/bin/check-for-duplicate-words.perl $<
 	@sh   $(PAPER_BUILD)/bin/check-for-todo.sh              $<
+	cp $(PAPER_BUILD)/papers/paper.pdf $(PAPER_BUILD)/papers/paper_$(shell cat $(PAPER_BUILD)/git-revision).pdf
 
 # Include dependency information for PDF files, if it exists:
 -include $(PDF_FILES:%.pdf=%.dep)
@@ -379,3 +380,5 @@ ifneq ($(strip $(TOOLS)),)
 endif
 	$(foreach tool,$(TOOLS),rm -rf $(PAPER_BUILD)/$(tool).dSYM)
 	@$(call remove-latex,$(PDF_FILES:%.pdf=%.tex))
+	rm -f $(PAPER_BUILD)/papers/paper_*.pdf
+	rm -f $(PAPER_BUILD)/papers/paper.synctex.gz
