@@ -160,6 +160,8 @@ doc/paper/papers/paper.blg
 doc/paper/papers/paper.dep
 doc/paper/papers/paper.fls
 doc/paper/papers/paper.fonts
+# Synctex binaries
+doc/paper/papers/paper.synctex.gz
 
 
 # Do NOT exclude the following
