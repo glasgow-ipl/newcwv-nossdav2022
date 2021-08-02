@@ -5,6 +5,7 @@ sudo apt-get install -y texlive
 sudo apt-get install -y texlive-extra
 sudo apt-get install -y texlive-science
 sudo apt-get install -y texlive-latex-extra
+sudo apt-get install -y texlive-fonts-extra
 
 # Required for pdfinfo and pdffonts
 sudo apt-get install -y poppler-utils

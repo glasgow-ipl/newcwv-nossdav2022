@@ -183,7 +183,10 @@ else
         BSTINPUTS=.
         if [ -d `pwd`/lib/tex/inputs ]; then
           BSTINPUTS=$BSTINPUTS:`pwd`/lib/tex/inputs
+        elif [ -d `pwd`/$(dirname $(dirname $1))/lib/tex/inputs ]; then
+          BSTINPUTS=$BSTINPUTS:`pwd`/$(dirname $(dirname $1))/lib/tex/inputs
         fi
+        
 
         (cd $DIR_NAME && BSTINPUTS=$BSTINPUTS: bibtex $TEX_BASE)
         if [ $? = 1 ]; then

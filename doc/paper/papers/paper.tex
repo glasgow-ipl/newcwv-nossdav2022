@@ -352,7 +352,7 @@
   %  - Say what your solution achieves
   %  - Say what follows from your solution
 
-In HTTP video streaming playback stability is an important metric contributing to the user's quality of experience. Throughput adaptive algorithms are known to achieve lower levels of playback stability than their counterparts. New congestion window validation is a proposal aiming to keep the transport's transfer rate more stable. This paper shows how more stable transfer rate reflects to the playback stability. We find that while new congestion window validation stabilises the transfer rate in the transport layer this does not translate to a significant difference in the application's playback stability. 
+In HTTP video streaming playback stability is an important metric contributing to the user's quality of experience. Throughput adaptive algorithms are known to achieve lower levels of playback stability than their buffer-based counterparts. New congestion window validation is a proposal aiming to keep the transport's transfer rate more stable. This paper shows how this reflects the playback stability. We find that while new congestion window validation stabilises the transfer rate in the transport layer this does not translate to a significant difference in the application's playback stability. 
 
 \end{abstract}
 \maketitleACM
@@ -374,14 +374,16 @@ In HTTP video streaming playback stability is an important metric contributing t
 % context here. Why is the problem of interest and importance to the larger
 % community?
 
-Video playback stability is one of the key components contributing to user experience.
+Video playback stability is one of the key components contributing to user experience. Adaptive algorithms residing at the client are responsible for delivering high user experience. Adaptive algorithms are throughput or buffer based, or some combination of these. Throughput algorithms are known to achieve lower stability compared to their buffer-based counterparts.
 
 % Paragraph 2: What is the specific problem considered in this paper? This
 % paragraph narrows down the topic area of the paper. In the first
 % paragraph you have established general context and importance. Here you
 % establish specific context and background.
 
-In DASH's reference implementation, one of the main adaptive algorithms - throughput is known to have lower stability score than the other algorithms. One  reason for the reduced metric might be because the underlying transport also uses unstable transfer rates. New CWV is a proposal that meant to keep a more stable network transfer rate.
+The adaptive algorithms face the difficult task of delivering video while picking its ``best'' representations at any given point in time. This is a complex task since these algorithms need to simultaneously fulfil multiple criteria including: high stability, high quality, and low video stalls. These criteria can often conflict one another. For example, an algorithm always picking the lowest available representation will achieve low video stall time and high stability (since representations will not fluctuate), however, it will also display lower video quality, whereas perhaps higher one was possible. In a dynamic network, achieving a high index on one of these criterion also comes at the cost of observing a lower index in another. Modern adaptive algorithms try to balance that trade-off. They use either the pre-buffered capacity at the client or the immediate network state as a heuristic to aid them in the decision process. The former algorithms are known as buffer and the latter as throughput based. 
+
+In DASH's reference implementation, one of the main adaptive algorithms: ``throughput'' is known to have lower stability score compared to its alternatives. One reason for this might be because the underlying transport (e.g., TCP) does not transmit using a fixed rate. Recall TCP's ``sawtooth pattern'' shows the fluctuations in TCP's sending rate. Additionally, video over HTTP uses a single connection and exhibits idle periods (i.e., there is no useful information being exchanged) in-between video chunk transfers. During these idle periods, standard TCP practice is to ``validate'' the window by resetting its congestion state (the CWND variable). New Congestion Window Validation (New CWV) is a proposal that meant to keep more stable transfer rates in the presence of such idle periods.
 
 % Paragraph 3: "In this paper, we show that...". This is the key paragraph
 % in the introduction - you summarize, in one paragraph, what are the main
@@ -393,8 +395,7 @@ In DASH's reference implementation, one of the main adaptive algorithms - throug
 % State your contributions: these drive the entire paper.  Contributions
 % should be refutable claims, not vague generic statements.
 
-In this paper we show whether New CWV increases the video's playback stability and the overall video QoE. To demonstrate this, we compare video streams using TCP Reno with and without New CWV enabled. To measure video stability we collect standard video performance metrics such as Average bit-rate and Average bit-rate oscillation. Additionally, in order to show the effect of New CWV on the estimated client throughput, we keep a record of the client's probes.
-
+In this paper we show whether New CWV's more stable rates at the transport layer translate into an increased video playback stability and more generally: increased video QoE. To test our hypothesis, we compare two video streams using TCP Reno. One with New CWV disabled (the current default) and one with it enabled. To measure video stability and overall QoE we collect standard video performance metrics: average bit-rate, bit-rate oscillation, and video stall time. To quantify the impact of New CWV with respect to the inferred network state at the client, we also record the immediate and smoothened client's throughput estimations for each delivered video chunk.
 
 % Paragraph 4: What are the differences between your work, and what others
 % have done? Keep this at a high level, as you can refer to future sections
@@ -402,7 +403,7 @@ In this paper we show whether New CWV increases the video's playback stability a
 % for the reader to know what is new about this work compared to other work
 % in the area.
 
-To the best of our knowledge, this is the first paper that informs about New CWV's application performance. Nazir et al. \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv} proposed New CWV and examined its effects in the transport layer. Other related work proposed new application algorithms to control video representation choices. In contrast, we evaluate how a transport modification would impact the video stream.
+To the best of our knowledge, this is the first paper that studies New CWV's effect with respect to the achieved QoE and video stability. Nazir et al. \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv} proposed New CWV and examined its effects in the transport layer, whereas we study its effect in the application layer. Other related work proposed new application algorithms to control video representation choices. We on the other hand evaluate a transport, not an application change and measure its impact on the video delivery. Finally, \cite{Bhat-2017-not-so-quic} consider replacing the transport protocol from TCP to QUIC for video delivery. 
 
 % Paragraph 5: "We structure the remainder of this paper as follows." Give
 % the reader a road-map for the rest of the paper. Try to avoid redundant
@@ -496,9 +497,9 @@ We structure the remainder of this paper as follows. In section 2, we introduce 
 % Throughput algorithms continuously measure the available bandwidth. High CWND fluctuations, (f.e., as a result of an RTO idle reset) could be picked up by the application algorithm. This could lead to requesting representations that are not fully using or overload network's available capacity. In either case, this would lead to an increased number of representation switches, which is shown to reduce user's QoE.
 
 
-The problem of TCP not being designed to carry long bursty traffic, such as HTTP video is well known. Even before that, there were proposals to optimise TCP for application limited traffic.
+The problem of TCP not being designed to carry long bursty traffic, such as HTTP video is well known. Even before that, there were proposals to optimise TCP for application limited traffic \cite{rfc2861-2000-padhye-congestion-window-validation}.
 
-In standard window based congestion control algorithms, the transfer is network bound if the sender is fully utilising its congestion window capacity. The behaviour of that is well known, (e.g., during the slow-start the window will double every RTT until it sees loss and during the congestion avoidance phase the window will increase by 1 MSS packet every RTT). However, not all applications that use TCP would fully use their window capacity. In this case they are considered to be application limited, i.e., the application does not have enough data to send with a rate that the network currently offers. It has been found that during such phases the RTT could grow unrealistically large, as for example, TCP would continue to grow the window by 1 every RTT until it sees loss. In cases where the application cannot send as fast as the network allows it, the chances of observing loss due to high sending rate is low.
+In standard window based congestion control algorithms, the transfer is network bound if the sender is fully utilising its congestion window capacity. The behaviour of that is well known, (e.g., during the slow-start the window will double every RTT until it sees loss and during the congestion avoidance phase the window will increase by 1 MSS packet every RTT). However, not all applications that use TCP would fully use their window capacity. Those are then said to be application limited, f.e., the application does not have enough data to send with a rate that the network currently offers. It has been found that during such phases the RTT could grow unrealistically large, as for example, TCP would continue to grow the window by 1 every RTT until it sees loss. In cases where the application cannot send as fast as the network allows it, the chances of observing loss due to high sending rate are low.
 
 Another issue might arise if the application sends data in bursts over the same connection. In such cases, the value that the internal TCP connection had for the window might not be representative of the network state anymore, depending on the duration of the idling period. For example, consider a single TCP application sending data over a 10Mbps link with no cross traffic. Then that connection could fully utilise the available capacity. But if the connection had began the transfer, then paused and during the pause two more such application joined the network. Then the fair share if the first application resumed would be 3.3Mbps, but its internal state might be closer to the previously measured capacity of 10.
 
@@ -783,7 +784,7 @@ In this scenario, the values for the link speed and encoding representations are
 \begin{itemize}
     \item New Transport ideas
     \item This chapter comes to the conclusion that while New CWV might be able to report more accurate results, in the scenarios for VoD streaming that we have today, they do not make a difference.
-    \item However, if there was a proposal that promised an even more accurate bandwidth reporting, then the application could use that to better determine if represenation $R$ is sustainable.
+    \item However, if there was a proposal that promised an even more accurate bandwidth reporting, then the application could use that to better determine if representation $R$ is sustainable.
 \end{itemize}
 
 % Prior work evaluated New CWV against TCP Reno using a Linux kernel 3.14 implementation. Since then the Linux's Reno implementation has been a subject to both further optimisations (i.e., adoption of newer proposals) and API changes.
