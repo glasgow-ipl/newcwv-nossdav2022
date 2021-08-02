@@ -20,6 +20,7 @@ import generate_player
 import subprocess
 
 from utils import bw_utils
+from check_playtime import check_playtime
 
 bw_init = None
 class SingleSwitchTopo( Topo ):
@@ -264,6 +265,8 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
         os.system('mv dashjs_metrics.json %s' % pcap_path)
     else:
         print("Dash metrics not found")
+
+    check_playtime(os.path.join('/vagrant', mpd_location), os.path.join(pcap_path, 'dashjs_metrics.json'))
 
     # Move dashjs_metrics file to relevant directory
     if os.path.exists('dashjs_estimates.json'):

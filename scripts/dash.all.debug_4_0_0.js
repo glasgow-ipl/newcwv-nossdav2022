@@ -56478,7 +56478,7 @@ function ThroughputHistory(config) {
     if(!('estimations' in settings.get())) {
       settings.get()['estimations'] = {'precise': {}, 'average': {}};
     }
-    settings.get()['estimations']['precise'][new Date().getTime()] = throughput;
+    settings.get()['estimations']['precise'][new Date().getTime()] = [throughput, httpRequest.url, downloadBytes, httpRequest._tfinish.getTime(), httpRequest.tresponse.getTime(), throughputMeasureTime, httpRequest.tresponse.getTime(), httpRequest.trequest.getTime(), downloadTimeInMilliseconds, JSON.stringify(httpRequest.trace)];
 
     checkSettingsForMediaType(mediaType);
 
