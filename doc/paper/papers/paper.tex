@@ -423,7 +423,7 @@ We structure the remainder of this paper as follows. In section 2, we introduce 
 
 \begin{figure*}
     \centering
-    \includegraphics{figures/cwv_idle.pdf}
+    % \includegraphics{figures/cwv_idle.pdf}
     \caption{Idle Period CWND effect}
     \label{fig:idle_effect}
 \end{figure*}
@@ -521,33 +521,40 @@ In HTTP adaptive streaming's dash.js, the throughput algorithm does exactly that
 
 \section{Experiment}
 
-To evaluate whether New CWV results in more accurate bandwidth measurements and to assess their impact on the application layer, we design an experiment, using dumbbell topology. We then use one of the far ends as the server and the other as the client. The server is Nginx, the client is Firefox using dash.js 3.1.3. The adaptation algorithm is set to throughput, so the obtained bandwidth measurements have the biggest impact on the player stability. The RTT of the connection is 40 ms, which is an average value that we measured from our residential network to a Netflix CDN. The routers are configured with queue size equal to the bandwidth delay product.
+To evaluate whether New CWV results in more accurate bandwidth measurements and to assess their impact on the application layer, we design an experiment, using dumbbell topology. We then use one of the far ends as the server and the other as the client. The server is Nginx, the client is Firefox (v 91) using dash.js 3.1.3. The adaptation algorithm is set to throughput. This is chosen to maximise the impact of variable bandwidth measurements. Even though the current default algorithm uses a combination of throughput and buffer heuristics to decide which video chunk to request, the throuhgput algorithm is still a vital part of the default algorithm and is heavily leveraged for lower latency scenarios. Therefore, influencing the throughput algorithm's performance also has a direct impact on the current default's performance and could span novel lower latency solutions.
 
-We chose 3 different bandwidth capacities that represent DSLv2, FTTC, and FTTP as seen in the United Kingdom \cite{online-ofcom-report} (Table \ref{tab:experiments-network}). For all instances, we run two sets of simulations. One using TCP Reno without New Congestion Window Validation and one using Reno with it. We then repeat these experiments 5 times and report the average values to reduce the statistical noise.
+The RTT of the connection is 40 ms average value that measured from our residential network to a Netflix CDN. The routers' queues are set equal to the bandwidth delay product.
 
-The streamed video is Blender's Big Buck Bunny \cite{online-bbb}.
+For bandwidth profiles, we chose capacities representative of DSLv2, FTTC, and FTTP as reported in the United Kingdom \cite{online-ofcom-report} (Table \ref{tab:experiments-network}).
 
-For each congestion control algorithm we collect the client's bandwidth estimations, so we can compare them. Additionally, we keep a record of what video representations have been requested in order, so we can calculate the average bit-rate and the average bit-rate oscillations. Finally, we also monitor the buffer levels of the player, so we can detect any stalling events and measure their length. In summary, to measure the impact of New Congestion Window Validation's effect on playback stability, we gather information to produce standard video streaming performance metrics, namely, average bit-rate, bit-rate oscillation, and re-buffer ratio \cite{Spiteri-2019-from-theory-to-practice-sabre, Yin-2015-a-control-theoritic-approach, Dobrian-2013-understanding-the-impact-of-video-quality}. 
-Additionally, to measure the immediate effect of the transport modification we gather the obtained bandwidth probes by the client.
+Two distinct simulation instances are run each time: one using TCP Reno but not New Congestion Window Validation. The other one also uses TCP Reno but has New Congestion Window Validation enabled as well. To eliminate noise, we run each such instance 5 times before averaging and reporting the results.
 
-From Figures (\ref{fig:throughput-precise-DSL} - \ref{fig:avg-oscillation-FTTP}) we see that in the examined scenario New CWV behaves no different than Reno in terms of achieved video performance. Therefore, for the examined scenario New CWV's transport change has no observable benefit compared to Reno.
+The streamed video is Blender's Big Buck Bunny \cite{online-bbb}. Details in \ref{tab:experiments-video}
 
-\todo{Graphs showing that}
+Finally, we modify the Linux kernel's timestamp reporting precision instruct it to use RFC 3339.
 
-Additionally, Figure \ref{fig:throughput-precise-FTTP} shows one of the effects of the better defined transmission periods for New CWV. On the figure New CWV displays tighter confidence interval on the measured throughput, whereas Reno's inferred values vary more. This behaviour follows directly from Reno's irregular intervals. Varying the transmission time for chunks of same length, naturally translates to less confident bandwidth probes.
+From application's point of view, during each simulation we collect the client's bandwidth estimations, so we can check our hypothesis. Additionally, we report standard video performance metrics: average bit-rate, average bit-rate oscillations, re-buffer ratio to quantify the achieved video quality of experience \cite{Spiteri-2019-from-theory-to-practice-sabre, Yin-2015-a-control-theoritic-approach, Dobrian-2013-understanding-the-impact-of-video-quality}.
+
+In addition, we run tcpdump and record all packets on the client and the server, so we can reconstruct the network activity.
+
+We expect that the profiles using New Congestion Window Validation will have better defined and denser clusters of the available link capacity, as measured by the client while connections not using New Congestion Window Validation will not be able to always accurately measure the link capacity. This would result in a more sparse and weaker confidence interval. We expect to observe less accurate measurements for video chunk requests immediately following an idle period. This is because standard TCP Reno re-sets its congestion window and slow start threshold states once such inactive period is detected.
+
+\todo{Results}
+
+% Additionally, Figure \ref{fig:throughput-precise-FTTP} shows one of the effects of the better defined transmission periods for New CWV. On the figure New CWV displays tighter confidence interval on the measured throughput, whereas Reno's inferred values vary more. This behaviour follows directly from Reno's irregular intervals. Varying the transmission time for chunks of same length, naturally translates to less confident bandwidth probes.
 
 
-However, we note that at the transport level New CWV results in more predictable sending patterns with better defined boundaries and more granular durations of the periods where the channel is in idle or sending period. For comparison, when not using New CWV these channels are irregular and do not follow a set of patterns. This might suggest that using New CWV, the traffic might be more stable in the presence of cross traffic or when multiple video clients are competing over the same bottleneck link. To demonstrate this, I will conduct a simulation where two clients request video on the DSL link. The results so far show that the client would start requesting the 1080 encoding as it is the highest sustainable for the 10 Mbps provided by DSL. The expected behaviour is that with two competing players both clients should carry on requesting 1080, as the combined bandwidth constraint remains lower than the capacity.
+% However, we note that at the transport level New CWV results in more predictable sending patterns with better defined boundaries and more granular durations of the periods where the channel is in idle or sending period. For comparison, when not using New CWV these channels are irregular and do not follow a set of patterns. This might suggest that using New CWV, the traffic might be more stable in the presence of cross traffic or when multiple video clients are competing over the same bottleneck link. To demonstrate this, I will conduct a simulation where two clients request video on the DSL link. The results so far show that the client would start requesting the 1080 encoding as it is the highest sustainable for the 10 Mbps provided by DSL. The expected behaviour is that with two competing players both clients should carry on requesting 1080, as the combined bandwidth constraint remains lower than the capacity.
 
-\todo{ Simulation}
+% \todo{ Simulation}
 
-\idea{Next, I am planning on investigating the effect of the idle periods.\\
-In specific:\\
-\begin{itemize}
-    \item How many idle periods are there during a simulation for a particular algorithm
-    \item How long are the idle periods on average; For how long is the connection idle, i.e., sum of all idle periods
-    \item What throughput is being reported before and after the idle period. Is the throughput before stable and the throughput after unstable? How long does it take to stabilise?
-\end{itemize}}
+% \idea{Next, I am planning on investigating the effect of the idle periods.\\
+% In specific:\\
+% \begin{itemize}
+%     \item How many idle periods are there during a simulation for a particular algorithm
+%     \item How long are the idle periods on average; For how long is the connection idle, i.e., sum of all idle periods
+%     \item What throughput is being reported before and after the idle period. Is the throughput before stable and the throughput after unstable? How long does it take to stabilise?
+% \end{itemize}}
 
 
 
@@ -653,84 +660,84 @@ In specific:\\
 
 \begin{figure}
     \centering
-    \includegraphics{figures/Throughput_Precise_DSL.pdf}
+    % \includegraphics{figures/Throughput_Precise_DSL.pdf}
     \caption{Calculated Throughput DSL}
     \label{fig:throughput-precise-DSL}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics{figures/Throughput_Precise_FTTC.pdf}
+    % \includegraphics{figures/Throughput_Precise_FTTC.pdf}
     \caption{Calculated Throughput FTTC}
     \label{fig:throughput-precise-FTTC}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics{figures/Throughput_Precise_FTTP.pdf}
+    % \includegraphics{figures/Throughput_Precise_FTTP.pdf}
     \caption{Calculated Throughput FTTP}
     \label{fig:throughput-precise-FTTP}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics{figures/Throughput_Safe_DSL.pdf}
+    % \includegraphics{figures/Throughput_Safe_DSL.pdf}
     \caption{Advertised Throughput DSL}
     \label{fig:throughput-safe-DSL}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics{figures/Throughput_Safe_FTTC.pdf}
+    % \includegraphics{figures/Throughput_Safe_FTTC.pdf}
     \caption{Advertised Throughput FTTC}
     \label{fig:throughput-safe-FTTC}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics{figures/Throughput_Safe_FTTP.pdf}
+    % \includegraphics{figures/Throughput_Safe_FTTP.pdf}
     \caption{Advertised Throughput FTTP}
     \label{fig:throughput-safe-FTTP}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics{figures/Average_Bitrate_DSL.pdf}
+    % \includegraphics{figures/Average_Bitrate_DSL.pdf}
     \caption{Average Bit-rate DSL}
     \label{fig:avg-bitrate-DSL}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics{figures/Average_Bitrate_FTTC.pdf}
+    % \includegraphics{figures/Average_Bitrate_FTTC.pdf}
     \caption{Average Bit-rate FTTC}
     \label{fig:avg-bitrate-FTTC}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics{figures/Average_Bitrate_FTTP.pdf}
+    % \includegraphics{figures/Average_Bitrate_FTTP.pdf}
     \caption{Average Bit-rate FTTP}
     \label{fig:avg-bitrate-FTTP}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics{figures/Average_Oscillations_DSL.pdf}
+    % \includegraphics{figures/Average_Oscillations_DSL.pdf}
     \caption{ Bit-rate Oscillation DSL}
     \label{fig:avg-oscillation-DSL}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics{figures/Average_Oscillations_FTTC.pdf}
+    % \includegraphics{figures/Average_Oscillations_FTTC.pdf}
     \caption{ Bit-rate Oscillation FTTC}
     \label{fig:avg-oscillation-FTTC}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics{figures/Average_Oscillations_FTTP.pdf}
+    % \includegraphics{figures/Average_Oscillations_FTTP.pdf}
     \caption{ Bit-rate Oscillation FTTP}
     \label{fig:avg-oscillation-FTTP}
 \end{figure}
