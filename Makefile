@@ -410,6 +410,13 @@ ${ROOT}/logs/newcwv/test/DSL/10_newcwv/nginx_access.log: ${ROOT}/scripts/mn_scri
 	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/links/DSL.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS)
 
 
+single_run: ${ROOT}/logs/single/newcwv/nginx_access.log
+	@echo "Single run executed successfully"
+
+${ROOT}/logs/single/newcwv/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
+	@echo $@
+	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/links/FTTP.json --mpd_location $(MPD_LOCATION) --dash_alg ${DASH_ALG} --ignore_link_loss ${IGNORE_LINK_LOSS}
+
 ############################
 # Paper 
 ############################
