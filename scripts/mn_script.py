@@ -266,8 +266,6 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
     else:
         print("Dash metrics not found")
 
-    check_playtime(os.path.join('/vagrant', mpd_location), os.path.join(pcap_path, 'dashjs_metrics.json'))
-
     # Move dashjs_metrics file to relevant directory
     if os.path.exists('dashjs_estimates.json'):
         print("Saving dash estimates to %s" % pcap_path)
@@ -293,6 +291,8 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
     if os.path.exists("event_log.json"):
         print("Removing event log")
         os.remove("event_log.json")
+
+    check_playtime(os.path.join('/vagrant', mpd_location), os.path.join(pcap_path, 'dashjs_metrics.json'))
 
 
 if __name__ == '__main__':
