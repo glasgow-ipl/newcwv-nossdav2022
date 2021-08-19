@@ -373,8 +373,13 @@ PAPER_BUILD = doc/paper
 TOOLS = 
 
 
+figures: ${ROOT}/scripts/analytics/paper/plot_data.py ${TEST_LOGS}
+	@echo 'Generating Figures'
+	/usr/bin/python3 $<
+	@echo 'Done'
+
 # Master build rule:
-paper: check-make git-revision $(TOOLS) $(PDF_FILES) 
+paper: check-make git-revision $(TOOLS) $(PDF_FILES) figures
 
 # =================================================================================================
 # Project specific rules to download files:
