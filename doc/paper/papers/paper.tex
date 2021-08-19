@@ -359,6 +359,7 @@ In HTTP video streaming playback stability is an important metric contributing t
 
 
 \section{Introduction}
+\label{sec:introduction}
 
 % A good paper introduction is fairly formulaic. If you follow a simple set
 % of rules, you can write a very good introduction. The following outline can
@@ -521,9 +522,11 @@ In HTTP adaptive streaming's dash.js, the throughput algorithm does exactly that
 
 \section{Experiment}
 
-To evaluate whether New CWV results in more accurate bandwidth measurements and to assess their impact on the application layer, we design an experiment, using dumbbell topology. We then use one of the far ends as the server and the other as the client. The server is Nginx, the client is Firefox (v 91) using dash.js 3.1.3. The adaptation algorithm is set to throughput. This is chosen to maximise the impact of variable bandwidth measurements. Even though the current default algorithm uses a combination of throughput and buffer heuristics to decide which video chunk to request, the throuhgput algorithm is still a vital part of the default algorithm and is heavily leveraged for lower latency scenarios. Therefore, influencing the throughput algorithm's performance also has a direct impact on the current default's performance and could span novel lower latency solutions.
+As discussed in section \ref{sec:introduction} the goal of this paper is to show whether New Congestion Window Validation's improved transport performance translates to a smoother video playout in the application layer. Our hypothesis is that the faster congestion window resumption will enable the client to obtain more precise bandwidth estimations. In turn, when the throughput estimation is the main or only heuristic (e.g., the throughput algorithm in dash.js) that determines the next video chunk's encoding this more precise estimations could lead to fewer encoding switches and higher average bit-rate. Both of which directly impact the achieved QoE.
 
-The RTT of the connection is 40 ms average value that measured from our residential network to a Netflix CDN. The routers' queues are set equal to the bandwidth delay product.
+To evaluate our hypothesis we design an experiment using a dumbbell topology. One of its far ends acts as the server (nginx 1.18 HTTP/2) and the other one as the client (dash.js 3.1.3 in Firefox 91). The adaptation algorithm is set to throughput as explained in the previous paragraph. The throughput algorithm is currently one of the two adaptive strategies used in dash.js's default selection algorithm. Therefore, evaluating the impact of the throughput algorithm directly carries these findings to the default ``DYNAMIC'' algorithm. 
+
+The RTT of the connection is 40 ms average value measured from a residential network in the United Kingdom to a Netflix's CDN. The routers' queues are set equal to the bandwidth delay product.
 
 For bandwidth profiles, we chose capacities representative of DSLv2, FTTC, and FTTP as reported in the United Kingdom \cite{online-ofcom-report} (Table \ref{tab:experiments-network}).
 
@@ -531,13 +534,12 @@ Two distinct simulation instances are run each time: one using TCP Reno but not 
 
 The streamed video is Blender's Big Buck Bunny \cite{online-bbb}. Details in \ref{tab:experiments-video}
 
-Finally, we modify the Linux kernel's timestamp reporting precision instruct it to use RFC 3339.
+Finally, we modify the timestamp precision in Linux kernel (5.4.0) to comply to RFC 3339, we also provide a \cite{rfc7661-2015-fairhurst-new-cwnd-validation} compliant New Congestion Window Validation implementation for that kernel and modify reno to expose information on when CWND occurred for a given connection.
 
-From application's point of view, during each simulation we collect the client's bandwidth estimations, so we can check our hypothesis. Additionally, we report standard video performance metrics: average bit-rate, average bit-rate oscillations, re-buffer ratio to quantify the achieved video quality of experience \cite{Spiteri-2019-from-theory-to-practice-sabre, Yin-2015-a-control-theoritic-approach, Dobrian-2013-understanding-the-impact-of-video-quality}.
+From application's point of view, during each simulation we collect the client's bandwidth estimations. Additionally, we report standard video performance metrics: average bit-rate, average bit-rate oscillations, re-buffer ratio to quantify the achieved video quality of experience \cite{Spiteri-2019-from-theory-to-practice-sabre, Yin-2015-a-control-theoritic-approach, Dobrian-2013-understanding-the-impact-of-video-quality}.
 
 In addition, we run tcpdump and record all packets on the client and the server, so we can reconstruct the network activity.
 
-We expect that the profiles using New Congestion Window Validation will have better defined and denser clusters of the available link capacity, as measured by the client while connections not using New Congestion Window Validation will not be able to always accurately measure the link capacity. This would result in a more sparse and weaker confidence interval. We expect to observe less accurate measurements for video chunk requests immediately following an idle period. This is because standard TCP Reno re-sets its congestion window and slow start threshold states once such inactive period is detected.
 
 \todo{Results}
 
@@ -674,7 +676,7 @@ We expect that the profiles using New Congestion Window Validation will have bet
 
 \begin{figure}
     \centering
-    % \includegraphics{figures/Throughput_Precise_FTTP.pdf}
+    \includegraphics{figures/Throughput_Precise_FTTP.pdf}
     \caption{Calculated Throughput FTTP}
     \label{fig:throughput-precise-FTTP}
 \end{figure}
@@ -695,7 +697,7 @@ We expect that the profiles using New Congestion Window Validation will have bet
 
 \begin{figure}
     \centering
-    % \includegraphics{figures/Throughput_Safe_FTTP.pdf}
+    \includegraphics{figures/Throughput_Safe_FTTP.pdf}
     \caption{Advertised Throughput FTTP}
     \label{fig:throughput-safe-FTTP}
 \end{figure}
@@ -716,7 +718,7 @@ We expect that the profiles using New Congestion Window Validation will have bet
 
 \begin{figure}
     \centering
-    % \includegraphics{figures/Average_Bitrate_FTTP.pdf}
+    \includegraphics{figures/Average_Bitrate_FTTP.pdf}
     \caption{Average Bit-rate FTTP}
     \label{fig:avg-bitrate-FTTP}
 \end{figure}
@@ -737,7 +739,7 @@ We expect that the profiles using New Congestion Window Validation will have bet
 
 \begin{figure}
     \centering
-    % \includegraphics{figures/Average_Oscillations_FTTP.pdf}
+    \includegraphics{figures/Average_Oscillations_FTTP.pdf}
     \caption{ Bit-rate Oscillation FTTP}
     \label{fig:avg-oscillation-FTTP}
 \end{figure}
