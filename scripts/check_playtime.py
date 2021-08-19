@@ -22,7 +22,8 @@ def check_playtime(mpd_location, dash_js_location):
         outcome = 'failed'
         print("Video playtime significantly deviates from expected playtime")
 
-    with open(os.path.join(root, 'video_duration_%s' % outcome), 'w'): pass
+    with open(os.path.join(root, 'video_duration_%s' % outcome), 'w') as f:
+        f.write("Played video for: %s\nExpected: %s" % (play_time, play_time_expected))
     
     if outcome == 'failed':
         print("Video played for longer than expected")
