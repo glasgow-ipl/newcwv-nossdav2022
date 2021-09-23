@@ -5,7 +5,7 @@ echo ${vreno_loaded}
 
 if [ -z "${vreno_loaded}" ]; then
     cd /home/vagrant/verbose_reno
-    make
+    sudo make
     sudo make install_vreno
 fi
 

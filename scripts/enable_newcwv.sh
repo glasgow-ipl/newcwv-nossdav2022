@@ -5,7 +5,7 @@ echo ${newcwv_loaded}
 
 if [ -z "${newcwv_loaded}" ]; then
     cd /home/vagrant/newcwv
-    make
+    sudo make
     sudo make install_newcwv
 fi
 
