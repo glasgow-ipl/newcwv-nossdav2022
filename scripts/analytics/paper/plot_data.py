@@ -8,7 +8,7 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.
 sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 
 import parse_access_log
-from constants import QUALITY_TO_BPS_3S
+from constants import QUALITY_TO_BPS_3S_IETF
 import parse_dash_log
 
 
@@ -40,8 +40,8 @@ def plot_data(root, links, algs, numbers, extension = 'png'):
                 access_log = os.path.join(path, 'nginx_access.log')
                 values = parse_access_log.get_qualities(access_log)
                 times, qualities = zip(*values)
-                avg_bitrate = parse_access_log.calculate_avg_bitrate(qualities, QUALITY_TO_BPS_3S)
-                avg_oscillation = parse_access_log.calculate_avg_oscillation(qualities, QUALITY_TO_BPS_3S)
+                avg_bitrate = parse_access_log.calculate_avg_bitrate(qualities, QUALITY_TO_BPS_3S_IETF)
+                avg_oscillation = parse_access_log.calculate_avg_oscillation(qualities, QUALITY_TO_BPS_3S_IETF)
                 bitrates.append(avg_bitrate / 1_000_000)
                 oscillations.append(avg_oscillation / 1_000_000)
 
@@ -92,20 +92,26 @@ def plot_data(root, links, algs, numbers, extension = 'png'):
             plt.xticks(range(1, len(algs) + 1), algs)
             
             if link == 'DSL':
-                y_top = 15
+                # y_top = 15
                 link_cap = 10
             elif link == 'FTTC':
-                y_top = 60
+                # y_top = 60
                 link_cap = 50
             elif link == 'FTTP':
-                y_top = 200
+                # y_top = 200
                 link_cap = 145
 
-            if mname == 'Average Oscillations':
-                y_top = 1
+            # if mname == 'Average Oscillations':
+            #     y_top = 1
             
-            if mname == 'Average Bitrate' and link == 'FTTP':
-                y_top = 60
+            # if mname == 'Average Bitrate' and link == 'FTTP':
+            #     y_top = 60
+
+            print(mname,  plt.gca().get_ylim())
+            plt.ylim(bottom=0)
+            # if y_top:
+            #     plt.ylim(top=y_top)
+            #     y_top = None
 
             # plt.ylim(top = y_top)
             if mname.startswith('Throughput'):
@@ -121,4 +127,4 @@ def plot_data(root, links, algs, numbers, extension = 'png'):
             plt.clf()
 
 if __name__ == '__main__':
-    plot_data(root='/vagrant/logs/newcwv/test2', links=['FTTP'], algs=['newcwv', 'vreno'], numbers=range(1, 11), extension='pdf')
+    plot_data(root='/vagrant/logs/newcwv/test2', links=['DSL', 'FTTP', 'FTTC'], algs=['newcwv', 'vreno'], numbers=range(1, 11), extension='pdf')
