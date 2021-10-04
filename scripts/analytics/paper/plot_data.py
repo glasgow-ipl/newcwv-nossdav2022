@@ -32,6 +32,8 @@ def plot_data(root, links, algs, numbers, extension = 'png'):
     throughput_safe = []
     thr_precise = []
     thr_safe = []
+    combined = {}
+    
     for link in links:
         for alg in algs:
             for number in numbers:
@@ -80,7 +82,6 @@ def plot_data(root, links, algs, numbers, extension = 'png'):
         metrics[link] = tmp
         tmp = {}
 
-    # print(metrics)
 
     for link in links:
         for mname in metric_names:
@@ -89,6 +90,9 @@ def plot_data(root, links, algs, numbers, extension = 'png'):
             for alg in algs:
                 data.append(metrics[link][alg][mname])
             plt.boxplot(data)
+            aggregate = combined.get(mname, {})
+            aggregate[link] = data
+            combined[mname] = aggregate
             plt.xticks(range(1, len(algs) + 1), algs)
             
             if link == 'DSL':
@@ -121,10 +125,37 @@ def plot_data(root, links, algs, numbers, extension = 'png'):
             # plt.ylim(bottom=0)
             plt.gcf().set_size_inches(3.2, 3)
 
+            # print(aggregate.keys())
+
             mname = mname.replace(' ', '_')
             save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures')
             plt.savefig(os.path.join(save_path, f'{mname}_{link}.{extension}'), bbox_inches='tight')
             plt.clf()
+    
+    max_y = 0
+    axs = []
+    for idx, name in enumerate(combined['Average Bitrate'].keys()):
+        if idx == 1:
+            plt.ylabel(f'Average Bitrate (Mbps)')
+        ax = plt.subplot(1, 3, idx+1)
+        ax.boxplot(combined['Average Bitrate'][name])
+        if max_y < max(ax.get_ylim()):
+            max_y = max(ax.get_ylim())
+        ax.set_title(name)
+        plt.xticks(range(1, len(algs) + 1), algs)
+        axs.append(ax)
+
+    for ax in axs:
+        ax.set_ylim(bottom=0, top=max_y)
+
+    save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures')
+    # fname = os.path.join(save_path, f'test.{extension}')
+    # print(fname)
+    plt.gcf().set_size_inches(8, 3)
+    plt.savefig(os.path.join(save_path, f'test.pdf'), bbox_inches='tight')
+    plt.clf()
+
+    print("done")
 
 if __name__ == '__main__':
-    plot_data(root='/vagrant/logs/newcwv/test2', links=['DSL', 'FTTP', 'FTTC'], algs=['newcwv', 'vreno'], numbers=range(1, 11), extension='pdf')
+    plot_data(root='/vagrant/logs/newcwv/test2', links=['DSL', 'FTTP', 'FTTC'], algs=['newcwv', 'vreno'], numbers=range(1, 11), extension='png')

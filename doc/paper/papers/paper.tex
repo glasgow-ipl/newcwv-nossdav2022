@@ -512,23 +512,31 @@ New Congestion Window Validation reuses the ideas of RFC 2861 with the main diff
 
 The most notable difference between RFCs 2861 and 7661 is the reaction after an idle period (Figure \ref{fig:idle_effect}). An RFC 2861 validated connection would re-enter slow-start and thus temporary overwhelm the network to figure out the capacity limit. In contrast, an RFC 7661 connection would enter slow-start until it reaches its old slow-start threshold and begin congestion avoidance phase. For short bursty traffic such as video chunks in HTTP adaptive streaming. The lack of this initial window spike could mean more accurate capacity estimations for applications that performed this dividing the artifact's size by the transfer period.
 
-In HTTP adaptive streaming's dash.js, the throughput algorithm does exactly that. Dash.js is a reference implementation provided by the DASH industry forum \cite{online-dashif}. The throughput algorithm is one of the three main adaptive strategies provided by dash.js. It is also currently a component of the default streaming strategy. In summary, the throughput algorithm selects appropriate bit-rate representation to request by measuring the throughput for the currently downloaded video chunks. It estimates the throughput by dividing the receive time by the size of the received element. Therefore, the throughput algorithm benefits greatly from having accurate bandwidth estimations. Currently, throughput is not the default strategy but a part of it, as relying solely on the bandwidth might force the player to switch to a lower representation much earlier than needed to reflect some temporary congestion on the link. However, the throughput algorithm is essential component of the current default strategy and also is being heavily used for streams that cannot provide sufficient buffer ahead of time (e.g., live-streaming). Therefore, improving the performance of the throughput algorithm benefits the whole streaming ecosystem.
+In HTTP adaptive streaming's dash.js, the throughput algorithm does exactly that. Dash.js is a reference implementation provided by the DASH industry forum \cite{online-dashif}. The throughput algorithm is one of the three main adaptive strategies provided by dash.js. It is also currently a component of the default streaming strategy. In summary, the throughput algorithm selects appropriate bit-rate representation to request by measuring the throughput for the currently downloaded video chunks. It estimates the throughput by dividing the receipt time by the size of the received element. Therefore, the throughput algorithm benefits greatly from having accurate bandwidth estimations. Currently, throughput is not the default strategy but a part of it, as relying solely on the bandwidth might force the player to switch to a lower representation much earlier than needed to reflect some temporary congestion on the link. However, the throughput algorithm is essential component of the current default strategy and also is being heavily used for streams that cannot provide sufficient buffer ahead of time (e.g., live-streaming). Therefore, improving the performance of the throughput algorithm benefits the whole streaming ecosystem.
 
 \begin{itemize}
     \item This means that using New Congestion Window Validation, it could obtain more accurate results.
 \end{itemize}
 
-\section{Motivation}
+\section{NewCwv Impact on video}
+\label{sec:newcwv-impact}
 
-A ``standard'' TCP connection (as defined in the Kernel). Would erase all of its state after an idle period longer than the RTO, while a new congestion window validation one would sustain knowledge of its slow start threshold. This results in the former connection re-entering its slow start phase, drastically increasing its sending rate and relying on packet loss to adjust to the connection's current capacity. On the other hand, a new congestion window validation controlled connection would only re-enter slow start up to its previously known slow start threshold.
+A ``standard'' TCP connection (as defined in the Kernel). Would erase all of its state after an idle period longer than the RTO, while a new congestion window validation one would sustain knowledge of its slow start threshold. This results in the former connection re-entering its slow start phase, drastically increasing its sending rate and relying on packet loss to adjust to the connection's current capacity. On the other hand, a new congestion window validation controlled connection would only re-enter slow start up to its previously known slow start threshold and enter congestion avoidance phase after that.
 
-With video sized chunks, these two transfer patterns would yield different results about the connection's transfer rate. The former one would have lower consistency if that scenario is repeated over time, while the latter will have a more precise confidence interval.
+Essentially, this allows a New Congestion Window validated connection to resume operation as normal faster. Furthermore, by not searching for the available capacity after a timeout period, these connections are less aggressive to the middleboxes and account for fewer lost packets caused by overfilling the network buffers. In addition, by preventing the initial CWND spike after a timeout period, New Congestion Window validated connections' average bandwidth converges to this of the link capacity faster. This is critical, given that HTTP video leverages this on-off behaviour often and in our dataset individual video chunks were not bigger than 120 kilobytes for the highest video encoding.
 
-Since dash.js is performing similar evaluations as the ones described above to gauge the connection's throughput, this lead us to believe that connections that do not use new congestion window validation might show higher variance in estimating the connection's capacity after an idle period. In turn, such a wrong estimation could trick the bit-rate selection algorithm into requesting a too conservative or a too aggressive video chunk. The next chapter summarizes our findings on whether our hypothesis currently holds for DSL, FTTC, and FTTP connections.   
+Fast converging estimation mechanisms for the average link capacity is critical in environments such as dash.js. In it one of the adaptation algorithms heavily relies on this method. It uses the estimation from one chunk to decide what encoding should be requested next. In other words, an accurate representation would enable the adaptation algorithm to request the correct encoding more often. Equally, an imprecise calculation could potentially force a wrong encoding to be requested hindering the QoE.
 
-\section{Results}
 
-As discussed in section \ref{sec:introduction} the goal of this paper is to show whether New Congestion Window Validation's improved transport performance translates to a smoother video playout in the application layer. Our hypothesis is that the faster congestion window resumption will enable the client to obtain more precise bandwidth estimations. In turn, when the throughput estimation is the main or only heuristic (e.g., the throughput algorithm in dash.js) that determines the next video chunk's encoding this more precise estimations could lead to fewer encoding switches and higher average bit-rate. Both of which directly impact the achieved QoE.
+Our hypothesis is that New Congestion Window validated connections would be able to more accurately estimate the link capacity which could potentially also yield higher QoE.
+
+% With video sized chunks, these two transfer patterns would yield different results about the connection's transfer rate. The former one would have lower consistency if that scenario is repeated over time, while the latter will have a more precise confidence interval.
+
+% Since dash.js is performing similar evaluations as the ones described above to gauge the connection's throughput, this lead us to believe that connections that do not use new congestion window validation might show higher variance in estimating the connection's capacity after an idle period. In turn, such a wrong estimation could trick the bit-rate selection algorithm into requesting a too conservative or a too aggressive video chunk. The next chapter summarizes our findings on whether our hypothesis currently holds for DSL, FTTC, and FTTP connections.  
+
+\section{Experimental Setup}
+
+As discussed in section \ref{sec:newcwv-impact} the goal of this paper is to show whether New Congestion Window Validation's improved transport performance translates to a smoother video playout in the application layer. Our hypothesis is that the faster congestion window resumption will enable the client to obtain more precise bandwidth estimations. In turn, when the throughput estimation is the main or only quality selecting heuristic (e.g., the throughput algorithm in dash.js) these more precise estimations could lead to fewer quality switches and higher average bit-rate. Both directly impacting the achieved QoE.
 
 To evaluate our hypothesis we design an experiment using a dumbbell topology. One of the ends acts as a server (nginx 1.18 HTTP/2) and the other one as a client (dash.js 3.1.3 in Firefox 91). The adaptation algorithm is set to throughput as explained in the previous paragraph. The throughput algorithm is currently one of the two adaptive strategies used in dash.js's default selection algorithm. Therefore, evaluating the impact of the throughput algorithm directly carries these findings to the default ``DYNAMIC'' algorithm. 
 
@@ -546,7 +554,17 @@ From application's point of view, during each simulation we collect the client's
 
 In addition, we run tcpdump and record all packets on the client and the server, so we can reconstruct the network activity.
 
-+++++++++
+\section{Results}
+
+Figures \ref{fig:throughput-precise-DSL} - \ref{fig:throughput-precise-FTTP} show the distribution of the different throughput calculations as estimated by the dash client. Figures \ref{fig:throughput-safe-DSL} - \ref{fig:throughput-safe-FTTP} show the distribution of different throughput calculations as exposed by the dash client. Refer to the discussion below for more details on how these are different.
+
+Figures \ref{fig:avg-bitrate-DSL} - \ref{fig:avg-oscillation-FTTP} show metrics immediately impacting the video QoE. In particular, Figures \ref{fig:avg-bitrate-DSL} - \ref{fig:avg-bitrate-FTTP} show the achieved average bitrate by the video stream over the full playout duration. Finally, Figures \ref{fig:avg-oscillation-DSL} - \ref{fig:avg-oscillation-FTTP} show the bitrate oscillation index for both streams.
+
+In summary, we found that New CWV connections have a lower value for the estimated throughput, compared to Reno connections without newcwv. \todo{More on that when I add the distribution plots}
+Additionally, we found that in the tested network scenarios Reno with and without New CWV displayed similar performance in terms of the QoE defining metrics. Therefore, in these cases New CWV makes no difference w.r.t. the QoE or video smoothness.
+
+
+\todo{Distribution plots for the throughput}
 
 Dash.js exposes one value for the calculated bandwidth but internally works with two. The advertised one is an average based on previous calculations and then further reduced by the so-called ``safety'' factor. The second, internal one is the immediate bandwidth that the client calculates after the video chunk transfer was completed. In Figures \ref{fig:throughput-precise-DSL} to \ref{fig:throughput-safe-FTTP} we report both and call the former advertised and the latter calculated throughput.
 
@@ -727,6 +745,13 @@ Figures (\ref{fig:avg-bitrate-DSL} to \ref{fig:avg-oscillation-FTTP}) represent 
     \caption{Advertised Throughput FTTP}
     \label{fig:throughput-safe-FTTP}
 \end{figure}
+
+\begin{figure*}
+  \centering
+  \includegraphics{figures/test.pdf}
+  \caption{Average Bitrate Per Connection Type}
+  \label{fig:combined}
+\end{figure*}
 
 \begin{figure}
     \centering
