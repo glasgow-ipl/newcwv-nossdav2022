@@ -422,18 +422,21 @@ We structure the remainder of this paper as follows. In section 2, we introduce 
 %     \label{fig:idle_cwnd_rto}
 % \end{figure*}
 
-\begin{figure*}
-    \centering
-    % \includegraphics{figures/cwv_idle.pdf}
-    \caption{Idle Period CWND effect}
-    \label{fig:idle_effect}
-\end{figure*}
+% \begin{figure*}
+%     \centering
+%     \includegraphics{figures/cwv_idle.pdf}
+%     \caption{Idle Period CWND effect}
+%     \label{fig:idle_effect}
+% \end{figure*}
 
 \begin{itemize}
     \item Congestion Window Validation
     \item New Congestion Window Validation
     \item DASH Throughput
 \end{itemize}
+
+
+\todo{Diagram of Newcwv for Reno}
 
 % Test case1:
 
@@ -523,15 +526,22 @@ In HTTP adaptive streaming's dash.js, the throughput algorithm does exactly that
 
 In this paper, we focus primarily on HTTP adaptive video. Thus, we chose TCP Reno, as it reported to be the congestion control algorithm used by Netflix \cite{Mishra-2019-the-great-internet-tcp-congestion-control-census}. Additionally, Netflix is reported to have been the most impactful company in terms of network bandwidth with it accounting for over 12.6\% of the Internet traffic overall \cite{Sandvine-2019-global-internet-report}.
 
-TCP Reno connections as defined in the Kernel 5.4 series. Would reset its slow-start threshold if an idle period longer than the RTO occurs. In contrast, new congestion window validation one would sustain its slow start threshold. This means that the former can resume transferring at its previous sending rate quicker. Thus, New Congestion window validation assumes and is optimised for link stability.
 
-Furthermore, by not re-entering slow-start, New Congestion Window Validated connections remove the inherent initial capacity overshooting of TCP Reno and do not aggressively take more space in the network buffers, thus, being less aggressive overall and less likely to cause bufferbloat \cite{Gettys-2011-bufferbloat}. In addition, for smaller data transfers (e.g., video chunks: 120 Kb for the highest encoding) the initial overshooting could introduce higher variance to systems trying to estimate the average throughput as a factor of the data size and the transfer time. In other words, we expect connections running New Congestion Window Validation to result in more stable capacity estimations from the HTTP client.
+TCP Reno connections as implemented in the Linux Kernel 5.4 series reset their slow-start threshold if an idle period longer than the RTO occurs. In contrast, As discussed in Section \ref{sec:background} New Congestion Window Validation sustains its slow start threshold during such periods. This means that the former can resume transferring at its previous sending rate quicker. Thus, New Congestion window validation assumes and is optimised for link stability.
+
+\todo{Buffer bloated network less impactful on the latency}
+
+\todo{In Excessive buffer networks New CWV is less likely to fill the buffers}
+
+Furthermore, by not re-entering slow-start, New Congestion Window Validated connections remove the inherent initial capacity overshooting of TCP Reno and do not aggressively take more space in the network buffers, thus, being less aggressive overall and less likely to cause bufferbloat \cite{Gettys-2011-bufferbloat}. In addition, for smaller data transfers (e.g., video chunks: 120 Kb for the highest encoding \todo{Where does that come from}) the initial overshooting could introduce higher variance to systems trying to estimate the average throughput as a factor of the data size and the transfer time. In other words, we expect connections running New Congestion Window Validation to result in more stable capacity estimations from the HTTP client.
 
 Stable bandwidth estimation is critical for environments such as dash.js. In those, the client attempts to gauge the current link capacity by dividing the downloaded content over the download period. It then uses this estimation as a heuristic to predict what video quality should be requested next. Naturally, this means that more stable estimations are likely to result in the same quality being requested, while higher variance might end up requesting too high or too low quality and so, respectively, failing to meet its deadlines or not fully utilising the link capacity. In either case this would directly impact the achieved video QoE.
 
 Our hypothesis is that New Congestion Window validated connections would help client to obtain stabler capacity estimations which could result in more consistent representation choices.
 
 \section{Experimental Setup}
+
+\todo{Move to section 3. 1st paragraph. To evaluate our Hypothesis - section 4 first sentence}
 
 As discussed in section \ref{sec:newcwv-impact} the goal of this paper is to show whether New Congestion Window Validation's improved transport performance translates to a smoother video playout in the application layer. Our hypothesis is that the faster congestion window resumption will enable the client to obtain more precise bandwidth estimations. In turn, when the throughput estimation is the main or only quality selecting heuristic (e.g., the throughput algorithm in dash.js) these more precise estimations could lead to fewer quality switches and higher average bit-rate. Both directly impacting the achieved QoE.
 
@@ -704,96 +714,117 @@ Figures (\ref{fig:avg-bitrate-DSL} to \ref{fig:avg-oscillation-FTTP}) represent 
 %     \item For completeness, we can say that we have measured the re-buffer duration, which I also expect to be the same across all scenarios.
 % \end{itemize}
 
-\begin{figure}
-    \centering
-    \includegraphics{figures/Throughput_Precise_DSL.pdf}
-    \caption{Calculated Throughput DSL}
-    \label{fig:throughput-precise-DSL}
-\end{figure}
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{figures/throughput_precise.pdf}
+  \caption{Calculated Throughput}
+  \label{fig:throughput-precise}
+\end{figure*}
 
-\begin{figure}
-    \centering
-    \includegraphics{figures/Throughput_Precise_FTTC.pdf}
-    \caption{Calculated Throughput FTTC}
-    \label{fig:throughput-precise-FTTC}
-\end{figure}
+% \begin{figure}
+%     \centering
+%     \includegraphics{figures/Throughput_Precise_DSL.pdf}
+%     \caption{Calculated Throughput DSL}
+%     \label{fig:throughput-precise-DSL}
+% \end{figure}
 
-\begin{figure}
-    \centering
-    \includegraphics{figures/Throughput_Precise_FTTP.pdf}
-    \caption{Calculated Throughput FTTP}
-    \label{fig:throughput-precise-FTTP}
-\end{figure}
+% \begin{figure}
+%     \centering
+%     \includegraphics{figures/Throughput_Precise_FTTC.pdf}
+%     \caption{Calculated Throughput FTTC}
+%     \label{fig:throughput-precise-FTTC}
+% \end{figure}
 
-\begin{figure}
-    \centering
-    \includegraphics{figures/Throughput_Safe_DSL.pdf}
-    \caption{Advertised Throughput DSL}
-    \label{fig:throughput-safe-DSL}
-\end{figure}
-
-\begin{figure}
-    \centering
-    \includegraphics{figures/Throughput_Safe_FTTC.pdf}
-    \caption{Advertised Throughput FTTC}
-    \label{fig:throughput-safe-FTTC}
-\end{figure}
-
-\begin{figure}
-    \centering
-    \includegraphics{figures/Throughput_Safe_FTTP.pdf}
-    \caption{Advertised Throughput FTTP}
-    \label{fig:throughput-safe-FTTP}
-\end{figure}
+% \begin{figure}
+%     \centering
+%     \includegraphics{figures/Throughput_Precise_FTTP.pdf}
+%     \caption{Calculated Throughput FTTP}
+%     \label{fig:throughput-precise-FTTP}
+% \end{figure}
 
 \begin{figure*}
   \centering
-  \includegraphics{figures/test.pdf}
+  \includegraphics[width=\textwidth]{figures/throughput_safe.pdf}
+  \caption{Advertised Throughput}
+  \label{fig:throughput-safe}
+\end{figure*}
+
+% \begin{figure}
+%     \centering
+%     \includegraphics{figures/Throughput_Safe_DSL.pdf}
+%     \caption{Advertised Throughput DSL}
+%     \label{fig:throughput-safe-DSL}
+% \end{figure}
+
+% \begin{figure}
+%     \centering
+%     \includegraphics{figures/Throughput_Safe_FTTC.pdf}
+%     \caption{Advertised Throughput FTTC}
+%     \label{fig:throughput-safe-FTTC}
+% \end{figure}
+
+% \begin{figure}
+%     \centering
+%     \includegraphics{figures/Throughput_Safe_FTTP.pdf}
+%     \caption{Advertised Throughput FTTP}
+%     \label{fig:throughput-safe-FTTP}
+% \end{figure}
+
+\begin{figure*}
+  \centering
+  \includegraphics{figures/Average_Bitrate.pdf}
   \caption{Average Bitrate Per Connection Type}
   \label{fig:combined}
 \end{figure*}
 
-\begin{figure}
-    \centering
-    \includegraphics{figures/Average_Bitrate_DSL.pdf}
-    \caption{Average Bit-rate DSL}
-    \label{fig:avg-bitrate-DSL}
-\end{figure}
+% \begin{figure}
+%     \centering
+%     \includegraphics{figures/Average_Bitrate_DSL.pdf}
+%     \caption{Average Bit-rate DSL}
+%     \label{fig:avg-bitrate-DSL}
+% \end{figure}
 
-\begin{figure}
-    \centering
-    \includegraphics{figures/Average_Bitrate_FTTC.pdf}
-    \caption{Average Bit-rate FTTC}
-    \label{fig:avg-bitrate-FTTC}
-\end{figure}
+% \begin{figure}
+%     \centering
+%     \includegraphics{figures/Average_Bitrate_FTTC.pdf}
+%     \caption{Average Bit-rate FTTC}
+%     \label{fig:avg-bitrate-FTTC}
+% \end{figure}
 
-\begin{figure}
-    \centering
-    \includegraphics{figures/Average_Bitrate_FTTP.pdf}
-    \caption{Average Bit-rate FTTP}
-    \label{fig:avg-bitrate-FTTP}
-\end{figure}
+% \begin{figure}
+%     \centering
+%     \includegraphics{figures/Average_Bitrate_FTTP.pdf}
+%     \caption{Average Bit-rate FTTP}
+%     \label{fig:avg-bitrate-FTTP}
+% \end{figure}
 
-\begin{figure}
-    \centering
-    \includegraphics{figures/Average_Oscillations_DSL.pdf}
-    \caption{ Bit-rate Oscillation DSL}
-    \label{fig:avg-oscillation-DSL}
-\end{figure}
+\begin{figure*}
+  \centering
+  \includegraphics{figures/Average_Oscillations.pdf}
+  \caption{Bit-rate Oscillation}
+  \label{fig:avg-oscillation}
+\end{figure*}
 
-\begin{figure}
-    \centering
-    \includegraphics{figures/Average_Oscillations_FTTC.pdf}
-    \caption{ Bit-rate Oscillation FTTC}
-    \label{fig:avg-oscillation-FTTC}
-\end{figure}
+% \begin{figure}
+%     \centering
+%     \includegraphics{figures/Average_Oscillations_DSL.pdf}
+%     \caption{ Bit-rate Oscillation DSL}
+%     \label{fig:avg-oscillation-DSL}
+% \end{figure}
 
-\begin{figure}
-    \centering
-    \includegraphics{figures/Average_Oscillations_FTTP.pdf}
-    \caption{ Bit-rate Oscillation FTTP}
-    \label{fig:avg-oscillation-FTTP}
-\end{figure}
+% \begin{figure}
+%     \centering
+%     \includegraphics{figures/Average_Oscillations_FTTC.pdf}
+%     \caption{ Bit-rate Oscillation FTTC}
+%     \label{fig:avg-oscillation-FTTC}
+% \end{figure}
+
+% \begin{figure}
+%     \centering
+%     \includegraphics{figures/Average_Oscillations_FTTP.pdf}
+%     \caption{ Bit-rate Oscillation FTTP}
+%     \label{fig:avg-oscillation-FTTP}
+% \end{figure}
 
 % For all experiments, we stream a 635 second long SDR video from an Nginx server. The client is a Firefox instance using dash.js 3.1.3 using default parameters and "abrThroughput" as its adaptive strategy. We chose to set this strategy as it is one of the three current main ones and would best reflect the impact of accurate link capacity estimations. The video is encoded in 3 second chunks as prior work identified this gives the best trade-off in optimising network load, while minimising video stalls. 
 
