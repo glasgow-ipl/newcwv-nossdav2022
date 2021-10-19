@@ -1,39 +1,15 @@
-import socket
-import struct
 
 import BaseHTTPServer
 import SimpleHTTPServer
 import SocketServer
-# For monitoriong CPU usage
-#import psutil
-import time
-import os
 
 import json
+import sys
 
 PORT = 8000
 
-# Returns TCP_INFO encoded structure
-# for exact unpack format and size, check TCP_INFO struct at /usr/include/linux/tcp.h
-
-# 7 -> is_app_limited
-# 14 -> RCV_SSTRESH
-# 17 -> SND_SSTRESH
-# 18 -> SND_CWND
-
-# def getTCPInfo(s):
-#     fmt_14_04 = "B"*7+"I"*21
-#     fmt_18_04 = "B"*8+"I"*21
-
-#     desired = fmt_18_04
-
-#     struct_size = struct.calcsize(desired)
-
-#     info = s.getsockopt(socket.IPPROTO_TCP, socket.TCP_INFO, struct_size)
-#     x = struct.unpack(desired, info)
-#     return "app_limited: %s, RCV_SSTRESH: %s, SND_SSTRESH: %s, SND_CWND: %s" % (x[7], x[21], x[24], x[25])
-
 class MyHttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+
     def do_OPTIONS(self):           
         self.send_response(200, "ok")       
         self.send_header('Access-Control-Allow-Origin', '*')                
@@ -42,23 +18,33 @@ class MyHttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == '/end':
-            print("Stopping watchdog (GET)")
-            self.server.server_close()
+            self.server.clients -= 1
+            if self.server.clients == 0:
+                self.server.server_close()
+            else:
+                print("Waiting for %s clients to finish before terminating..." % self.server.clients)
 
 
     def do_POST(self):
+        cli_addr = self.client_address[0]
+        cli_addr.replace('.', '_')
         if self.path == '/end':
+            self.server.clients -= 1
+            if self.server.clients == 0:
+                print("Stopping watchdog (POST)")
+                self.server.server_close()
+            else:
+                print("Waiting for %s clients to finish before terminating..." % self.server.clients)
+            
             self.data_string = self.rfile.read(int(self.headers['Content-Length']))
             data = json.loads(self.data_string)
-            with open('dashjs_metrics.json', 'w') as f:
+            with open('dashjs_metrics_client_%s.json' % cli_addr, 'w') as f:
                 json.dump(data, f)
 
-            print("Stopping watchdog (POST)")
-            self.server.server_close()
         elif self.path == '/estimates':
             self.data_string = self.rfile.read(int(self.headers['Content-Length']))
             data = json.loads(self.data_string)
-            with open('dashjs_estimates.json', 'w') as f:
+            with open('dashjs_estimates_client_%s.json' % cli_addr, 'w') as f:
                 json.dump(data, f)
 
             print("Got estimates", data)
@@ -66,14 +52,16 @@ class MyHttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.data_string = self.rfile.read(int(self.headers['Content-Length']))
             data = json.loads(self.data_string)
             print("got data %s" % data)
-            with open('event_log.json', 'w') as f:
+            with open('event_log_%s.json' % cli_addr, 'w') as f:
                 json.dump(data, f)
 
 
 
 def start_server():
+    clients = int(sys.argv[1]) if len(sys.argv) > 1 else 1
     handler = MyHttpHandler
     httpd = SocketServer.TCPServer(("", PORT), handler)
+    httpd.clients = clients
 
     try:
         httpd.serve_forever() 

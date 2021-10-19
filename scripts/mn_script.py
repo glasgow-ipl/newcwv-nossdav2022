@@ -45,6 +45,8 @@ class DumbbellTopo( Topo ):
     _hosts = 0
 
     def build( self, n=2 ):
+        if n != 2:
+            print("Building topo with %s nodes" % n)
         s1 = self.addSwitch( 's1' )
         s2 = self.addSwitch( 's2' )
         hosts = []
@@ -61,8 +63,9 @@ class DumbbellTopo( Topo ):
         print(bdp) 
 
         # Leaving non-bottleneck links to run at maximum capacity with default parameters
-        self.addLink( hosts[0], s1)#, bw=bw, delay='%dms' % delay, max_queue_size=bdp)
-        self.addLink( hosts[1], s2)#, bw=bw, delay='%dms' % delay, max_queue_size=bdp)
+        for i in range(len(hosts)):
+            self.addLink(hosts[i], s1 if i % 2 == 0 else s2)#, bw=bw, delay='%dms' % delay, max_queue_size=bdp)
+
         self.addLink( s1, s2, bw=bw, delay='%dms' % (RTT/2), max_queue_size=bdp)
 
 
@@ -87,13 +90,13 @@ def test_change_bw():
 
     setLogLevel('info')
 
-def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_location=None, dash_alg=None, ignore_link_loss=None):
+def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_location=None, dash_alg=None, ignore_link_loss=None, clients=1):
     "Create network and run simple performance test"
 
     # Create a list to keep logging events
     logger = []
     # Create Topology
-    topo = DumbbellTopo()
+    topo = DumbbellTopo(n=4)
     net = Mininet( topo=topo,
                host=CPULimitedHost, link=TCLink)
     logger.append('initial link speed: %sMbps' % bw_init)
@@ -109,6 +112,7 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
     net.pingAll()
 
     server, client = net.get( 'h1', 'h2' ) # Hosts
+    extra_client = net.get('h4')
     s1, s2 = net.get('s1', 's2') # Switches
 
     # If congestion control algorithm was specified, enable that algortithm on the server
@@ -120,6 +124,7 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
 
 
     server.cmdPrint("sudo sysctl net.ipv4.tcp_congestion_control")
+
 #    server.cmdPrint("sudo sysctl net.core.default_qdisc")
 
 
@@ -168,13 +173,13 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
     server_log_name = os.path.join(pcap_path, "nginx_access.log")
 
     # optionally add buffer=32k (or some other big value for access_log)
-    config_str = "events { } http { log_format tcp_info '$time_local, $msec, \"$request\", $status, $tcpinfo_rtt, $tcpinfo_rttvar, \"$tcpinfo_snd_cwnd\", $tcpinfo_rcv_space, $body_bytes_sent, \"$http_referer\", \"$http_user_agent\"'; keepalive_requests 10000; server { listen " + server_ip + "; root /vagrant; access_log " + server_log_name + " tcp_info;} }"
+    config_str = "events { } http { log_format tcp_info '$time_local, $msec, \"$request\", $status, $tcpinfo_rtt, $tcpinfo_rttvar, \"$tcpinfo_snd_cwnd\", $tcpinfo_rcv_space, $body_bytes_sent, \"$http_referer\", \"$http_user_agent\", $remote_addr'; keepalive_requests 10000; server { listen " + server_ip + "; root /vagrant; access_log " + server_log_name + " tcp_info;} }"
     print(config_str)
     with open('nginx-conf.conf', 'w') as f:
         f.write(config_str)
 
     # Start watchdog service
-    server.cmd("python watchdog.py &")
+    server.cmd("python watchdog.py %s &" % clients)
     watchdog_pid = server.cmd("echo $!")
     print("watchdog pid: %s" % watchdog_pid)
 
@@ -196,20 +201,27 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
 
     firefox_output = os.path.join(pcap_path, "browser_out.txt")
     firefox_log_format = "timestamp,rotate:200,nsHttp:5,cache2:5,nsSocketTransport:5,nsHostResolver:5,cookie:5"
-    client_cmd = 'su - %s -c "firefox --headless --private http://%s/scripts/player.html --MOZ_LOG=%s --MOZ_LOG_FILE=%s &"' % (user, server_ip, firefox_log_format, firefox_output)
 
-    client_cmd = 'su - %s -c "xvfb-run firefox --private http://%s/scripts/player.html&"' % (user, server_ip)
+    client_cmd = 'su - %s -c "xvfb-run -a -e /vagrant/xvfb_error.log firefox --private http://%s/scripts/player.html http://%s/scripts/player.html&"' % (user, server_ip, server_ip)
+    if clients > 1:
+        client_cmd = 'su - %s -c "xvfb-run -a -e /vagrant/xvfb_error.log firefox -P client1 --private http://%s/scripts/player.html http://%s/scripts/player.html&"' % (user, server_ip, server_ip)
+        extra_client.cmd(client_cmd)
+        client_cmd = 'su - %s -c "xvfb-run -a -e /vagrant/xvfb_error.log firefox -P client2 --private http://%s/scripts/player.html http://%s/scripts/player.html&"' % (user, server_ip, server_ip)
+        client.cmd(client_cmd)
+    else:
+        # client_cmd_extra = 'su - %s -c "xvfb-run -n 91 -e /vagrant/xvfb_error.log firefox --private http://%s/scripts/player.html http://%s/scripts/player.html&"' % (user, server_ip, server_ip)
 
-    print ("Client cmd: %s " % client_cmd)
+        print ("Client cmd: %s " % client_cmd)
 
-    # print('1. Open xterm at the client. Run: xterm h2.\n2. In the newly opened terminal, open Firefox as a non-root user by running: su - %s -c "firefox"\n2. In firefox navigate to http://%s/scripts/player.html and wait for the video to playout' % (user, server_ip) )
-    # CLI(net)
+        # print('1. Open xterm at the client. Run: xterm h2.\n2. In the newly opened terminal, open Firefox as a non-root user by running: su - %s -c "firefox"\n2. In firefox navigate to http://%s/scripts/player.html and wait for the video to playout' % (user, server_ip) )
+        # CLI(net)
 
-    # msg = "starting client at: %s" % datetime.datetime.now().strftime(precise_time_str)
-    # print(msg)
-    # logger.append(msg)
+        # msg = "starting client at: %s" % datetime.datetime.now().strftime(precise_time_str)
+        # print(msg)
+        # logger.append(msg)
 
-    client.cmd(client_cmd)
+        client.cmd(client_cmd)
+ 
     #client.cmdPrint('python /vagrant/scripts/scratch/start_chrome.py')
 
     # print('Waiting for 80 seconds')
@@ -309,6 +321,8 @@ if __name__ == '__main__':
 
     parser.add_argument('--ignore_link_loss', help="1 if link loss characteristics should be ignored 0 to apply them. Default 0", default=0, type=int)
 
+    parser.add_argument('--clients', help="Number of concurrent video streams to run", default=1, type=int)
+
     args = parser.parse_args()
     log_dir = args.log_dir
 
@@ -322,5 +336,7 @@ if __name__ == '__main__':
 
     ignore_link_loss = args.ignore_link_loss
 
+    clients = args.clients
+
     setLogLevel( 'info' )
-    doSimulation(log_root=log_dir, cong_alg=cong_alg, network_model_file=network_model_file, dash_alg=dash_alg, mpd_location=mpd_location, ignore_link_loss=ignore_link_loss)
+    doSimulation(log_root=log_dir, cong_alg=cong_alg, network_model_file=network_model_file, dash_alg=dash_alg, mpd_location=mpd_location, ignore_link_loss=ignore_link_loss, clients=clients)
