@@ -16,6 +16,7 @@ import server
 import math
 import argparse
 import generate_player
+import glob
 
 import subprocess
 
@@ -95,6 +96,17 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
 
     # Create a list to keep logging events
     logger = []
+
+    # Check if there are enough profiles to run firefox
+    print("Checking if firefox can initiate %s clients" % clients)
+
+    for i in range(clients):
+        if not glob.glob('/home/vagrant/.mozilla/firefox/*client%s' % (i + 1)):
+            print("Creating Firefox Client Profile %s" % (i + 1))
+            os.system('xvfb-run -e /vagrant/scripts/xvfb_error.log firefox -CreateProfile client%s' % (i + 1))
+
+    print("Ok")
+
     # Create Topology
     topo = DumbbellTopo(n=4)
     net = Mininet( topo=topo,
@@ -111,8 +123,11 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
     print("Testing network connectivity")
     net.pingAll()
 
-    server, client = net.get( 'h1', 'h2' ) # Hosts
-    extra_client = net.get('h4')
+    server = net.get( 'h1' ) # server
+    client_hosts = []
+    for i in range(clients):
+        client_hosts.append(net.get('h%s' % ((i+1) * 2))) # clients
+
     s1, s2 = net.get('s1', 's2') # Switches
 
     # If congestion control algorithm was specified, enable that algortithm on the server
@@ -135,13 +150,12 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
 
     print('tcpdump -s 200 -w %s' % os.path.join(pcap_path, 'server.pcap'))
 
-    s_name = os.path.join(pcap_path, 'server.pcap')
-    c_name = os.path.join(pcap_path, 'client.pcap')
-
     print ('ethtool -K ' + str(server.intf()) + ' gso off')
 
     # Disable segment offloading for hosts
-    for host in [server, client]:
+    hosts = [server]
+    hosts.extend(client_hosts)
+    for host in hosts:
         host.cmd('ethtool -K ' + str(server.intf()) + ' gso off')
         host.cmd('ethtool --offload ' + str(server.intf()) + ' tso off')
 
@@ -155,9 +169,17 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
 
 
     # Start pcaps on the client and the server
+    s_name = os.path.join(pcap_path, 'server.pcap')
     server_pcap = server.popen('tcpdump -s 200 -w %s -z gzip' % s_name)
-    print(type(server_pcap))
-    client_pcap = client.popen('tcpdump -s 200 -w %s -z gzip' % c_name)
+
+    client_pcaps = []    
+    for client in client_hosts:
+        c_addr = client.IP()
+        c_addr.replace('.', '_')
+        c_name = os.path.join(pcap_path, 'client_%s.pcap' % c_addr)
+        client_pcap = client.popen('tcpdump -s 200 -w %s -z gzip' % c_name)
+        client_pcaps.append(client_pcap)
+
     # Get server/client config settings
     wd = str(server.cmd('pwd'))[:-2]
     user = os.getlogin()
@@ -184,9 +206,9 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
     print("watchdog pid: %s" % watchdog_pid)
 
     # Start HTTP server
-    server_out = server.cmd("sudo nginx -c " + wd + "/nginx-conf.conf &")
+    server.cmd("sudo nginx -c " + wd + "/nginx-conf.conf &")
 
-    # Create player.html
+    # Create player.html for clients to use
     generate_player.generate_player(mpd_location=mpd_location, dash_alg=dash_alg)
 
     time.sleep(3)
@@ -195,58 +217,16 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
     bw_manager.start()
     time.sleep(1)
 
-    # bw_utils.changeLinkBw(s1, s2, bw_speed, topo._RTT)
-
-    net.iperf((client, server))
-
     firefox_output = os.path.join(pcap_path, "browser_out.txt")
     firefox_log_format = "timestamp,rotate:200,nsHttp:5,cache2:5,nsSocketTransport:5,nsHostResolver:5,cookie:5"
 
-    client_cmd = 'su - %s -c "xvfb-run -a -e /vagrant/xvfb_error.log firefox --private http://%s/scripts/player.html http://%s/scripts/player.html&"' % (user, server_ip, server_ip)
-    if clients > 1:
-        client_cmd = 'su - %s -c "xvfb-run -a -e /vagrant/xvfb_error.log firefox -P client1 --private http://%s/scripts/player.html http://%s/scripts/player.html&"' % (user, server_ip, server_ip)
-        extra_client.cmd(client_cmd)
-        client_cmd = 'su - %s -c "xvfb-run -a -e /vagrant/xvfb_error.log firefox -P client2 --private http://%s/scripts/player.html http://%s/scripts/player.html&"' % (user, server_ip, server_ip)
+    for idx, client in enumerate(client_hosts):
+        client_cmd = 'su - %s -c "xvfb-run -a -e /vagrant/xvfb_error.log firefox -P client%s --private http://%s/scripts/player.html http://%s/scripts/player.html&"' % (user, (idx + 1), server_ip, server_ip)
         client.cmd(client_cmd)
-    else:
-        # client_cmd_extra = 'su - %s -c "xvfb-run -n 91 -e /vagrant/xvfb_error.log firefox --private http://%s/scripts/player.html http://%s/scripts/player.html&"' % (user, server_ip, server_ip)
 
         print ("Client cmd: %s " % client_cmd)
-
-        # print('1. Open xterm at the client. Run: xterm h2.\n2. In the newly opened terminal, open Firefox as a non-root user by running: su - %s -c "firefox"\n2. In firefox navigate to http://%s/scripts/player.html and wait for the video to playout' % (user, server_ip) )
-        # CLI(net)
-
-        # msg = "starting client at: %s" % datetime.datetime.now().strftime(precise_time_str)
-        # print(msg)
-        # logger.append(msg)
-
         client.cmd(client_cmd)
  
-    #client.cmdPrint('python /vagrant/scripts/scratch/start_chrome.py')
-
-    # print('Waiting for 80 seconds')
-    # time.sleep(80)
-
-
-    #month-day-hour:minute:second:microsecond
-    # bw_speed = .5
-    # msg = 'changing BW %s %s ' % (bw_speed, datetime.datetime.now().strftime(precise_time_str))
-    # print(msg)
-    # logger.append(msg)
-
-    # changeLinkBw(s1, s2, bw_speed, topo._RTT)
-    # net.iperf((client, server))
-    # time.sleep(60)
-
-    # bw_speed = 15
-    # msg = 'changing BW to %s %s ' % (bw_speed, datetime.datetime.now().strftime(precise_time_str) )
-    # print(msg)
-
-    # logger.append(msg)    
-    # changeLinkBw(s1, s2, bw_speed, topo._RTT)
-    # net.iperf((client, server))
-    # time.sleep(80)
-    
     msg = "Waiting for server to finish %s" % datetime.datetime.now().strftime(precise_time_str)
     print(msg)
     logger.append(msg)
@@ -256,14 +236,16 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
     logger.append("terminating")
 
     server_pcap.terminate()
-    client_pcap.terminate()
+    for client_pcap in client_pcaps:
+        client_pcap.terminate()
 
     time.sleep(2)
 
     bw_manager.join()
 
     print("Stopping firefox instances")
-    client.cmd("sudo killall firefox")
+    for client in client_hosts:
+        client.cmd("sudo killall firefox")
 
 
     print("Stopping server")
@@ -272,9 +254,9 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
     net.stop()
 
     # Move dashjs_metrics file to relevant directory
-    if os.path.exists('dashjs_metrics.json'):
+    if glob.glob('dashjs_metrics_*.json'):
         print("Saving dash metrics to %s" % pcap_path)
-        os.system('mv dashjs_metrics.json %s' % pcap_path)
+        os.system('mv dashjs_metrics_*.json %s' % pcap_path)
     else:
         print("Dash metrics not found")
 
@@ -289,9 +271,6 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
     # copy kernel logs
     os.system('sudo cp /var/log/kern.log %s' % pcap_path)
 
-    # remove player.html
-    # os.remove('player.html')
-
     logger_path = os.path.join(pcap_path, 'events.log')
     logger = '\n'.join(logger)
     with open(logger_path, 'w') as f:
@@ -300,11 +279,12 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
     os.system('su - %s -c "/vagrant/scripts/quitff.sh"' % user)
 
     # if we got to here everything is good, remove the event_log.json we do not need it anymore
-    if os.path.exists("event_log.json"):
-        print("Removing event log")
-        os.remove("event_log.json")
+    for entry in glob.glob("event_log_*.json"):
+        print("Removing event log %s" % entry)
+        os.remove(entry)
 
-    check_playtime(os.path.join('/vagrant', mpd_location), os.path.join(pcap_path, 'dashjs_metrics.json'))
+    for entry in glob.glob(os.path.join(pcap_path, 'dashjs_metrics_client_*')):
+        check_playtime(os.path.join('/vagrant', mpd_location), entry)
 
 
 if __name__ == '__main__':

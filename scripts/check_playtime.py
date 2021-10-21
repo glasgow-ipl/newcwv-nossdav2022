@@ -23,7 +23,7 @@ def check_playtime(mpd_location, dash_js_location):
         print("Video playtime significantly deviates from expected playtime")
 
     with open(os.path.join(root, 'video_duration_%s' % outcome), 'w') as f:
-        f.write("Played video for: %s\nExpected: %s" % (play_time, play_time_expected))
+        f.write("%s played video for: %s\nExpected: %s" % (dash_js_location, play_time, play_time_expected))
     
     if outcome == 'failed':
         print("Video played for longer than expected")
@@ -31,5 +31,4 @@ def check_playtime(mpd_location, dash_js_location):
 
 
 if __name__ == '__main__':
-    check_playtime('/vagrant/data/ietf/bbb.mpd', '/vagrant/logs/newcwv/FTTP/1_newcwv/dashjs_metrics.json')
-    # check_playtime(sys.argv[1], sys.argv[2])
+    check_playtime('/vagrant/data/ietf/bbb.mpd', '/vagrant/logs/single/newcwv/dashjs_metrics_client_10.0.0.2.json')
