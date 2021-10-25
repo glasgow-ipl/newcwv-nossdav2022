@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import os
 import numpy as np
 import sys
+import json
 
 PACKAGE_PARENT = '..'
 SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__))))
@@ -21,6 +22,138 @@ def plot_data(root, links, algs, numbers, extension = 'png'):
     plt.clf()
     BAR_WIDTH = .35
     plt.gcf().set_size_inches(3.2, 3)
+
+    tmp_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp')
+    os.makedirs(tmp_path, exist_ok=True)
+    tmp_path = os.path.join(tmp_path, 'parsed_data.json')
+    with open(tmp_path, 'r') as f:
+        metrics = json.load(f)
+        print("Parsed data saved")    
+
+    combined = {}
+    for link in links:
+        for mname in metric_names:
+            plt.ylabel(f'{mname} (Mbps)')
+            data = []
+            for alg in algs:
+                data.append(metrics[link][alg][mname])
+            plt.boxplot(data)
+            aggregate = combined.get(mname, {})
+            aggregate[link] = data
+            combined[mname] = aggregate
+            plt.xticks(range(1, len(algs) + 1), algs)
+            
+            if link == 'DSL':
+                # y_top = 15
+                link_cap = 10
+            elif link == 'FTTC':
+                # y_top = 60
+                link_cap = 50
+            elif link == 'FTTP':
+                # y_top = 200
+                link_cap = 145
+
+            # if mname == 'Average Oscillations':
+            #     y_top = 1
+            
+            # if mname == 'Average Bitrate' and link == 'FTTP':
+            #     y_top = 60
+
+            print(mname,  plt.gca().get_ylim())
+            plt.ylim(bottom=0)
+            # if y_top:
+            #     plt.ylim(top=y_top)
+            #     y_top = None
+
+            # plt.ylim(top = y_top)
+            if mname.startswith('Throughput'):
+                plt.axhline(y=link_cap, label='Link Capacity')
+                plt.legend()
+
+            # plt.ylim(bottom=0)
+            plt.gcf().set_size_inches(3.2, 3)
+
+            # print(aggregate.keys())
+
+            mname = mname.replace(' ', '_')
+            save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures')
+            plt.savefig(os.path.join(save_path, f'{mname}_{link}.{extension}'), bbox_inches='tight')
+            plt.clf()
+    
+
+    ####################
+
+    print(combined.keys())
+
+    save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp')
+    for thr_metric in ['Throughput Precise', 'Throughput Safe']:
+        for idx, link in enumerate(['DSL', 'FTTC', 'FTTP']):
+            ax = plt.subplot(1, 3, idx+1)
+            ax.set_title(link)
+
+            if link == 'DSL':
+                bin_l = 7
+                bin_h = 10
+            elif link == 'FTTC':
+                bin_l = 20
+                bin_h = 60
+            elif link == 'FTTP':
+                bin_l = 20
+                bin_h = 200
+
+            newcwv = np.array(combined[thr_metric][link][0])
+            bins = np.arange(bin_l, bin_h, 0.1)
+            bins = list(bins)
+            ax.hist(newcwv, bins=bins, alpha=.7, density=True, label='newcwv')
+
+            reno = np.array(combined[thr_metric][link][1])
+            ax.hist(reno, bins=bins, color='red', alpha=.7, density=True, label='vreno')
+
+
+            from matplotlib.ticker import PercentFormatter
+
+            ax.get_yaxis().set_major_formatter(PercentFormatter(10))
+            ax.set_xlabel("Bandwidth (Mbps)")
+
+        plt.gcf().set_size_inches(12, 3)
+        plt.legend()
+        fig_name = thr_metric.lower().replace(' ', '_')
+        extension = 'pdf'
+        plt.savefig(os.path.join(save_path, f'{fig_name}.{extension}'), bbox_inches='tight')
+        plt.clf()
+
+    max_y = 0
+    axs = []
+    a = 0
+    for m_name in metric_names:
+        for idx, name in enumerate(combined[m_name].keys()):
+            if idx == 1:
+                plt.ylabel(f'{m_name} (Mbps)')
+            ax = plt.subplot(1, 3, idx+1)
+            ax.boxplot(combined[m_name][name])
+            if max_y < max(ax.get_ylim()):
+                max_y = max(ax.get_ylim())
+            ax.set_title(name)
+            plt.xticks(range(1, len(algs) + 1), algs)
+            axs.append(ax)
+
+        for ax in axs:
+            ax.set_ylim(bottom=0, top=max_y)
+
+        save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures')
+        plt.gcf().set_size_inches(8, 3)
+        a += 1
+        plt.savefig(os.path.join(save_path, f'test_{a}.{extension}'), bbox_inches='tight')
+        plt.clf()
+
+    print("done")
+
+
+def parse_data(root, links, algs, numbers, extension = 'png'):
+    metric_names = ['Average Bitrate',
+                        'Average Oscillations',
+                        'Throughput Precise',
+                        'Throughput Safe']
 
     metrics = {}
 
@@ -82,80 +215,25 @@ def plot_data(root, links, algs, numbers, extension = 'png'):
         metrics[link] = tmp
         tmp = {}
 
-
-    for link in links:
-        for mname in metric_names:
-            plt.ylabel(f'{mname} (Mbps)')
-            data = []
-            for alg in algs:
-                data.append(metrics[link][alg][mname])
-            plt.boxplot(data)
-            aggregate = combined.get(mname, {})
-            aggregate[link] = data
-            combined[mname] = aggregate
-            plt.xticks(range(1, len(algs) + 1), algs)
-            
-            if link == 'DSL':
-                # y_top = 15
-                link_cap = 10
-            elif link == 'FTTC':
-                # y_top = 60
-                link_cap = 50
-            elif link == 'FTTP':
-                # y_top = 200
-                link_cap = 145
-
-            # if mname == 'Average Oscillations':
-            #     y_top = 1
-            
-            # if mname == 'Average Bitrate' and link == 'FTTP':
-            #     y_top = 60
-
-            print(mname,  plt.gca().get_ylim())
-            plt.ylim(bottom=0)
-            # if y_top:
-            #     plt.ylim(top=y_top)
-            #     y_top = None
-
-            # plt.ylim(top = y_top)
-            if mname.startswith('Throughput'):
-                plt.axhline(y=link_cap, label='Link Capacity')
-                plt.legend()
-
-            # plt.ylim(bottom=0)
-            plt.gcf().set_size_inches(3.2, 3)
-
-            # print(aggregate.keys())
-
-            mname = mname.replace(' ', '_')
-            save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures')
-            plt.savefig(os.path.join(save_path, f'{mname}_{link}.{extension}'), bbox_inches='tight')
-            plt.clf()
     
-    max_y = 0
-    axs = []
-    for idx, name in enumerate(combined['Average Bitrate'].keys()):
-        if idx == 1:
-            plt.ylabel(f'Average Bitrate (Mbps)')
-        ax = plt.subplot(1, 3, idx+1)
-        ax.boxplot(combined['Average Bitrate'][name])
-        if max_y < max(ax.get_ylim()):
-            max_y = max(ax.get_ylim())
-        ax.set_title(name)
-        plt.xticks(range(1, len(algs) + 1), algs)
-        axs.append(ax)
+    tmp_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp')
+    os.makedirs(tmp_path, exist_ok=True)
+    tmp_path = os.path.join(tmp_path, 'parsed_data.json')
+    with open(tmp_path, 'w') as f:
+        json.dump(metrics, f, indent=4)
+        print("Parsed data saved")
 
-    for ax in axs:
-        ax.set_ylim(bottom=0, top=max_y)
 
-    save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures')
-    # fname = os.path.join(save_path, f'test.{extension}')
-    # print(fname)
-    plt.gcf().set_size_inches(8, 3)
-    plt.savefig(os.path.join(save_path, f'test.pdf'), bbox_inches='tight')
-    plt.clf()
+def main():
+    root = '/vagrant/logs/newcwv/test2'
+    links = ['DSL', 'FTTC', 'FTTP']
+    algs = ['newcwv', 'vreno']
+    numbers = range(1, 11)
+    extension = 'png'
+    # parse_data(root=root, links=links, algs=algs, numbers=numbers, extension=extension)
+    plot_data(root, links, algs, numbers, extension)
 
-    print("done")
+
 
 if __name__ == '__main__':
-    plot_data(root='/vagrant/logs/newcwv/test2', links=['DSL', 'FTTP', 'FTTC'], algs=['newcwv', 'vreno'], numbers=range(1, 11), extension='png')
+    main()

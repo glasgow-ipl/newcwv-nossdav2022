@@ -312,6 +312,7 @@ def plot_metrics(root, links, algs, numbers):
     # kernel_log_path = os.path.join(dir_path, 'kern.log')
     # cwnds = parse_kern_log.get_cwnds(kernel_log_path, video_only=False, disconnect=-1)
 
+    return
     index = np.arange(len(metrics))
 
     link_labels = []
@@ -383,8 +384,8 @@ def plot_metrics(root, links, algs, numbers):
     plt.savefig(save_path, bbox_inches='tight')
 
 if __name__ == '__main__':
-    plot_metrics('/vagrant/logs/newcwv/test', links=['FTTP', 'FTTC', 'DSL'], algs=['newcwv', 'vreno'], numbers=range(1, 11))
+    # plot_metrics('/vagrant/logs/newcwv/test2', links=['FTTP'], algs=['newcwv', 'vreno'], numbers=range(1, 11))
     # for i in range(3, 6):
     #     plot_cwnd_evolution('/vagrant/logs/tmp/curtis/DSL', i)
     # plot_cwnd_evolution('/vagrant/logs/newcwv/FTTP', 1)
-    std_deviation('/vagrant/logs/newcwv/', ['DSL', 'FTTC', 'FTTP'], ['newcwv', 'vreno'], range(1, 8))
+    std_deviation('/vagrant/logs/newcwv/test2/', ['FTTP'], ['newcwv', 'vreno'], range(1, 11))
