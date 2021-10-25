@@ -524,10 +524,11 @@ In HTTP adaptive streaming's dash.js, the throughput algorithm does exactly that
 \section{NewCwv Impact on video}
 \label{sec:newcwv-impact}
 
-In this paper, we focus primarily on HTTP adaptive video. Thus, we chose TCP Reno, as it reported to be the congestion control algorithm used by Netflix \cite{Mishra-2019-the-great-internet-tcp-congestion-control-census}. Additionally, Netflix is reported to have been the most impactful company in terms of network bandwidth with it accounting for over 12.6\% of the Internet traffic overall \cite{Sandvine-2019-global-internet-report}.
+The goal of this paper is to show whether New Congestion Window Validation's improved transport performance translates to a smoother video playout in the application layer. Our hypothesis is that the faster congestion window resumption will enable the client to obtain more precise bandwidth estimations. Consequently, when the throughput estimation is the main quality selecting heuristic (e.g., the throughput algorithm in dash.js) the improved precision could also lead to fewer quality switches and higher average bit-rate, directly impacting the achieved QoE.
 
+Since we are interested in the effect of the congestion control algorithms for HTTP video we conduct our simulations using TCP Reno, which is used by Netflix according to Mishra et al. \cite{Mishra-2019-the-great-internet-tcp-congestion-control-census}. Moreover, Netflix is reported to be the biggest contributor of HTTP adaptive video with 12.6\% of the Internet traffic overall according to the Sandvine's Global Internet Report \cite{Sandvine-2019-global-internet-report}.
 
-TCP Reno connections as implemented in the Linux Kernel 5.4 series reset their slow-start threshold if an idle period longer than the RTO occurs. In contrast, As discussed in Section \ref{sec:background} New Congestion Window Validation sustains its slow start threshold during such periods. This means that the former can resume transferring at its previous sending rate quicker. Thus, New Congestion window validation assumes and is optimised for link stability.
+TCP Reno as implemented in the Linux Kernel 5.4 resets its slow-start threshold if an idle period longer than the RTO occurs. In contrast, as discussed in Section \ref{sec:background} New Congestion Window Validation sustains its slow start threshold during such periods. This means that the former can resume transferring at its previous sending rate quicker. Thus, New Congestion window validation assumes and is optimised for link stability.
 
 \todo{Buffer bloated network less impactful on the latency}
 
@@ -540,10 +541,6 @@ Stable bandwidth estimation is critical for environments such as dash.js. In tho
 Our hypothesis is that New Congestion Window validated connections would help client to obtain stabler capacity estimations which could result in more consistent representation choices.
 
 \section{Experimental Setup}
-
-\todo{Move to section 3. 1st paragraph. To evaluate our Hypothesis - section 4 first sentence}
-
-As discussed in section \ref{sec:newcwv-impact} the goal of this paper is to show whether New Congestion Window Validation's improved transport performance translates to a smoother video playout in the application layer. Our hypothesis is that the faster congestion window resumption will enable the client to obtain more precise bandwidth estimations. In turn, when the throughput estimation is the main or only quality selecting heuristic (e.g., the throughput algorithm in dash.js) these more precise estimations could lead to fewer quality switches and higher average bit-rate. Both directly impacting the achieved QoE.
 
 To evaluate our hypothesis we design an experiment using a dumbbell topology. One of the ends acts as a server (nginx 1.18 HTTP/2) and the other one as a client (dash.js 3.1.3 in Firefox 91). The adaptation algorithm is set to throughput as explained in the previous paragraph. The throughput algorithm is currently one of the two adaptive strategies used in dash.js's default selection algorithm. Therefore, evaluating the impact of the throughput algorithm directly carries these findings to the default ``DYNAMIC'' algorithm. 
 
@@ -575,9 +572,6 @@ The throughput estimate that dash.js uses as a heuristic for which encoding shou
 
 In therms of the calculated throughput, it should be noted that the New Congestion Window Validation connections consistently report lower throughput estimations compared to their counterpart. We reason this comes from the fact that New Congestion Window Validated connections are less aggressive and do not send as many bursts over the link capacity as the alternative. In turn these episodes where Reno overshoots account for the higher overall reported link bitrate.
 
-% \todo{verify if statement below is correct}
-% Furthermore, our initial hypothesis that New Congestion Window Validated connections would yield more consistent link estimations is confirmed for the FTTC and FTTP scenarios, but interestingly pure Reno's confidence in the DSL connection is higher.
-
 Figures \ref{fig:avg-bitrate-DSL} - \ref{fig:avg-oscillation-FTTP} show metrics immediately impacting the video QoE. In particular, Figures \ref{fig:avg-bitrate-DSL} - \ref{fig:avg-bitrate-FTTP} show the achieved average bitrate by the video stream over the full playout duration. Finally, Figures \ref{fig:avg-oscillation-DSL} - \ref{fig:avg-oscillation-FTTP} show the bitrate oscillation index for both streams.
 
 Figures (\ref{fig:avg-bitrate-DSL} to \ref{fig:avg-oscillation-FTTP}) represent video QoE defining metrics. In these, we see that under the examined scenario with the given set of representations and link constraints Reno performs the same regardless of whether New Congestion Window validation is enabled.
@@ -601,17 +595,6 @@ Figures (\ref{fig:avg-bitrate-DSL} to \ref{fig:avg-oscillation-FTTP}) represent 
 
 
 % However, we note that at the transport level New CWV results in more predictable sending patterns with better defined boundaries and more granular durations of the periods where the channel is in idle or sending period. For comparison, when not using New CWV these channels are irregular and do not follow a set of patterns. This might suggest that using New CWV, the traffic might be more stable in the presence of cross traffic or when multiple video clients are competing over the same bottleneck link. To demonstrate this, I will conduct a simulation where two clients request video on the DSL link. The results so far show that the client would start requesting the 1080 encoding as it is the highest sustainable for the 10 Mbps provided by DSL. The expected behaviour is that with two competing players both clients should carry on requesting 1080, as the combined bandwidth constraint remains lower than the capacity.
-
-% \todo{ Simulation}
-
-% \idea{Next, I am planning on investigating the effect of the idle periods.\\
-% In specific:\\
-% \begin{itemize}
-%     \item How many idle periods are there during a simulation for a particular algorithm
-%     \item How long are the idle periods on average; For how long is the connection idle, i.e., sum of all idle periods
-%     \item What throughput is being reported before and after the idle period. Is the throughput before stable and the throughput after unstable? How long does it take to stabilise?
-% \end{itemize}}
-
 
 
 % To evaluate whether the hypothesis that more precise bandwidth estimations could improve streaming stability and to demonstrate to what extent inaccurate measurements contribute to playback instability when using the throughput algorithm we perform an experiment that emulates DSL and FTTC links.
@@ -661,86 +644,12 @@ Figures (\ref{fig:avg-bitrate-DSL} to \ref{fig:avg-oscillation-FTTP}) represent 
     \label{tab:experiments-video}
 \end{table}
 
-% \begin{figure}
-%     \centering
-%     \includegraphics{figures/average_bitrate.pdf}
-%     \caption{Average Bit-rate}
-%     \label{fig:avg-bitrate}
-% \end{figure}
-
-% \begin{itemize}
-%     \item Figure \ref{fig:avg-bitrate} notes:
-%     \item Based on the encodings I expect that the results for DSL and FTTP to be the same.
-%     \item Where New CWV might make a difference is to achieve higher average bitrate for the FTTC scenario, since the encoding rate is close to the link capacity.
-% \end{itemize}
-
-% \begin{figure}
-%     \centering
-%     \includegraphics{figures/average_oscillations.pdf}
-%     \caption{Bit-rate oscillation}
-%     \label{fig:bitrate-oscillation}
-% \end{figure}
-
-% \begin{itemize}
-%     \item Figure \ref{fig:bitrate-oscillation} notes:
-%     \item Again, for DSL and FTTP I expect oscillation to only occur at the beginning and otherwise be the same.
-%     \item For the FTTC scenario I would expect that both proposals will keep requesting the 1440 encoding, as dash.js would only switch to a higher quality if the average throughput goes beyond 52 Mbps. And neither of the algorithms overestimates the link capacity.
-% \end{itemize}
-
-
-% \begin{figure}
-%     \centering
-%     \includegraphics{figures/calculated_throughput.pdf}
-%     \caption{Estimated Throughput}
-%     \label{fig:estimated-throughput}
-% \end{figure}
-
-% \begin{figure}
-%     \centering
-%     \includegraphics{figures/calculated_safe_throughput.pdf}
-%     \caption{Estimated Safe Throughput}
-%     \label{fig:estimated-throughput-safe}
-% \end{figure}
-
-% \begin{itemize}
-%     \item Figure \ref{fig:estimated-throughput} notes:
-%     \item This is where I expect to see the real difference between New CWV and non New CWV transport.
-%     \item For all cases, I expect New CWV traffic to have an average estimate closer to the link rate.
-%     \item However, as Figures \ref{fig:bitrate-oscillation} and \ref{fig:bitrate-oscillation} show, that difference on its own is not able to make a difference to improve playback stability.
-% \end{itemize}
-
-% \begin{itemize}
-%     \item Additional notes:
-%     \item For completeness, we can say that we have measured the re-buffer duration, which I also expect to be the same across all scenarios.
-% \end{itemize}
-
 \begin{figure*}
   \centering
   \includegraphics[width=\textwidth]{figures/throughput_precise.pdf}
   \caption{Calculated Throughput}
   \label{fig:throughput-precise}
 \end{figure*}
-
-% \begin{figure}
-%     \centering
-%     \includegraphics{figures/Throughput_Precise_DSL.pdf}
-%     \caption{Calculated Throughput DSL}
-%     \label{fig:throughput-precise-DSL}
-% \end{figure}
-
-% \begin{figure}
-%     \centering
-%     \includegraphics{figures/Throughput_Precise_FTTC.pdf}
-%     \caption{Calculated Throughput FTTC}
-%     \label{fig:throughput-precise-FTTC}
-% \end{figure}
-
-% \begin{figure}
-%     \centering
-%     \includegraphics{figures/Throughput_Precise_FTTP.pdf}
-%     \caption{Calculated Throughput FTTP}
-%     \label{fig:throughput-precise-FTTP}
-% \end{figure}
 
 \begin{figure*}
   \centering
@@ -749,26 +658,10 @@ Figures (\ref{fig:avg-bitrate-DSL} to \ref{fig:avg-oscillation-FTTP}) represent 
   \label{fig:throughput-safe}
 \end{figure*}
 
-% \begin{figure}
-%     \centering
-%     \includegraphics{figures/Throughput_Safe_DSL.pdf}
-%     \caption{Advertised Throughput DSL}
-%     \label{fig:throughput-safe-DSL}
-% \end{figure}
+\todo{Same Plots for the y axis in Fig 1 and 2}
+\todo{Mean and Std deviation}
+\todo{99 percentile for the bandwidth}
 
-% \begin{figure}
-%     \centering
-%     \includegraphics{figures/Throughput_Safe_FTTC.pdf}
-%     \caption{Advertised Throughput FTTC}
-%     \label{fig:throughput-safe-FTTC}
-% \end{figure}
-
-% \begin{figure}
-%     \centering
-%     \includegraphics{figures/Throughput_Safe_FTTP.pdf}
-%     \caption{Advertised Throughput FTTP}
-%     \label{fig:throughput-safe-FTTP}
-% \end{figure}
 
 \begin{figure*}
   \centering
@@ -777,26 +670,6 @@ Figures (\ref{fig:avg-bitrate-DSL} to \ref{fig:avg-oscillation-FTTP}) represent 
   \label{fig:combined}
 \end{figure*}
 
-% \begin{figure}
-%     \centering
-%     \includegraphics{figures/Average_Bitrate_DSL.pdf}
-%     \caption{Average Bit-rate DSL}
-%     \label{fig:avg-bitrate-DSL}
-% \end{figure}
-
-% \begin{figure}
-%     \centering
-%     \includegraphics{figures/Average_Bitrate_FTTC.pdf}
-%     \caption{Average Bit-rate FTTC}
-%     \label{fig:avg-bitrate-FTTC}
-% \end{figure}
-
-% \begin{figure}
-%     \centering
-%     \includegraphics{figures/Average_Bitrate_FTTP.pdf}
-%     \caption{Average Bit-rate FTTP}
-%     \label{fig:avg-bitrate-FTTP}
-% \end{figure}
 
 \begin{figure*}
   \centering
@@ -805,26 +678,6 @@ Figures (\ref{fig:avg-bitrate-DSL} to \ref{fig:avg-oscillation-FTTP}) represent 
   \label{fig:avg-oscillation}
 \end{figure*}
 
-% \begin{figure}
-%     \centering
-%     \includegraphics{figures/Average_Oscillations_DSL.pdf}
-%     \caption{ Bit-rate Oscillation DSL}
-%     \label{fig:avg-oscillation-DSL}
-% \end{figure}
-
-% \begin{figure}
-%     \centering
-%     \includegraphics{figures/Average_Oscillations_FTTC.pdf}
-%     \caption{ Bit-rate Oscillation FTTC}
-%     \label{fig:avg-oscillation-FTTC}
-% \end{figure}
-
-% \begin{figure}
-%     \centering
-%     \includegraphics{figures/Average_Oscillations_FTTP.pdf}
-%     \caption{ Bit-rate Oscillation FTTP}
-%     \label{fig:avg-oscillation-FTTP}
-% \end{figure}
 
 % For all experiments, we stream a 635 second long SDR video from an Nginx server. The client is a Firefox instance using dash.js 3.1.3 using default parameters and "abrThroughput" as its adaptive strategy. We chose to set this strategy as it is one of the three current main ones and would best reflect the impact of accurate link capacity estimations. The video is encoded in 3 second chunks as prior work identified this gives the best trade-off in optimising network load, while minimising video stalls. 
 
