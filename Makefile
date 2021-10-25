@@ -7,14 +7,16 @@ IGNORE_LINK_LOSS=0
 
 REPEAT = 10
 RUNS = $(shell seq 1 ${REPEAT})
-ALGS = vreno newcwv
+ALGS = vreno newcwv reno
 LINKS = DSL FTTC FTTP
 
 LOGS = $(foreach link, ${LINKS}, $(foreach alg, ${ALGS}, $(foreach run_instance, ${RUNS}, ${ROOT}/logs/newcwv/${link}/${run_instance}_${alg}/nginx_access.log)))
 
-TEST_ALGS = vreno newcwv
+TEST_ALGS = reno
 
 TEST_LOGS = $(foreach link, ${LINKS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 10), ${ROOT}/logs/newcwv/test2/${link}/${run_instance}_${alg}/nginx_access.log)))
+
+MULTI_LOGS = $(foreach link, ${LINKS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 2), ${ROOT}/logs/clients/2/${link}/${run_instance}_${alg}/nginx_access.log)))
 
 # Encoding video
 
@@ -210,12 +212,24 @@ ${ROOT}/logs/newcwv/test2/DSL/%_reno/nginx_access.log: ${ROOT}/scripts/mn_script
 	@echo $@
 	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/links/DSL.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS)
 
+
+${ROOT}/logs/clients/2/DSL/%_vreno/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
+	@echo $@
+	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg vreno --network_model /vagrant/network_models/links/DSL.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients 2
+
+${ROOT}/logs/clients/2/DSL/%_newcwv/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
+	@echo $@
+	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/links/DSL.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients 2
+
+${ROOT}/logs/clients/2/DSL/%_reno/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
+	@echo $@
+	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/links/DSL.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients 2 
+
 ## FTTC
 
 ${ROOT}/logs/newcwv/FTTC/%_reno/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
 	@echo $@
 	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/links/FTTC.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS)
-
 
 ${ROOT}/logs/newcwv/test2/FTTC/%_vreno/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
 	@echo $@
@@ -228,6 +242,19 @@ ${ROOT}/logs/newcwv/test2/FTTC/%_newcwv/nginx_access.log: ${ROOT}/scripts/mn_scr
 ${ROOT}/logs/newcwv/test2/FTTC/%_reno/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
 	@echo $@
 	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/links/FTTC.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS)
+
+
+${ROOT}/logs/clients/2/FTTC/%_vreno/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
+	@echo $@
+	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg vreno --network_model /vagrant/network_models/links/FTTC.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients 2
+
+${ROOT}/logs/clients/2/FTTC/%_newcwv/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
+	@echo $@
+	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/links/FTTC.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients 2
+
+${ROOT}/logs/clients/2/FTTC/%_reno/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
+	@echo $@
+	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/links/FTTC.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients 2
 
 ## FTTP
 
@@ -243,13 +270,28 @@ ${ROOT}/logs/newcwv/test2/FTTP/%_reno/nginx_access.log: ${ROOT}/scripts/mn_scrip
 	@echo $@
 	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/links/FTTP.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS)
 
+
+${ROOT}/logs/newcwv/test2/FTTP/%_vreno/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
+	@echo $@
+	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg vreno --network_model /vagrant/network_models/links/FTTP.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients 2
+
+${ROOT}/logs/clients/2/FTTP/%_newcwv/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
+	@echo $@
+	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/links/FTTP.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients 2
+
+${ROOT}/logs/clients/2/FTTP/%_reno/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
+	@echo $@
+	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/links/FTTP.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients 2
+
 ${ROOT}/logs:
 	mkdir ${ROOT}/logs
 
 
 test: ${TEST_LOGS}
 	echo "Raaan test succcesssfullly"
-	
+
+multi_log: ${MULTI_LOGS}
+	echo "Completed"
 
 single_run: ${ROOT}/logs/single/newcwv/nginx_access.log
 	@echo "Single run executed successfully"
@@ -257,7 +299,7 @@ single_run: ${ROOT}/logs/single/newcwv/nginx_access.log
 
 ${ROOT}/logs/single/newcwv/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
 	@echo $@
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/links/FTTP.json --mpd_location $(MPD_LOCATION) --dash_alg ${DASH_ALG} --ignore_link_loss ${IGNORE_LINK_LOSS}
+	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/links/FTTP.json --mpd_location $(MPD_LOCATION) --dash_alg ${DASH_ALG} --ignore_link_loss ${IGNORE_LINK_LOSS} --clients 2
 
 ############################
 # Paper 
@@ -283,21 +325,24 @@ PDF_FILES = doc/paper/papers/paper.pdf
 # Paper BUILD dir
 PAPER_BUILD = doc/paper
 
+FIGURES_FOLDER = ${PAPER_BUILD}/figures
+
 # Tools to build before the PDF files. This is a list of executable files in
 # the bin/ directory:
 TOOLS = 
 
-FIGURES = doc/paper/figures/Average_Bitrate_FTTP.pdf doc/paper/figures/Average_Oscillations_FTTP.pdf doc/paper/figures/Throughput_Precise_FTTP.pdf doc/paper/figures/Throughput_Safe_FTTP.pdf
+FIGURES = ${FIGURES_FOLDER}/Average_Bitrate_DSL.pdf ${FIGURES_FOLDER}/Average_Bitrate_FTTC.pdf ${FIGURES_FOLDER}/Average_Bitrate_FTTP.pdf ${FIGURES_FOLDER}/Average_Oscillations_DSL.pdf ${FIGURES_FOLDER}/Average_Oscillations_FTTC.pdf ${FIGURES_FOLDER}/Average_Oscillations_FTTP.pdf ${FIGURES_FOLDER}/Throughput_Precise_DSL.pdf ${FIGURES_FOLDER}/Throughput_Precise_FTTC.pdf ${FIGURES_FOLDER}/Throughput_Precise_FTTP.pdf ${FIGURES_FOLDER}/Throughput_Safe_DSL.pdf ${FIGURES_FOLDER}/Throughput_Safe_FTTC.pdf ${FIGURES_FOLDER}/Throughput_Safe_FTTP.pdf
 
-figures: ${ROOT}/scripts/analytics/paper/plot_data.py
-	@echo 'Generating Figures'
-	/usr/bin/python3 $<
-	@echo 'Done'
 
-${FIGURES}: figures
+# figures: ${ROOT}/scripts/analytics/paper/plot_data.py ${TEST_LOGS}
+# 	@echo 'Generating Figures'
+# 	/usr/bin/python3 $<
+# 	@echo 'Done'
+
+# ${FIGURES}: figures
 
 # Master build rule:
-paper: check-make git-revision $(TOOLS) $(PDF_FILES) figures
+paper: check-make git-revision $(TOOLS) $(PDF_FILES)
 
 # =================================================================================================
 # Project specific rules to download files:
