@@ -103,12 +103,12 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
     for i in range(clients):
         if not glob.glob('/home/vagrant/.mozilla/firefox/*client%s' % (i + 1)):
             print("Creating Firefox Client Profile %s" % (i + 1))
-            os.system('xvfb-run -e /vagrant/scripts/xvfb_error.log firefox -CreateProfile client%s' % (i + 1))
+            os.system('su - vagrant -c "xvfb-run -e /vagrant/scripts/xvfb_error.log firefox -CreateProfile client%s"' % (i + 1))
 
     print("Ok")
 
     # Create Topology
-    topo = DumbbellTopo(n=4)
+    topo = DumbbellTopo(n=clients * 2)
     net = Mininet( topo=topo,
                host=CPULimitedHost, link=TCLink)
     logger.append('initial link speed: %sMbps' % bw_init)
