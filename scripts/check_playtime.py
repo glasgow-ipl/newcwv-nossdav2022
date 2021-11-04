@@ -15,6 +15,9 @@ def check_playtime(mpd_location, dash_js_location):
         dash_dic = json.load(f)
 
     play_time = dash_dic['play_time']
+    delay = dash_dic['total_delay']
+    delay += dash_dic['startup_delay']
+    play_time_expected += delay
     root = os.path.dirname(dash_js_location)
 
     outcome = 'passed'
