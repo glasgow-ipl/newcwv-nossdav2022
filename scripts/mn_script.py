@@ -253,6 +253,14 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
     print("Closing...")
     net.stop()
 
+
+    # Xvfb sometimes does not quit after its process has ended.
+    # For sanity and to preserve system memory, make sure all heavy processes are killed after each simulation
+    os.system("killall nginx")
+    os.system("killall firefox")
+    os.system("killall Xvfb")
+
+
     # Move dashjs_metrics file to relevant directory
     if glob.glob('dashjs_metrics_*.json'):
         print("Saving dash metrics to %s" % pcap_path)
