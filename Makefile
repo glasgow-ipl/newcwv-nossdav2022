@@ -331,8 +331,24 @@ FIGURES_FOLDER = ${PAPER_BUILD}/figures
 # the bin/ directory:
 TOOLS = 
 
-FIGURES = ${FIGURES_FOLDER}/Average_Bitrate_DSL.pdf ${FIGURES_FOLDER}/Average_Bitrate_FTTC.pdf ${FIGURES_FOLDER}/Average_Bitrate_FTTP.pdf ${FIGURES_FOLDER}/Average_Oscillations_DSL.pdf ${FIGURES_FOLDER}/Average_Oscillations_FTTC.pdf ${FIGURES_FOLDER}/Average_Oscillations_FTTP.pdf ${FIGURES_FOLDER}/Throughput_Precise_DSL.pdf ${FIGURES_FOLDER}/Throughput_Precise_FTTC.pdf ${FIGURES_FOLDER}/Throughput_Precise_FTTP.pdf ${FIGURES_FOLDER}/Throughput_Safe_DSL.pdf ${FIGURES_FOLDER}/Throughput_Safe_FTTC.pdf ${FIGURES_FOLDER}/Throughput_Safe_FTTP.pdf
+FIGURES = ${FIGURES_FOLDER}/Average_Bitrate_5_clients.pdf
 
+#TODO: Logs as a dependency here
+${FIGURES_FOLDER}/tmp/parsed_data.json: ${ROOT}/scripts/analytics/paper/plot_data.py
+	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --root /vagrant/logs/clients/5 --algs newcwv vreno --runs ${shell seq 1 10} --links ${LINKS} --parse 1 --target none
+
+#TODO need to fix parsed data dependency to allow for more clients
+${FIGURES_FOLDER}/Average_Bitrate_5_clients.pdf: ${FIGURES_FOLDER}/tmp/parsed_data.json
+	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "average bitrate" --extension pdf
+
+${FIGURES_FOLDER}/Average_Oscillations_5_clients.pdf: ${FIGURES_FOLDER}/tmp/parsed_data.json
+	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "average oscillations" --extension pdf
+
+${FIGURES_FOLDER}/Throughput_Precise_5_clients.pdf: ${FIGURES_FOLDER}/tmp/parsed_data.json
+	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "throughput precise" --extension pdf
+
+${FIGURES_FOLDER}/Throughput_Safe_5_clients.pdf: ${FIGURES_FOLDER}/tmp/parsed_data.json
+	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "throughput safe" --extension pdf
 
 # figures: ${ROOT}/scripts/analytics/paper/plot_data.py ${TEST_LOGS}
 # 	@echo 'Generating Figures'
