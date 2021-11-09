@@ -34,20 +34,25 @@ def get_qualities(access_log_path):
                 continue
             if 'favicon.ico' in rec[2]:
                 continue # in case favico request comes after video has started being downloaded
+            if any(x in rec[2] for x in ['bbb.mpd', 'dash.all.debug', 'player.html']):
+                continue # In case of multiple clients, static file requests could be made after a single stream already started downloading video
+
             quality = int(rec[2].split('/out')[0].split('/')[-1])
             chunk = rec[2].split('/out')[1].split('-')[1].split('.')[0]
             timestamp = float(rec[1].strip())
+
+            client_ip = rec[-1].strip()
 
             if chunk == 'init':
                 continue
             else:
                 # Ensures that if a follow-up request for the same chunk is made, we will record that
-                quality_dic[int(chunk)] = (timestamp, quality)
+                chunk_no = int(chunk)
+                tmp = quality_dic.get(client_ip, {})
+                tmp[chunk] = (timestamp, quality)
+                quality_dic[client_ip] = tmp
 
-
-    time_quality = [value for _key, value in sorted(quality_dic.items())]
-
-    return time_quality
+    return quality_dic
 
 
 def calculate_avg_bitrate(qualities, q_kbps_lookup):
