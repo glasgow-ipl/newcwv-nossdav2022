@@ -16,6 +16,7 @@ def check_playtime(mpd_location, dash_js_location):
 
     play_time = dash_dic['play_time']
     delay = dash_dic['total_delay']
+    delay += delay * .1 # In case of many rebuffering events allow, we are more linient and allow the OS more time to restart the video
     delay += dash_dic['startup_delay']
     play_time_expected += delay
     root = os.path.dirname(dash_js_location)
