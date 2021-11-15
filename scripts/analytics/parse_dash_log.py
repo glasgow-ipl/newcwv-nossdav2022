@@ -110,9 +110,15 @@ def get_total_stall_time(dash_log_file):
     total_stall_time = sum([x1 - x0 for x0, x1 in stalls])
     return total_stall_time
 
+
 def get_delay(dash_log_file):
      with open(dash_log_file) as f:
         return json.load(f)['total_delay']
+
+
+def get_playtime(dash_log_file):
+     with open(dash_log_file) as f:
+        return json.load(f)['play_time']
 
 
 def get_throughput_estimates(dash_log_file):
