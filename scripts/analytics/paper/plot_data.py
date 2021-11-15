@@ -37,7 +37,7 @@ def plot_boxplot(metric_name, data_aggregate, algs, clients, extension, ylabel=N
 
     save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures')
     plt.gcf().set_size_inches(8, 3)
-    fig_name = os.path.join(save_path, f'{metric_name.replace(" ", "_")}_{clients}_client{"s" if clients > 1 else ""}.{extension}')
+    fig_name = os.path.join(save_path, f'{metric_name.replace(" ", "_")}_{clients}_clients.{extension}')
     print(f"Saving {fig_name}")
     plt.savefig(fig_name, bbox_inches='tight')
     plt.clf()
@@ -82,9 +82,9 @@ def plot_stall_histogram(metric_name, data_aggregate, clients, extension):
 
     plt.gcf().set_size_inches(12, 3)
     plt.legend()
-    fig_name = metric_name.lower().replace(' ', '_')
-    save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp')
-    figname = os.path.join(save_path, f'{fig_name}_{clients}_client{"s" if clients > 1 else ""}.{extension}')
+    fig_name = metric_name.replace(' ', '_')
+    save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures')
+    figname = os.path.join(save_path, f'{fig_name}_{clients}_clients.{extension}')
     print(f"saving {figname}")
     plt.savefig(figname, bbox_inches='tight')
     plt.clf()
@@ -115,26 +115,80 @@ def plot_histogram(metric_name, data_aggregate, clients, extension):
 
     plt.gcf().set_size_inches(12, 3)
     plt.legend()
-    fig_name = metric_name.lower().replace(' ', '_')
-    save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp')
-    figname = os.path.join(save_path, f'{fig_name}_{clients}_client{"s" if clients > 1 else ""}.{extension}')
+    fig_name = metric_name.replace(' ', '_')
+    save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures')
+    figname = os.path.join(save_path, f'{fig_name}_{clients}_clients.{extension}')
     print(f"saving {figname}")
     plt.savefig(figname, bbox_inches='tight')
     plt.clf()
 
 
-def plot_data(links, algs, extension = 'png', target='all'):
+def plot_cdf(metric_name, data_aggregate, clients, extension):
+    for idx, link in enumerate(['DSL', 'FTTC', 'FTTP']):
+        ax = plt.subplot(1, 3, idx+1)
+        ax.set_title(link)
+
+        newcwv = np.array(data_aggregate[metric_name][link][0])
+        reno = np.array(data_aggregate[metric_name][link][1])
+        bin_l = min(min(newcwv), min(reno)) * .9
+        bin_h = max(np.percentile(newcwv, 99.9), np.percentile(reno, 99.9)) * 1.1
+
+        leap = .1
+        
+        bins = np.arange(bin_l, bin_h, leap)
+        bins = list(bins)
+
+        count, bins_count = np.histogram(newcwv, 100)
+        pdf = count / sum(count)
+        cdf = np.cumsum(pdf)
+        ax.plot(bins_count[1:], cdf, label='newcwv')
+
+        count, bins_count = np.histogram(reno, 100)
+        pdf = count / sum(count)
+        cdf = np.cumsum(pdf)
+        ax.plot(bins_count[1:], cdf, label='reno', color='red')
+        ax.axvline(0.44, linestyle='--', c='brown', label='480p')
+        ax.axvline(2.64, linestyle='--', c='b', label='720p')
+        ax.axvline(4.82, linestyle='--', c='g', label='1080p')
+
+        ax.set_ylim(bottom=0, top=1)
+        ax.set_xlim(left=0, right=bin_h)
+
+        # ax.hist(newcwv, bins=bins, alpha=.7, cumulative=True, histtype='step', label='newcwv')
+        # ax.hist(reno, bins=bins, color='red', alpha=.7, cumulative=True, histtype='step', label='vreno')
+        
+        ax.set_xlabel("Bandwidth (Mbps)")
+        if idx == 0:
+            ax.set_ylabel("CDF")
+
+    plt.gcf().set_size_inches(12, 3)
+    plt.legend()
+    fig_name = metric_name.lower().replace(' ', '_')
+    save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp')
+    figname = os.path.join(save_path, f'{fig_name}_{clients}_clients_cdf.{extension}')
+    print(f"saving {figname}")
+    plt.savefig(figname, bbox_inches='tight')
+    plt.clf()
+
+
+def plot_data(*, links, algs, extension = 'png', clients=0, target='all'):
+    if not clients:
+        print('Client argument must be supplied and different from 0', file=sys.stderr)
+        sys.exit(1)
     metric_names = ['Average Bitrate',
                         'Average Oscillations',
                         'Throughput Precise',
                         'Throughput Safe',
-                        'Average Stalls']
+                        'Rebuffer Ratio']
 
-    tmp_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp')
+    tmp_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp', str(clients))
     tmp_path = os.path.join(tmp_path, 'parsed_data.json')
+    print(f"Using file {tmp_path}")
     with open(tmp_path, 'r') as f:
         metrics = json.load(f)
         print("Parsed data loaded")
+        
+
 
     clients = metrics['clients']    
 
@@ -149,17 +203,17 @@ def plot_data(links, algs, extension = 'png', target='all'):
             aggregate[link] = data
             combined[mname] = aggregate
 
-
     if target.lower() == 'throughput precise' or target.lower() == 'all':
         plot_histogram('Throughput Precise', data_aggregate=combined, clients=clients, extension=extension)
     if target.lower() == 'throughput safe' or target.lower() == 'all':
         plot_histogram('Throughput Safe', data_aggregate=combined, clients=clients, extension=extension)
+        plot_cdf('Throughput Safe', data_aggregate=combined, clients=clients, extension=extension)
     if target.lower() == 'average bitrate' or target.lower() == 'all':
         plot_boxplot('Average Bitrate', combined, algs, clients, extension)
     if target.lower() == 'average oscillations' or target.lower() == 'all':
         plot_boxplot('Average Oscillations', combined, algs, clients, extension)
-    if target.lower() == 'average stalls' or target.lower() == 'all':
-        plot_stall_histogram('Average Stalls', data_aggregate=combined, clients=clients, extension=extension)
+    if target.lower() == 'rebuffer ratio' or target.lower() == 'all':
+        plot_boxplot('Rebuffer Ratio', combined, algs, clients, extension, ylabel='Rebuffer Ratio')
 
 
 def parse_data(root, links, algs, numbers):
@@ -219,7 +273,7 @@ def parse_data(root, links, algs, numbers):
                     thr_precise.extend([x / 1000 for x in precise_list]) # Mbps
                     thr_safe.extend([x / 1000 for x in safe_list]) # Mbps
                     
-                    delays.append(parse_dash_log.get_delay(metrics_path))
+                    delays.append(parse_dash_log.get_delay(metrics_path) / parse_dash_log.get_playtime(metrics_path) )
 
             print(f"Delays: {delays}")
             # Out of simulations calculate the average of the averages
@@ -227,7 +281,7 @@ def parse_data(root, links, algs, numbers):
                         'Average Oscillations': oscillations,
                         'Throughput Precise': thr_precise,
                         'Throughput Safe': thr_safe,
-                        'Average Stalls': delays,
+                        'Rebuffer Ratio': delays,
                         }
 
             bitrates = []
@@ -244,7 +298,7 @@ def parse_data(root, links, algs, numbers):
 
     metrics['clients'] = len(metric_files)
 
-    tmp_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp')
+    tmp_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp', str(metrics['clients']))
     os.makedirs(tmp_path, exist_ok=True)
     tmp_path = os.path.join(tmp_path, 'parsed_data.json')
     with open(tmp_path, 'w') as f:
@@ -258,14 +312,17 @@ def main():
     algs = ['newcwv', 'vreno']
     numbers = range(1, 11)
     extension = 'png'
-    # parse_data(root=root, links=links, algs=algs, numbers=numbers, extension=extension)
-    plot_data(links, algs, extension, target='average stalls')
+    clients = 5
+    parse_data(root=root, links=links, algs=algs, numbers=numbers)
+    plot_data(links, algs, extension, clients=clients, target='all')
 
 
 
 if __name__ == '__main__':
-    main()
-    sys.exit(1)
+    if len(sys.argv) == 1:
+        main()
+        sys.exit(0)
+
     parser = argparse.ArgumentParser(description="")
     
     parser.add_argument('--links', nargs='+', required=True)
@@ -277,8 +334,9 @@ if __name__ == '__main__':
 
     parser.add_argument('--parse', type=int, default=0)
     parser.add_argument('--extension', default='pdf')
-    parser.add_argument('--target', type=str.lower, choices=['all', 'none', 'average bitrate', 'average oscillations', 'throughput safe', 'throughput precise'], default='all')
-    
+    parser.add_argument('--target', type=str.lower, choices=['all', 'none', 'average bitrate', 'average oscillations', 'throughput safe', 'throughput precise', 'rebuffer ratio'], default='all')
+    parser.add_argument('--clients', type=int, default=0)
+
     args = parser.parse_args()
 
     root = args.root
@@ -290,5 +348,5 @@ if __name__ == '__main__':
 
     if args.parse:
         parse_data(root, links, algs, numbers)
-
-    plot_data(links, algs, extension, target)
+    if args.target.lower() != 'none':
+        plot_data(links=links, algs=algs, extension=extension, clients=args.clients, target=target)
