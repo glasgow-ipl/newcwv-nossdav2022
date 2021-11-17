@@ -582,8 +582,6 @@ In addition, we run tcpdump and record all packets on the client and the server,
 
 \section{Results}
 
-\todo{Open with an introduction paragraph of what sets of simulations have been run.}
-
 Our results confirm our initial hypothesis discussed in Section \ref{sec:newcwv-impact}. In other words, we find that New CWV connections obtain stabler bandwidth estimates compared to Reno. The only exception to this case is the FTTP link, where the difference between Reno and New CWV is not as marginal. We believe this is due to the much higher link capacity combined with the low maximum bandwidth requirement used in the dataset.
 
 Additionally, we confirm that the more stable bandwidth estimations (Figure \ref{fig:throughput-precise-clients-5} and Figure \ref{fig:throughput-safe-clients-5}) lead to improved QoE. This is evident by the achieved higher bitrate Figure \ref{fig:avg-bitrate-clients-5}, lower Oscillation \ref{fig:avg-oscillation-clients-5}, and lower re-buffer ratio \ref{fig:rebuffer-ratio-clients-5} of New CWV streams compared Reno ones.
