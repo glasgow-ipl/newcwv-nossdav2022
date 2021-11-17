@@ -12,13 +12,15 @@ LINKS = DSL FTTC FTTP
 
 LOGS = $(foreach link, ${LINKS}, $(foreach alg, ${ALGS}, $(foreach run_instance, ${RUNS}, ${ROOT}/logs/newcwv/${link}/${run_instance}_${alg}/nginx_access.log)))
 
-TEST_ALGS = reno
+TEST_ALGS = newcwv vreno
 
 CLIENTS = 1 2 3 5
 
 TEST_LOGS = $(foreach link, ${LINKS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 10), ${ROOT}/logs/newcwv/test2/${link}/${run_instance}_${alg}/nginx_access.log)))
 
-MULTI_LOGS = $(foreach link, ${LINKS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 2), ${ROOT}/logs/clients/2/${link}/${run_instance}_${alg}/nginx_access.log)))
+CLIENTS = 1 2 3 5
+
+MULTI_LOGS = $(foreach client, ${CLIENTS}, $(foreach link, ${LINKS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, ${RUNS}, ${ROOT}/logs/clients/${client}/${link}/${run_instance}_${alg}/nginx_access.log))))
 
 # Encoding video
 
@@ -200,100 +202,33 @@ stage1-mpd-ietf: ${OUT_DIR}/ietf/bbb.mpd
 
 logs: ${LOGS}
 
-## DSL
-
-${ROOT}/logs/newcwv/test2/DSL/%_vreno/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
-	@echo $@
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg vreno --network_model /vagrant/network_models/links/DSL.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS)
-
-${ROOT}/logs/newcwv/test2/DSL/%_newcwv/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
-	@echo $@
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/links/DSL.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS)
-
-${ROOT}/logs/newcwv/test2/DSL/%_reno/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
-	@echo $@
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/links/DSL.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS)
-
-
-${ROOT}/logs/clients/2/DSL/%_vreno/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
-	@echo $@
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg vreno --network_model /vagrant/network_models/links/DSL.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients 2
-
-${ROOT}/logs/clients/2/DSL/%_newcwv/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
-	@echo $@
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/links/DSL.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients 2
-
-${ROOT}/logs/clients/2/DSL/%_reno/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
-	@echo $@
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/links/DSL.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients 2 
-
-## FTTC
-
-${ROOT}/logs/newcwv/FTTC/%_reno/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
-	@echo $@
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/links/FTTC.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS)
-
-${ROOT}/logs/newcwv/test2/FTTC/%_vreno/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
-	@echo $@
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg vreno --network_model /vagrant/network_models/links/FTTC.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS)
-
-${ROOT}/logs/newcwv/test2/FTTC/%_newcwv/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
-	@echo $@
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/links/FTTC.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS)
-
-${ROOT}/logs/newcwv/test2/FTTC/%_reno/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
-	@echo $@
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/links/FTTC.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS)
-
-
-${ROOT}/logs/clients/2/FTTC/%_vreno/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
-	@echo $@
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg vreno --network_model /vagrant/network_models/links/FTTC.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients 2
-
-${ROOT}/logs/clients/2/FTTC/%_newcwv/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
-	@echo $@
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/links/FTTC.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients 2
-
-${ROOT}/logs/clients/2/FTTC/%_reno/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
-	@echo $@
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/links/FTTC.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients 2
-
-## FTTP
-
-${ROOT}/logs/newcwv/test2/FTTP/%_vreno/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
-	@echo $@
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg vreno --network_model /vagrant/network_models/links/FTTP.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS)
-
-${ROOT}/logs/newcwv/test2/FTTP/%_newcwv/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
-	@echo $@
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/links/FTTP.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS)
-
-${ROOT}/logs/newcwv/test2/FTTP/%_reno/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
-	@echo $@
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/links/FTTP.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS)
-
-
-${ROOT}/logs/newcwv/test2/FTTP/%_vreno/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
-	@echo $@
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg vreno --network_model /vagrant/network_models/links/FTTP.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients 2
-
-${ROOT}/logs/clients/2/FTTP/%_newcwv/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
-	@echo $@
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/links/FTTP.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients 2
-
-${ROOT}/logs/clients/2/FTTP/%_reno/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
-	@echo $@
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg reno --network_model /vagrant/network_models/links/FTTP.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients 2
-
 ${ROOT}/logs:
 	mkdir ${ROOT}/logs
 
+${ROOT}/logs/clients/%_vreno/nginx_access.log:
+	$(eval SIM_DIR = $(@D))
+	$(eval LINK_TYPE = $(shell basename `dirname $(@D)`))
+	$(eval CLIENT_NUM = $(shell basename $(shell dirname `dirname $(@D)`)))
+	echo "SIM_DIR=${SIM_DIR}"
+	echo "LINK_TYPE=${LINK_TYPE}"
+	echo "CLIENTS=${CLIENT_NUM}"
+	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg vreno --network_model /vagrant/network_models/links/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
+
+${ROOT}/logs/clients/%_newcwv/nginx_access.log:
+	$(eval SIM_DIR = $(@D))
+	$(eval LINK_TYPE = $(shell basename `dirname $(@D)`))
+	$(eval CLIENT_NUM = $(shell basename $(shell dirname `dirname $(@D)`)))
+	echo "SIM_DIR=${SIM_DIR}"
+	echo "LINK_TYPE=${LINK_TYPE}"
+	echo "CLIENTS=${CLIENT_NUM}"
+	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/links/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
 
 test: ${TEST_LOGS}
 	echo "Raaan test succcesssfullly"
 
 multi_log: ${MULTI_LOGS}
 	echo "Completed"
+
 
 single_run: ${ROOT}/logs/single/newcwv/nginx_access.log
 	@echo "Single run executed successfully"
@@ -356,6 +291,9 @@ ${FIGURES_FOLDER}/Throughput_Safe_%_clients.pdf: ${FIGURES_FOLDER}/tmp/%/parsed_
 
 ${FIGURES_FOLDER}/Rebuffer_Ratio_%_clients.pdf: ${FIGURES_FOLDER}/tmp/%/parsed_data.json
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "rebuffer ratio" --clients $* --extension pdf
+
+${FIGURES_FOLDER}/Average_Stalls_5_clients.pdf: ${FIGURES_FOLDER}/tmp/parsed_data.json
+	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "average stalls" --extension png
 
 # figures: ${ROOT}/scripts/analytics/paper/plot_data.py ${TEST_LOGS}
 # 	@echo 'Generating Figures'
