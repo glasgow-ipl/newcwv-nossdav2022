@@ -270,7 +270,7 @@ FIGURES_FOLDER = ${PAPER_BUILD}/figures
 # the bin/ directory:
 TOOLS = 
 
-FIGURES = $(foreach client, ${CLIENTS}, ${FIGURES_FOLDER}/Average_Bitrate_${client}_clients.pdf ${FIGURES_FOLDER}/Average_Oscillations_${client}_clients.pdf ${FIGURES_FOLDER}/Throughput_Precise_${client}_clients.pdf ${FIGURES_FOLDER}/Throughput_Safe_${client}_clients.pdf ${FIGURES_FOLDER}/Rebuffer_Ratio_${client}_clients.pdf)
+FIGURES = $(foreach client, ${CLIENTS}, ${FIGURES_FOLDER}/Average_Bitrate_${client}_clients.pdf ${FIGURES_FOLDER}/Average_Oscillations_${client}_clients.pdf ${FIGURES_FOLDER}/Throughput_Precise_${client}_clients_cdf.pdf ${FIGURES_FOLDER}/Throughput_Safe_${client}_clients_cdf.pdf ${FIGURES_FOLDER}/Rebuffer_Ratio_${client}_clients.pdf)
 
 #TODO: Logs as a dependency here
 ${FIGURES_FOLDER}/tmp/%/parsed_data.json: ${ROOT}/scripts/analytics/paper/plot_data.py
@@ -283,10 +283,10 @@ ${FIGURES_FOLDER}/Average_Bitrate_%_clients.pdf: ${FIGURES_FOLDER}/tmp/%/parsed_
 ${FIGURES_FOLDER}/Average_Oscillations_%_clients.pdf: ${FIGURES_FOLDER}/tmp/%/parsed_data.json
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "average oscillations" --clients $* --extension pdf
 
-${FIGURES_FOLDER}/Throughput_Precise_%_clients.pdf: ${FIGURES_FOLDER}/tmp/%/parsed_data.json
+${FIGURES_FOLDER}/Throughput_Precise_%_clients_cdf.pdf: ${FIGURES_FOLDER}/tmp/%/parsed_data.json
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "throughput precise" --clients $* --extension pdf
 
-${FIGURES_FOLDER}/Throughput_Safe_%_clients.pdf: ${FIGURES_FOLDER}/tmp/%/parsed_data.json
+${FIGURES_FOLDER}/Throughput_Safe_%_clients_cdf.pdf: ${FIGURES_FOLDER}/tmp/%/parsed_data.json
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "throughput safe" --clients $* --extension pdf
 
 ${FIGURES_FOLDER}/Rebuffer_Ratio_%_clients.pdf: ${FIGURES_FOLDER}/tmp/%/parsed_data.json

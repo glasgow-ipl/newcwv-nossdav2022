@@ -95,6 +95,9 @@ def plot_histogram(metric_name, data_aggregate, clients, extension):
         ax = plt.subplot(1, 3, idx+1)
         ax.set_title(link)
 
+        if idx == 0:
+            ax.set_ylabel("Percentage Distrubution")
+
         newcwv = np.array(data_aggregate[metric_name][link][0])
         reno = np.array(data_aggregate[metric_name][link][1])
         bin_l = min(min(newcwv), min(reno)) * .9
@@ -163,8 +166,8 @@ def plot_cdf(metric_name, data_aggregate, clients, extension):
 
     plt.gcf().set_size_inches(12, 3)
     plt.legend()
-    fig_name = metric_name.lower().replace(' ', '_')
-    save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp')
+    fig_name = metric_name.replace(' ', '_')
+    save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures')
     figname = os.path.join(save_path, f'{fig_name}_{clients}_clients_cdf.{extension}')
     print(f"saving {figname}")
     plt.savefig(figname, bbox_inches='tight')
@@ -204,9 +207,10 @@ def plot_data(*, links, algs, extension = 'png', clients=0, target='all'):
             combined[mname] = aggregate
 
     if target.lower() == 'throughput precise' or target.lower() == 'all':
-        plot_histogram('Throughput Precise', data_aggregate=combined, clients=clients, extension=extension)
+        # plot_histogram('Throughput Precise', data_aggregate=combined, clients=clients, extension=extension)
+        plot_cdf('Throughput Precise', data_aggregate=combined, clients=clients, extension=extension)
     if target.lower() == 'throughput safe' or target.lower() == 'all':
-        plot_histogram('Throughput Safe', data_aggregate=combined, clients=clients, extension=extension)
+        # plot_histogram('Throughput Safe', data_aggregate=combined, clients=clients, extension=extension)
         plot_cdf('Throughput Safe', data_aggregate=combined, clients=clients, extension=extension)
     if target.lower() == 'average bitrate' or target.lower() == 'all':
         plot_boxplot('Average Bitrate', combined, algs, clients, extension)

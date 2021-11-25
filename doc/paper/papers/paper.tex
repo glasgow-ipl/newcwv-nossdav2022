@@ -376,16 +376,21 @@ In HTTP video streaming playback stability is an important metric contributing t
 % context here. Why is the problem of interest and importance to the larger
 % community?
 
-Video playback stability is one of the key components contributing to user experience. Adaptive algorithms residing at the client are responsible for delivering high user experience. Adaptive algorithms are throughput or buffer based, or some combination of these. Throughput algorithms are known to achieve lower stability compared to their buffer-based counterparts.
+Video playback stability is one of the key components contributing to user experience. Adaptive algorithms residing at the client are responsible for delivering high user experience. Some current state-of-the-art solutions use network throughput as a bitrate selection heuristic.
 
 % Paragraph 2: What is the specific problem considered in this paper? This
 % paragraph narrows down the topic area of the paper. In the first
 % paragraph you have established general context and importance. Here you
 % establish specific context and background.
 
-The adaptive algorithms face the difficult task of delivering video while picking its ``best'' representations at any given point in time. This is a complex task since these algorithms need to simultaneously fulfil multiple criteria including: high stability, high quality, and low video stalls. These criteria can often conflict one another. For example, an algorithm always picking the lowest available representation will achieve low video stall time and high stability (since representations will not fluctuate), however, it will also display lower video quality, whereas perhaps higher one was possible. In a dynamic network, achieving a high index on one of these criterion also comes at the cost of observing a lower index in another. Modern adaptive algorithms try to balance that trade-off. They use either the pre-buffered capacity at the client or the immediate network state as a heuristic to aid them in the decision process. The former algorithms are known as buffer and the latter as throughput based. 
+The adaptive algorithms face the difficult task of delivering video while picking its ``best'' representations at any given point in time. This is since these algorithms need to simultaneously fulfil multiple criteria including: high stability, high quality, and low video stalls. These criteria can often conflict one another. For example, an algorithm always picking the lowest available representation will achieve low video stall time and high stability (since representations will not fluctuate), however, it will also display lower video quality, whereas perhaps higher one was possible. In a dynamic network, achieving a high index on one of these criterion also comes at the cost of observing a lower index in another. Modern adaptive algorithms try to balance that trade-off. They use either the pre-buffered capacity at the client or the immediate network state as a heuristic to aid them in the decision process. The former algorithms are known as buffer and the latter as throughput based. 
 
-In DASH's reference implementation, one of the main adaptive algorithms: ``throughput'' is known to have lower stability score compared to its alternatives \cite{Spiteri-2016-BOLA}. A reason for that might be the on-off nature of the HTTP video delivery. In it the connection exhibits idle periods, i.e., periods where no (useful) information being exchanged. During these, Reno and Cubic as defined in Linux Kernel 4.x and 5.x series have no way to gauge the most up-to-date link capacity and so will invalidate the window: resetting the connection's slow start threshold state. In contrast, New Congestion Window Validation (New CWV) is a proposal that keeps its slow-start state even during these idle periods. This would allow connections using this to resume their previous sending rate faster without the need of re-probing the network or otherwise entering slow-start again.
+
+One way to influence the client's throughput calculations is to change the transport. Video over HTTP has to transfer many video chunks over the same connection. The time when between each such transfers, when no information is exchanged, is known as an ``idle period''. RFC 5861 recommends that during such periods TCP should adjust its congestion window back to its initial window value and re-enter slow start. New Congestion Window Validation \cite{rfc7661-2015-fairhurst-new-cwnd-validation} proposes a way for the congestion window value to remain unchanged during idle periods and connections using it do not need to re-enter slow start. These two approaches have different impact on the client's throughput calculations.
+
+
+However, different client throughput estimations does not necessarily mean improved video QoE. Video QoE is a complex variable that is a combination of different application metrics, e.g., average bitrate, average bitrate oscillation, and rebuffer ratio. As discussed earlier, improving one could come at the cost of worsening others. Therefore, the implications of a transport change are unclear with respect to the video's QoE or smoothness.
+
 
 % Paragraph 3: "In this paper, we show that...". This is the key paragraph
 % in the introduction - you summarize, in one paragraph, what are the main
@@ -397,7 +402,7 @@ In DASH's reference implementation, one of the main adaptive algorithms: ``throu
 % State your contributions: these drive the entire paper.  Contributions
 % should be refutable claims, not vague generic statements.
 
-In this paper we show whether New CWV's more stable rates at the transport layer translate into an increased video playback stability and more generally: increased video QoE. To test our hypothesis, we compare two video streams using TCP Reno. One with New CWV disabled (the current default) and one with it enabled. To measure video stability and overall QoE we collect standard video performance metrics: average bit-rate, bit-rate oscillation, and video stall time. To quantify the impact of New CWV with respect to the inferred network state at the client, we also record the immediate and smoothened client's throughput estimations for each delivered video chunk. We carry our experiments using TCP Reno, as this is what Netflix uses for their video traffic \cite{Mishra-2019-the-great-internet-tcp-congestion-control-census}.
+In this paper we show whether New CWV's restart after idle behaviour translates into an increased video playback stability and more generally: increased video QoE. To test our hypothesis, we compare two video streams using TCP Reno. One with New CWV disabled (the current default) and one with it enabled. To measure video stability and overall QoE we collect standard video performance metrics: average bit-rate, bit-rate oscillation, and video stall time. To quantify the impact of New CWV with respect to the inferred network state at the client, we also record the immediate and smoothened client's throughput estimations for each delivered video chunk. We carry our experiments using TCP Reno, as this is what Netflix uses for their video traffic \cite{Mishra-2019-the-great-internet-tcp-congestion-control-census}.
 
 % Paragraph 4: What are the differences between your work, and what others
 % have done? Keep this at a high level, as you can refer to future sections
@@ -415,6 +420,10 @@ We structure the remainder of this paper as follows. In section 2, we introduce 
 
 \section{Background}
 \label{sec:background}
+
+\todo{MTG: Replace background with NewCWV impact on video. Keep some background content}
+
+\todo{No paragraph about increasing flows or fair share}
 
 % \begin{figure*}
 %     \centering
@@ -514,7 +523,9 @@ Since its proposal RFC 2861 has been adopted by the Linux kernel. However, resea
 
 New Congestion Window Validation reuses the ideas of RFC 2861 with the main difference that it does not differentiate between application limited and long idle periods. It combines them in one state, which the authors call non-validated period. In it the congestion window will not grow beyond its slow-start threshold until the transfer becomes limited by the network or a loss is observed. Furthermore, New Congestion Window Validation does not allow this period to exceed 5 minutes. As of the time of writing this paper RFC 7661 still holds an experimental status and New CWV as defined there has not been implemented in the latest Linux kernels.
 
-The most notable difference between RFCs 2861 and 7661 is the reaction after an idle period (Figure \ref{fig:idle_effect}). An RFC 2861 validated connection would re-enter slow-start and thus temporary overwhelm the network to figure out the capacity limit. In contrast, an RFC 7661 connection would enter slow-start until it reaches its old slow-start threshold and begin congestion avoidance phase. For short bursty traffic such as video chunks in HTTP adaptive streaming. The lack of this initial window spike could mean more accurate capacity estimations for applications that performed this dividing the artifact's size by the transfer period.
+\todo{Overwhelm is "strong" language here}
+
+The most notable difference between RFCs 2861 and 7661 is the reaction after an idle period (Figure \ref{fig:idle_effect}). An RFC 2861 validated connection would re-enter slow-start and thus temporary overwhelm the network to figure out the capacity limit. In contrast, an RFC 7661 connection would enter slow-start until it reaches its old slow-start threshold and begin congestion avoidance phase. For short bursty traffic such as video chunks in HTTP adaptive streaming. The lack of this initial window spike could mean more accurate capacity estimations for applications that performed this dividing the artefact's size by the transfer period.
 
 In HTTP adaptive streaming's dash.js, the throughput algorithm does exactly that. Dash.js is a reference implementation provided by the DASH industry forum \cite{online-dashif}. The throughput algorithm is one of the three main adaptive strategies provided by dash.js. It is also currently a component of the default streaming strategy. In summary, the throughput algorithm selects appropriate bit-rate representation to request by measuring the throughput for the currently downloaded video chunks. It estimates the throughput by dividing the receipt time by the size of the received element. Therefore, the throughput algorithm benefits greatly from having accurate bandwidth estimations. Currently, throughput is not the default strategy but a part of it, as relying solely on the bandwidth might force the player to switch to a lower representation much earlier than needed to reflect some temporary congestion on the link. However, the throughput algorithm is essential component of the current default strategy and also is being heavily used for streams that cannot provide sufficient buffer ahead of time (e.g., live-streaming). Therefore, improving the performance of the throughput algorithm benefits the whole streaming ecosystem.
 
@@ -568,7 +579,7 @@ Figure \ref{fig:experimental-setup} provides a visual representation of the setu
   \label{fig:experimental-setup}
 \end{figure}
 
-Finally, to eliminate noise, we run each of these 10 times before averaging and reporting results. The dataset presented includes data accumulated over 240 runs (2 algorithms * 3 link types * 4 client variations * 10 repetitions). This accounts for over 2538 seconds of video playtime or otherwise over 42.3 hours.
+Finally, to eliminate noise, we run each of these 10 times before averaging and reporting results. The dataset presented includes data accumulated over 240 runs (2 algorithms * 3 link types * 4 client variations * 10 repetitions). This accounts for over 2538 minutes of video playtime or otherwise over 42.3 hours.
 
 
 
@@ -576,30 +587,93 @@ The streamed video is Blender's Big Buck Bunny \cite{online-bbb} (Table \ref{tab
 
 Finally, we modify the Linux Kernel's (5.4.0) logger timestamp precision to comply to RFC 3339 and enable better event tracking. We also provide a New Congestion Window Validation \cite{rfc7661-2015-fairhurst-new-cwnd-validation} implementation for that kernel and modify Reno to report various CWND related events into the system log.
 
-From application's point of view, during each run we collect the client's bandwidth estimations. Additionally, to evaluate the video QoE impact we calculate standard QoE definig metrics such as: average bit-rate, average bit-rate oscillations, re-buffer ratio \cite{Spiteri-2019-from-theory-to-practice-sabre, Yin-2015-a-control-theoritic-approach, Dobrian-2013-understanding-the-impact-of-video-quality}.
+From application's point of view, during each run we collect the client's bandwidth estimations. Additionally, to evaluate the video QoE impact we calculate standard QoE defining metrics such as: average bit-rate, average bit-rate oscillations, re-buffer ratio \cite{Spiteri-2019-from-theory-to-practice-sabre, Yin-2015-a-control-theoritic-approach, Dobrian-2013-understanding-the-impact-of-video-quality}.
 
 In addition, we run tcpdump and record all packets on the client and the server, so we can reconstruct the network activity.
 
 \section{Results}
 
-Our results confirm our initial hypothesis discussed in Section \ref{sec:newcwv-impact}. In other words, we find that New CWV connections obtain stabler bandwidth estimates compared to Reno. The only exception to this case is the FTTP link, where the difference between Reno and New CWV is not as marginal. We believe this is due to the much higher link capacity combined with the low maximum bandwidth requirement used in the dataset.
+In order to prove whether out initial hypothesis holds, we first look at the bandwidth estimate distributions for Reno with and without NewCWV (Figures \ref{fig:avg-bitrate-clients-1} - \ref{fig:avg-bitrate-clients-5}). This allows us to verify whether New CWV enabled connections obtain more consistent bandwidth estimate. This shows the transport layer impact of New CWV's congestion window after idle resumption. 
 
-Additionally, we confirm that the more stable bandwidth estimations (Figure \ref{fig:throughput-precise-clients-5} and Figure \ref{fig:throughput-safe-clients-5}) lead to improved QoE. This is evident by the achieved higher bitrate Figure \ref{fig:avg-bitrate-clients-5}, lower Oscillation \ref{fig:avg-oscillation-clients-5}, and lower re-buffer ratio \ref{fig:rebuffer-ratio-clients-5} of New CWV streams compared Reno ones.
+We then look at the average bit-rate (Figures \ref{fig:avg-bitrate-clients-1} - \ref{fig:avg-bitrate-clients-5}), average bit-rate oscillation (Figures \ref{fig:avg-oscillation-clients-1} - \ref{fig:avg-oscillation-clients-5}), and average rebuffer ratios (Figures \ref{fig:rebuffer-ratio-clients-1} - \ref{fig:rebuffer-ratio-clients-5}) for Reno with New CWV enabled and without it. This allows us to investigate whether the different behaviour in the transport results in different application behaviour. We chose to present the aforementioned three properties as they are standard video defining QoE metrics. Average bitrate gives us the overall quality of all rendered video chunks. Average oscillation gives us a metric that shows how frequent quality changes were occurring and what was the amplitude between different switches in terms of bitrate. Finally, rebuffer ratio shows how much of the connection's total time, after the video started playing, was spent waiting for content to be played (rebuffering). The rebuffer ratio is a value between $[0.0 - 1)$, to make reading the results in Figures \ref{fig:rebuffer-ratio-clients-1} to \ref{fig:rebuffer-ratio-clients-1}, we have transformed that value in percentages, meaning that a rebuffer ratio with value of 0.5 would be presented as 50\% and would otherwise suggest that the connection spent half of its time rebuffering.
 
-Higher bitrate ration means that the quality of the rendered frames was higher overall. Lower oscillation means that the players had to switch between different representations less often. This is an important metric, as switching between representations has been reported to be highly noticeable and impeding the user's experience \cite{Spiteri-2016-BOLA,Akhshabi-2012-http-adaptive-players-compete,Huang-2013-downtown-abbey}. Finally, lower rebuffer ratio means that the player spent less time being "frozen" and waiting for new content to be loaded into the buffers before it can play it. The rebuffer ratio is a metric $[0.0 - 1.0)$, which indicates how long of the video "play" duration was spent waiting for more content. For example, a rebuffering ratio of 0.1 would mean that the video was stalled for 10\% of the whole play duration. 
+% Our results confirm our initial hypothesis discussed in Section \ref{sec:newcwv-impact}. In other words, we find that New CWV connections obtain stabler bandwidth estimates compared to Reno. The only exception to this case is the FTTP link, where the difference between Reno and New CWV is not as marginal. We believe this is due to the much higher link capacity combined with the low maximum bandwidth requirement used in the dataset.
 
-The throughput estimate that dash.js uses for its bit-rate selection (Figure \ref{fig:throughput-safe-clients-5}) is a function which takes any previous measurements if available and then applies an additional ``network safety'' factor. This is different from the direct throughput value the player calculates by dividing the chunk size and the transmission time (Figure \ref{fig:throughput-precise-clients-5}). We call the former advertised throughput and the latter calculated throughput.
+% Additionally, we confirm that the more stable bandwidth estimations (Figure \ref{fig:throughput-precise-clients-5} and Figure \ref{fig:throughput-safe-clients-5}) lead to improved QoE. This is evident by the achieved higher bitrate Figure \ref{fig:avg-bitrate-clients-5}, lower Oscillation \ref{fig:avg-oscillation-clients-5}, and lower re-buffer ratio \ref{fig:rebuffer-ratio-clients-5} of New CWV streams compared Reno ones.
 
-In figure \ref{fig:throughput-precise-cdf} we see that Reno has more measurements lower than the maximum quality threshold. Consequently, we see that the TCP state of both algorithms allows them to obtain measurements significantly higher than the highest bandwidth requirement for the connection. In practice, any speed measured over the highest media presentation demand is of no significant impact. In other words, regardless of how fast a connection can transmit its 1080p video chunks it will never be able to switch to a higher representation if that is not offered. Therefore, the bandwidth that would otherwise simply allow for faster filling of the client's playback buffer could be otherwise used. This idea could see interesting applications if there existed a congestion control algorithm that could learn the application's bandwidth demands and use that information to clamp the connection's TCP state to not yield any increase in terms of the perceived video quality.   
+% Higher bitrate ratio means that the quality of the rendered frames was higher overall. Lower oscillation means that the players had to switch between different representations less often. This is an important metric, as switching between representations has been reported to be highly noticeable and impeding the user's experience \cite{Spiteri-2016-BOLA,Akhshabi-2012-http-adaptive-players-compete,Huang-2013-downtown-abbey}. Finally, lower rebuffer ratio means that the player spent less time being "frozen" and waiting for new content to be loaded into the buffers before it can play it. The rebuffer ratio is a metric $[0.0 - 1.0)$, which indicates how long of the video "play" duration was spent waiting for more content. For example, a rebuffering ratio of 0.1 would mean that the video was stalled for 10\% of the whole play duration. 
+
+% The throughput estimate that dash.js uses for its bit-rate selection (Figure \ref{fig:throughput-safe-clients-5}) is a function which takes any previous measurements if available and then applies an additional ``network safety'' factor. This is different from the direct throughput value the player calculates by dividing the chunk size and the transmission time (Figure \ref{fig:throughput-precise-clients-5}). We call the former advertised throughput and the latter calculated throughput.
+
+% In figure \ref{fig:throughput-precise-cdf} we see that Reno has more measurements lower than the maximum quality threshold. Consequently, we see that the TCP state of both algorithms allows them to obtain measurements significantly higher than the highest bandwidth requirement for the connection. In practice, any speed measured over the highest media presentation demand is of no significant impact. In other words, regardless of how fast a connection can transmit its 1080p video chunks it will never be able to switch to a higher representation if that is not offered. Therefore, the bandwidth that would otherwise simply allow for faster filling of the client's playback buffer could be otherwise used. This idea could see interesting applications if there existed a congestion control algorithm that could learn the application's bandwidth demands and use that information to clamp the connection's TCP state to not yield any increase in terms of the perceived video quality.   
 
 
-We have conducted multiple experiments with  1, 2, 3, and 5 clients for DSL, FTTC, and FTTP representative scenarios. Below we provide a summary of the key findings. 
+We have conducted multiple experiments with  1, 2, 3, and 5 clients for DSL, FTTC, and FTTP representative scenarios. Below we provide a summary of the key findings.
 
-\textbf{Transport Effect:} NewCWV controlled connections have more stable rates, observed by the lower standard deviation in the throughput used by the client algorithm for 10 out of the 12 tested profiles. Additionally, we note that connections using NewCWV consistently measure a lower mean throughput value. In the FTTC case, the mean value reported by NewCWV is closer to the equilibrium value that would be obrained if bandwidth was distributed evenly if all connections were active at the same time. Interestingly, this trend is not carried over the DSL and FTTP scenarios. In fact for the DSL scenarios both algorithms would often report a mean value, higher than the link's available bandwidth. We traced the root cause for this behaviour to be very large congestion window values that allow video chunks to be transmitted in low number of roundtrips, such that the monitoring unit cannot obtain a large enough sample to compute a ``representative'' value.
+\textit{Note:} To present the full picture in with respect to the transport layer we present two different bandwidth measurement values: calculated and advertised throughput. The former is the raw calculation obtained by dividing the chunk size and the transmission time for each received chunk at the client. The latter represents the formal value that the dash.js algorithm uses to make its bitrate selection decision. It is a function of the calculated throughput, then averaged over a sampling period and multiplied by an internal bandwidth safety factor.  
+
+\textbf{Transport Effect:} NewCWV controlled connections have more stable rates, observed by the lower standard deviation in the throughput used by the client algorithm for 10 out of the 12 tested profiles. Additionally, we note that connections using NewCWV consistently measure a lower mean throughput value. In the FTTC case, the mean value reported by NewCWV is closer to the equilibrium value that would be obtained in the case where bandwidth was distributed evenly if all connections were active at the same time. Interestingly, this trend is not carried over the DSL and FTTP scenarios. In fact for the DSL scenarios both algorithms would often report a mean value, higher than the link's available bandwidth. We traced the root cause for this behaviour to be very large congestion window values that allow video chunks to be transmitted in low number of roundtrips, such that the monitoring unit cannot obtain a large enough sample to compute a ``representative'' value.
 \todo{I think this occurs for Reno with DSL, since the off-periods are not always long enough to cause the connection to reset its state. Further investigation is needed.}
 
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{figures/Throughput_Precise_1_clients_cdf.pdf}
+  \caption{Calculated Throughput 1 Client}
+  \label{fig:throughput-precise-clients-1}
+\end{figure*}
 
-\textbf{Application Effect:} We find that in all but two of the DSL profiles NewCWV connections would consistently obtain a higher average playout bit-rate. Additionally, in all considered scenarios NewCWV showed a mean rebuffering value of under 0.6 seconds for the whole video, while Reno connections without NewCWV would on average enter rebuffering state for over a second in half of the considered scenarios. Peaking at an average of over 20 seconds of rebuffering for the 5 connections over FTTP case. In addition to the lower rebuffering time, we find that NewCWV controlled connections also achieve comparable or lower mean oscillation values in all cases except the single connection over DSL one. In conclusion, with respect to application QoE defining metrics, connections with NewCWV enabled performed as well as or better than their pure Reno counterparts in almost all cases. Thus we summarise that enabling NewCWV on the streaming servers does lead to an increased QoE for the end-users. 
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{figures/Throughput_Precise_2_clients_cdf.pdf}
+  \caption{Calculated Throughput 2 Clients}
+  \label{fig:throughput-precise-clients-2}
+\end{figure*}
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{figures/Throughput_Precise_3_clients_cdf.pdf}
+  \caption{Calculated Throughput 3 Clients}
+  \label{fig:throughput-precise-clients-3}
+\end{figure*}
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{figures/Throughput_Precise_5_clients_cdf.pdf}
+  \caption{Calculated Throughput 5 Clients}
+  \label{fig:throughput-precise-clients-5}
+\end{figure*}
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{figures/Throughput_Safe_1_clients_cdf.pdf}
+  \caption{Advertised Throughput 1 Clients}
+  \label{fig:throughput-safe-clients-1}
+\end{figure*}
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{figures/Throughput_Safe_2_clients_cdf.pdf}
+  \caption{Advertised Throughput 2 Clients}
+  \label{fig:throughput-safe-clients-2}
+\end{figure*}
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{figures/Throughput_Safe_3_clients_cdf.pdf}
+  \caption{Advertised Throughput 3 Clients}
+  \label{fig:throughput-safe-clients-3}
+\end{figure*}
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{figures/Throughput_Safe_5_clients_cdf.pdf}
+  \caption{Advertised Throughput 5 Clients}
+  \label{fig:throughput-safe-clients-5}
+\end{figure*}
+
+\textbf{Application Effect:} We find that in all but two of the DSL profiles NewCWV connections would obtain a higher average playout bit-rate. Additionally, in all considered scenarios NewCWV showed a mean rebuffering value of under 0.6 seconds for the whole video, while Reno connections without NewCWV would on average enter rebuffering state for over a second in half of the considered scenarios. Peaking at an average of over 20 seconds of rebuffering for the 5 connections over FTTP case. In addition to the lower rebuffering time, we find that NewCWV also achieves comparable or lower mean oscillation in almost all cases.
+
+Achieving high bitrate with low oscillation are desired properties for any bitrate selection algorithm. In our case, we see that using NewCWV enables the same algorithm to perform better for both of these variables. Previous found high oscillation values to cause poor video QoE \cite{Spiteri-2016-BOLA,Akhshabi-2012-http-adaptive-players-compete,Huang-2013-downtown-abbey}. Finally, the other desired property for any algorithm is the lower rebuffering ratio. Similarly, we see that New CWV enables the same algorithm to perform better in this scenario as well. In other words, the difference of New CWV's CWND resumption after idle is noticeable in the transport layer, enabling the same adaptation algorithm to achieve lower video oscillation and rebuffering with higher bitrate, or otherwise: smoother, higher quality video that does not wait for new content. This directly translates to an increased video QoE. So we conclude that enabling New CWV at the server leads to improved bitrate selection performance and thus higher QoE. This confirms our initial hypothesis.
 
 \todo{We need to look at the CWND evolution for these connections}
 
@@ -676,266 +750,8 @@ We have conducted multiple experiments with  1, 2, 3, and 5 clients for DSL, FTT
     \label{tab:experiments-video}
 \end{table}
 
-% \begin{table*}[]
-%   \centering
-\onecolumn
-\begin{longtable}{{l|l|l|l|l|l|l}}
-  
-  % \begin{tabular}{l|l|l|l|l|l|l}
-  \toprule
-    Metric & Link & Clients & Algorithm & Mean & Standard Deviation & 99th Percentile \\
-  \midrule
-  Rebuffer Ratio & DSL & 1 & newcwv & 0.000 & 0.000 & 0.001 \\
-  Rebuffer Ratio & DSL & 1 & vreno & 0.000 & 0.000 & 0.000 \\
-  \midrule
-  Rebuffer Ratio & DSL & 2 & newcwv & 0.000 & 0.000 & 0.001 \\
-  Rebuffer Ratio & DSL & 2 & vreno & 0.001 & 0.002 & 0.006 \\
-  \midrule
-  Rebuffer Ratio & DSL & 3 & newcwv & 0.001 & 0.001 & 0.003 \\
-  Rebuffer Ratio & DSL & 3 & vreno & 0.002 & 0.004 & 0.017 \\
-  \midrule
-  Rebuffer Ratio & DSL & 5 & newcwv & 0.001 & 0.002 & 0.007 \\
-  Rebuffer Ratio & DSL & 5 & vreno & 0.012 & 0.015 & 0.048 \\
-  \midrule
-  Rebuffer Ratio & FTTC & 1 & newcwv & 0.000 & 0.000 & 0.000 \\
-  Rebuffer Ratio & FTTC & 1 & vreno & 0.000 & 0.000 & 0.000 \\
-  \midrule
-  Rebuffer Ratio & FTTC & 2 & newcwv & 0.000 & 0.001 & 0.003 \\
-  Rebuffer Ratio & FTTC & 2 & vreno & 0.000 & 0.001 & 0.002 \\
-  \midrule
-  Rebuffer Ratio & FTTC & 3 & newcwv & 0.000 & 0.000 & 0.002 \\
-  Rebuffer Ratio & FTTC & 3 & vreno & 0.003 & 0.004 & 0.016 \\
-  \midrule
-  Rebuffer Ratio & FTTC & 5 & newcwv & 0.001 & 0.002 & 0.006 \\
-  Rebuffer Ratio & FTTC & 5 & vreno & 0.025 & 0.036 & 0.115 \\
-  \midrule
-  Rebuffer Ratio & FTTP & 1 & newcwv & 0.000 & 0.000 & 0.000 \\
-  Rebuffer Ratio & FTTP & 1 & vreno & 0.000 & 0.000 & 0.000 \\
-  \midrule
-  Rebuffer Ratio & FTTP & 2 & newcwv & 0.000 & 0.000 & 0.000 \\
-  Rebuffer Ratio & FTTP & 2 & vreno & 0.000 & 0.001 & 0.004 \\
-  \midrule
-  Rebuffer Ratio & FTTP & 3 & newcwv & 0.000 & 0.001 & 0.005 \\
-  Rebuffer Ratio & FTTP & 3 & vreno & 0.003 & 0.004 & 0.015 \\
-  \midrule
-  Rebuffer Ratio & FTTP & 5 & newcwv & 0.001 & 0.002 & 0.006 \\
-  Rebuffer Ratio & FTTP & 5 & vreno & 0.000 & 0.001 & 0.004 \\
-  \midrule
-  Average Bitrate & DSL & 1 & newcwv & 4.823 & 0.004 & 4.825 \\
-  Average Bitrate & DSL & 1 & vreno & 4.825 & 0.000 & 4.825 \\
-  \midrule
-  Average Bitrate & DSL & 2 & newcwv & 3.721 & 0.011 & 3.737 \\
-  Average Bitrate & DSL & 2 & vreno & 3.731 & 0.019 & 3.752 \\
-  \midrule
-  Average Bitrate & DSL & 3 & newcwv & 4.049 & 0.133 & 4.100 \\
-  Average Bitrate & DSL & 3 & vreno & 4.025 & 0.076 & 4.106 \\
-  \midrule
-  Average Bitrate & DSL & 5 & newcwv & 4.247 & 0.193 & 4.390 \\
-  Average Bitrate & DSL & 5 & vreno & 3.975 & 0.023 & 4.023 \\
-  \midrule
-  Average Bitrate & FTTC & 1 & newcwv & 4.825 & 0.000 & 4.825 \\
-  Average Bitrate & FTTC & 1 & vreno & 4.825 & 0.000 & 4.825 \\
-  \midrule
-  Average Bitrate & FTTC & 2 & newcwv & 4.823 & 0.005 & 4.825 \\
-  Average Bitrate & FTTC & 2 & vreno & 4.802 & 0.026 & 4.825 \\
-  \midrule
-  Average Bitrate & FTTC & 3 & newcwv & 4.823 & 0.003 & 4.825 \\
-  Average Bitrate & FTTC & 3 & vreno & 4.673 & 0.042 & 4.766 \\
-  \midrule
-  Average Bitrate & FTTC & 5 & newcwv & 4.824 & 0.004 & 4.825 \\
-  Average Bitrate & FTTC & 5 & vreno & 4.334 & 0.039 & 4.391 \\
-  \midrule
-  Average Bitrate & FTTP & 1 & newcwv & 4.825 & 0.000 & 4.825 \\
-  Average Bitrate & FTTP & 1 & vreno & 4.825 & 0.000 & 4.825 \\
-  \midrule
-  Average Bitrate & FTTP & 2 & newcwv & 4.825 & 0.000 & 4.825 \\
-  Average Bitrate & FTTP & 2 & vreno & 4.810 & 0.017 & 4.825 \\
-  \midrule
-  Average Bitrate & FTTP & 3 & newcwv & 4.824 & 0.003 & 4.825 \\
-  Average Bitrate & FTTP & 3 & vreno & 4.655 & 0.051 & 4.739 \\
-  \midrule
-  Average Bitrate & FTTP & 5 & newcwv & 4.820 & 0.006 & 4.825 \\
-  Average Bitrate & FTTP & 5 & vreno & 4.820 & 0.007 & 4.825 \\
-  \midrule
-  Average Oscillations & DSL & 1 & newcwv & 0.002 & 0.004 & 0.010 \\
-  Average Oscillations & DSL & 1 & vreno & 0.000 & 0.000 & 0.000 \\
-  \midrule
-  Average Oscillations & DSL & 2 & newcwv & 0.004 & 0.001 & 0.005 \\
-  Average Oscillations & DSL & 2 & vreno & 0.004 & 0.003 & 0.010 \\
-  \midrule
-  Average Oscillations & DSL & 3 & newcwv & 0.002 & 0.001 & 0.003 \\
-  Average Oscillations & DSL & 3 & vreno & 0.003 & 0.002 & 0.007 \\
-  \midrule
-  Average Oscillations & DSL & 5 & newcwv & 0.001 & 0.001 & 0.004 \\
-  Average Oscillations & DSL & 5 & vreno & 0.010 & 0.003 & 0.016 \\
-  \midrule
-  Average Oscillations & FTTC & 1 & newcwv & 0.000 & 0.000 & 0.000 \\
-  Average Oscillations & FTTC & 1 & vreno & 0.000 & 0.000 & 0.000 \\
-  \midrule
-  Average Oscillations & FTTC & 2 & newcwv & 0.001 & 0.002 & 0.005 \\
-  Average Oscillations & FTTC & 2 & vreno & 0.003 & 0.004 & 0.010 \\
-  \midrule
-  Average Oscillations & FTTC & 3 & newcwv & 0.001 & 0.001 & 0.003 \\
-  Average Oscillations & FTTC & 3 & vreno & 0.011 & 0.005 & 0.020 \\
-  \midrule
-  Average Oscillations & FTTC & 5 & newcwv & 0.000 & 0.000 & 0.001 \\
-  Average Oscillations & FTTC & 5 & vreno & 0.012 & 0.004 & 0.017 \\
-  \midrule
-  Average Oscillations & FTTP & 1 & newcwv & 0.000 & 0.000 & 0.000 \\
-  Average Oscillations & FTTP & 1 & vreno & 0.000 & 0.000 & 0.000 \\
-  \midrule
-  Average Oscillations & FTTP & 2 & newcwv & 0.000 & 0.000 & 0.000 \\
-  Average Oscillations & FTTP & 2 & vreno & 0.003 & 0.004 & 0.010 \\
-  \midrule
-  Average Oscillations & FTTP & 3 & newcwv & 0.000 & 0.001 & 0.003 \\
-  Average Oscillations & FTTP & 3 & vreno & 0.008 & 0.004 & 0.013 \\
-  \midrule
-  Average Oscillations & FTTP & 5 & newcwv & 0.001 & 0.002 & 0.005 \\
-  Average Oscillations & FTTP & 5 & vreno & 0.002 & 0.002 & 0.005 \\
-  \midrule
-  Throughput Precise & DSL & 1 & newcwv & 8.168 & 0.777 & 8.994 \\
-  Throughput Precise & DSL & 1 & vreno & 8.605 & 0.507 & 9.077 \\
-  \midrule
-  Throughput Precise & DSL & 2 & newcwv & 12.110 & 8.626 & 34.046 \\
-  Throughput Precise & DSL & 2 & vreno & 12.953 & 9.343 & 34.744 \\
-  \midrule
-  Throughput Precise & DSL & 3 & newcwv & 11.617 & 14.741 & 24.714 \\
-  Throughput Precise & DSL & 3 & vreno & 13.273 & 8.702 & 32.873 \\
-  \midrule
-  Throughput Precise & DSL & 5 & newcwv & 9.733 & 3.871 & 16.115 \\
-  Throughput Precise & DSL & 5 & vreno & 13.006 & 30.516 & 32.069 \\
-  \midrule
-  Throughput Precise & FTTC & 1 & newcwv & 23.829 & 3.655 & 35.051 \\
-  Throughput Precise & FTTC & 1 & vreno & 28.491 & 3.790 & 37.613 \\
-  \midrule
-  Throughput Precise & FTTC & 2 & newcwv & 14.585 & 4.745 & 35.859 \\
-  Throughput Precise & FTTC & 2 & vreno & 15.270 & 6.696 & 36.696 \\
-  \midrule
-  Throughput Precise & FTTC & 3 & newcwv & 12.323 & 3.364 & 27.362 \\
-  Throughput Precise & FTTC & 3 & vreno & 15.742 & 7.741 & 36.413 \\
-  \midrule
-  Throughput Precise & FTTC & 5 & newcwv & 10.266 & 4.681 & 16.057 \\
-  Throughput Precise & FTTC & 5 & vreno & 12.850 & 25.822 & 32.723 \\
-  \midrule
-  Throughput Precise & FTTP & 1 & newcwv & 35.176 & 11.147 & 65.329 \\
-  Throughput Precise & FTTP & 1 & vreno & 38.962 & 15.954 & 101.918 \\
-  \midrule
-  Throughput Precise & FTTP & 2 & newcwv & 15.511 & 41.240 & 35.862 \\
-  Throughput Precise & FTTP & 2 & vreno & 15.700 & 6.561 & 36.912 \\
-  \midrule
-  Throughput Precise & FTTP & 3 & newcwv & 13.227 & 13.043 & 29.249 \\
-  Throughput Precise & FTTP & 3 & vreno & 14.997 & 7.768 & 35.060 \\
-  \midrule
-  Throughput Precise & FTTP & 5 & newcwv & 10.147 & 2.765 & 17.236 \\
-  Throughput Precise & FTTP & 5 & vreno & 10.527 & 2.838 & 17.722 \\
-  \midrule
-  Throughput Safe & DSL & 1 & newcwv & 7.359 & 0.441 & 7.872 \\
-  Throughput Safe & DSL & 1 & vreno & 7.741 & 0.296 & 8.020 \\
-  \midrule
-  Throughput Safe & DSL & 2 & newcwv & 10.945 & 7.704 & 29.089 \\
-  Throughput Safe & DSL & 2 & vreno & 11.701 & 8.343 & 32.443 \\
-  \midrule
-  Throughput Safe & DSL & 3 & newcwv & 10.351 & 5.508 & 25.440 \\
-  Throughput Safe & DSL & 3 & vreno & 12.153 & 7.340 & 30.896 \\
-  \midrule
-  Throughput Safe & DSL & 5 & newcwv & 8.762 & 3.475 & 14.664 \\
-  Throughput Safe & DSL & 5 & vreno & 10.927 & 6.909 & 22.245 \\
-  \midrule
-  Throughput Safe & FTTC & 1 & newcwv & 21.535 & 2.952 & 32.087 \\
-  Throughput Safe & FTTC & 1 & vreno & 25.742 & 2.300 & 30.568 \\
-  \midrule
-  Throughput Safe & FTTC & 2 & newcwv & 13.244 & 4.269 & 30.169 \\
-  Throughput Safe & FTTC & 2 & vreno & 14.046 & 4.766 & 32.287 \\
-  \midrule
-  Throughput Safe & FTTC & 3 & newcwv & 11.166 & 3.132 & 27.794 \\
-  Throughput Safe & FTTC & 3 & vreno & 14.219 & 5.896 & 29.848 \\
-  \midrule
-  Throughput Safe & FTTC & 5 & newcwv & 9.242 & 2.407 & 16.334 \\
-  Throughput Safe & FTTC & 5 & vreno & 10.899 & 6.219 & 22.836 \\
-  \midrule
-  Throughput Safe & FTTP & 1 & newcwv & 31.918 & 9.773 & 57.483 \\
-  Throughput Safe & FTTP & 1 & vreno & 36.148 & 13.484 & 95.857 \\
-  \midrule
-  Throughput Safe & FTTP & 2 & newcwv & 13.296 & 4.654 & 30.885 \\
-  Throughput Safe & FTTP & 2 & vreno & 14.448 & 4.661 & 33.529 \\
-  \midrule
-  Throughput Safe & FTTP & 3 & newcwv & 11.825 & 3.365 & 27.481 \\
-  Throughput Safe & FTTP & 3 & vreno & 13.545 & 5.820 & 29.814 \\
-  \midrule
-  Throughput Safe & FTTP & 5 & newcwv & 9.174 & 2.542 & 17.085 \\
-  Throughput Safe & FTTP & 5 & vreno & 9.509 & 2.626 & 17.487 \\
-  \bottomrule
-
-\end{longtable}
-\twocolumn
-%   \end{tabular}
-%   \caption{Experiment Data}
-% \end{table*}
-
-\begin{figure*}
-  \centering
-  \includegraphics[width=\textwidth]{figures/Throughput_Precise_1_client.pdf}
-  \caption{Calculated Throughput 1 Client}
-  \label{fig:throughput-precise-clients-1}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \includegraphics[width=\textwidth]{figures/Throughput_Precise_2_clients.pdf}
-  \caption{Calculated Throughput 2 Clients}
-  \label{fig:throughput-precise-clients-2}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \includegraphics[width=\textwidth]{figures/Throughput_Precise_3_clients.pdf}
-  \caption{Calculated Throughput 3 Clients}
-  \label{fig:throughput-precise-clients-3}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \includegraphics[width=\textwidth]{figures/Throughput_Precise_5_clients.pdf}
-  \caption{Calculated Throughput 5 Clients}
-  \label{fig:throughput-precise-clients-5}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \includegraphics[width=\textwidth]{figures/Throughput_Safe_1_client.pdf}
-  \caption{Advertised Throughput 1 Clients}
-  \label{fig:throughput-safe-clients-1}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \includegraphics[width=\textwidth]{figures/Throughput_Safe_2_clients.pdf}
-  \caption{Advertised Throughput 2 Clients}
-  \label{fig:throughput-safe-clients-2}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \includegraphics[width=\textwidth]{figures/Throughput_Safe_3_clients.pdf}
-  \caption{Advertised Throughput 3 Clients}
-  \label{fig:throughput-safe-clients-3}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \includegraphics[width=\textwidth]{figures/Throughput_Safe_5_clients.pdf}
-  \caption{Advertised Throughput 5 Clients}
-  \label{fig:throughput-safe-clients-5}
-\end{figure*}
-
 % TODO: Heatmap with all 50 connections
 
-\begin{figure*}
-  \centering
-  \includegraphics[width=\textwidth]{figures/tmp/throughput_safe_5_clients_cdf.pdf}
-  \caption{Advertised Throughput 5 Clients CDF}
-  \label{fig:throughput-precise-cdf}
-\end{figure*}
 
 \begin{figure*}
   \centering
@@ -1060,7 +876,7 @@ We have conducted multiple experiments with  1, 2, 3, and 5 clients for DSL, FTT
 
 \section{Discussion}
 
-\textbf{---------------------}
+Figures \ref{fig:throughput-precise-clients-1} - \ref{fig:throughput-safe-clients-5} show that Reno reports more data points with throughput value lower than the highest bandwidth requirement. Consequently, both algorithms have a high amount of data points over the highest bandwidth requirement. In practice, any speed measured over that requirement is of no significant impact. Higher values only allow the client's playback buffer to fill faster but would not enable a switch to a higher representation, since such is simply not being offered. Thus, any video connection would see limited gains beyond measuring any values beyond the connection's maximum bandwidth demand. This would mean that connections could be clamped at a given rate and the rest of the ``spare'' bandwidth could be used-up by other traffic. This idea could see interesting applications if there existed a congestion control algorithm that could learn the application's bandwidth demands and use that information to limit the connection's congestion window and not allow it to grow beyond a set value. The implications might be various from more video connections being able to reach their demands to non-video traffic performing better since video does not need to be aggressive beyond a given point. However, implementing such an algorithm would be hard since it raises many unknowns about how such an algorithm would react to lost packets and when it would slow down such that it is not beaten by other more aggressive traffic, would a standard AIMD or CUBIC function for controlling CWND growth suffice or would there be other alternatives, etc.
 
 % To verify whether New CWV's more accurate bandwidth estimations could improve playback stability, we would run three scenarios. Two with network link speed close to a representation requirement, and another sufficiently higher than a selected representation requirement.
 
@@ -1272,6 +1088,258 @@ We have conducted multiple experiments with  1, 2, 3, and 5 clients for DSL, FTT
     \pdfsuppressptexinfo=15
   \fi
 \fi
+
+\clearpage
+\appendix{APPENDIX: Extra items}
+
+\onecolumn
+\begin{longtable}{{l|l|l|l|l|l|l}}
+  
+  % \begin{tabular}{l|l|l|l|l|l|l}
+  \toprule
+    Metric & Link & Clients & Algorithm & Mean & Standard Deviation & 99th Percentile \\
+  \midrule
+  Rebuffer Ratio & DSL & 1 & newcwv & 0.000 & 0.000 & 0.001 \\
+  Rebuffer Ratio & DSL & 1 & vreno & 0.000 & 0.000 & 0.000 \\
+  \midrule
+  Rebuffer Ratio & DSL & 2 & newcwv & 0.000 & 0.000 & 0.001 \\
+  Rebuffer Ratio & DSL & 2 & vreno & 0.001 & 0.002 & 0.006 \\
+  \midrule
+  Rebuffer Ratio & DSL & 3 & newcwv & 0.001 & 0.001 & 0.003 \\
+  Rebuffer Ratio & DSL & 3 & vreno & 0.002 & 0.004 & 0.017 \\
+  \midrule
+  Rebuffer Ratio & DSL & 5 & newcwv & 0.001 & 0.002 & 0.007 \\
+  Rebuffer Ratio & DSL & 5 & vreno & 0.012 & 0.015 & 0.048 \\
+  \midrule
+  Rebuffer Ratio & FTTC & 1 & newcwv & 0.000 & 0.000 & 0.000 \\
+  Rebuffer Ratio & FTTC & 1 & vreno & 0.000 & 0.000 & 0.000 \\
+  \midrule
+  Rebuffer Ratio & FTTC & 2 & newcwv & 0.000 & 0.001 & 0.003 \\
+  Rebuffer Ratio & FTTC & 2 & vreno & 0.000 & 0.001 & 0.002 \\
+  \midrule
+  Rebuffer Ratio & FTTC & 3 & newcwv & 0.000 & 0.000 & 0.002 \\
+  Rebuffer Ratio & FTTC & 3 & vreno & 0.003 & 0.004 & 0.016 \\
+  \midrule
+  Rebuffer Ratio & FTTC & 5 & newcwv & 0.001 & 0.002 & 0.006 \\
+  Rebuffer Ratio & FTTC & 5 & vreno & 0.025 & 0.036 & 0.115 \\
+  \midrule
+  Rebuffer Ratio & FTTP & 1 & newcwv & 0.000 & 0.000 & 0.000 \\
+  Rebuffer Ratio & FTTP & 1 & vreno & 0.000 & 0.000 & 0.000 \\
+  \midrule
+  Rebuffer Ratio & FTTP & 2 & newcwv & 0.000 & 0.000 & 0.000 \\
+  Rebuffer Ratio & FTTP & 2 & vreno & 0.000 & 0.001 & 0.004 \\
+  \midrule
+  Rebuffer Ratio & FTTP & 3 & newcwv & 0.000 & 0.001 & 0.005 \\
+  Rebuffer Ratio & FTTP & 3 & vreno & 0.003 & 0.004 & 0.015 \\
+  \midrule
+  Rebuffer Ratio & FTTP & 5 & newcwv & 0.001 & 0.002 & 0.006 \\
+  Rebuffer Ratio & FTTP & 5 & vreno & 0.000 & 0.001 & 0.004 \\
+  \midrule
+  Average Bitrate & DSL & 1 & newcwv & 4.823 & 0.004 & 4.825 \\
+  Average Bitrate & DSL & 1 & vreno & 4.825 & 0.000 & 4.825 \\
+  \midrule
+  Average Bitrate & DSL & 2 & newcwv & 3.721 & 0.011 & 3.737 \\
+  Average Bitrate & DSL & 2 & vreno & 3.731 & 0.019 & 3.752 \\
+  \midrule
+  Average Bitrate & DSL & 3 & newcwv & 4.049 & 0.133 & 4.100 \\
+  Average Bitrate & DSL & 3 & vreno & 4.025 & 0.076 & 4.106 \\
+  \midrule
+  Average Bitrate & DSL & 5 & newcwv & 4.247 & 0.193 & 4.390 \\
+  Average Bitrate & DSL & 5 & vreno & 3.975 & 0.023 & 4.023 \\
+  \midrule
+  Average Bitrate & FTTC & 1 & newcwv & 4.825 & 0.000 & 4.825 \\
+  Average Bitrate & FTTC & 1 & vreno & 4.825 & 0.000 & 4.825 \\
+  \midrule
+  Average Bitrate & FTTC & 2 & newcwv & 4.823 & 0.005 & 4.825 \\
+  Average Bitrate & FTTC & 2 & vreno & 4.802 & 0.026 & 4.825 \\
+  \midrule
+  Average Bitrate & FTTC & 3 & newcwv & 4.823 & 0.003 & 4.825 \\
+  Average Bitrate & FTTC & 3 & vreno & 4.673 & 0.042 & 4.766 \\
+  \midrule
+  Average Bitrate & FTTC & 5 & newcwv & 4.824 & 0.004 & 4.825 \\
+  Average Bitrate & FTTC & 5 & vreno & 4.334 & 0.039 & 4.391 \\
+  \midrule
+  Average Bitrate & FTTP & 1 & newcwv & 4.825 & 0.000 & 4.825 \\
+  Average Bitrate & FTTP & 1 & vreno & 4.825 & 0.000 & 4.825 \\
+  \midrule
+  Average Bitrate & FTTP & 2 & newcwv & 4.825 & 0.000 & 4.825 \\
+  Average Bitrate & FTTP & 2 & vreno & 4.810 & 0.017 & 4.825 \\
+  \midrule
+  Average Bitrate & FTTP & 3 & newcwv & 4.824 & 0.003 & 4.825 \\
+  Average Bitrate & FTTP & 3 & vreno & 4.655 & 0.051 & 4.739 \\
+  \midrule
+  Average Bitrate & FTTP & 5 & newcwv & 4.820 & 0.006 & 4.825 \\
+  Average Bitrate & FTTP & 5 & vreno & 4.820 & 0.007 & 4.825 \\
+  \midrule
+  Average Oscillations & DSL & 1 & newcwv & 0.002 & 0.004 & 0.010 \\
+  Average Oscillations & DSL & 1 & vreno & 0.000 & 0.000 & 0.000 \\
+  \midrule
+  Average Oscillations & DSL & 2 & newcwv & 0.004 & 0.001 & 0.005 \\
+  Average Oscillations & DSL & 2 & vreno & 0.004 & 0.003 & 0.010 \\
+  \midrule
+  Average Oscillations & DSL & 3 & newcwv & 0.002 & 0.001 & 0.003 \\
+  Average Oscillations & DSL & 3 & vreno & 0.003 & 0.002 & 0.007 \\
+  \midrule
+  Average Oscillations & DSL & 5 & newcwv & 0.001 & 0.001 & 0.004 \\
+  Average Oscillations & DSL & 5 & vreno & 0.010 & 0.003 & 0.016 \\
+  \midrule
+  Average Oscillations & FTTC & 1 & newcwv & 0.000 & 0.000 & 0.000 \\
+  Average Oscillations & FTTC & 1 & vreno & 0.000 & 0.000 & 0.000 \\
+  \midrule
+  Average Oscillations & FTTC & 2 & newcwv & 0.001 & 0.002 & 0.005 \\
+  Average Oscillations & FTTC & 2 & vreno & 0.003 & 0.004 & 0.010 \\
+  \midrule
+  Average Oscillations & FTTC & 3 & newcwv & 0.001 & 0.001 & 0.003 \\
+  Average Oscillations & FTTC & 3 & vreno & 0.011 & 0.005 & 0.020 \\
+  \midrule
+  Average Oscillations & FTTC & 5 & newcwv & 0.000 & 0.000 & 0.001 \\
+  Average Oscillations & FTTC & 5 & vreno & 0.012 & 0.004 & 0.017 \\
+  \midrule
+  Average Oscillations & FTTP & 1 & newcwv & 0.000 & 0.000 & 0.000 \\
+  Average Oscillations & FTTP & 1 & vreno & 0.000 & 0.000 & 0.000 \\
+  \midrule
+  Average Oscillations & FTTP & 2 & newcwv & 0.000 & 0.000 & 0.000 \\
+  Average Oscillations & FTTP & 2 & vreno & 0.003 & 0.004 & 0.010 \\
+  \midrule
+  Average Oscillations & FTTP & 3 & newcwv & 0.000 & 0.001 & 0.003 \\
+  Average Oscillations & FTTP & 3 & vreno & 0.008 & 0.004 & 0.013 \\
+  \midrule
+  Average Oscillations & FTTP & 5 & newcwv & 0.001 & 0.002 & 0.005 \\
+  Average Oscillations & FTTP & 5 & vreno & 0.002 & 0.002 & 0.005 \\
+  \midrule
+  Throughput Precise & DSL & 1 & newcwv & 8.168 & 0.777 & 8.994 \\
+  Throughput Precise & DSL & 1 & vreno & 8.605 & 0.507 & 9.077 \\
+  \midrule
+  Throughput Precise & DSL & 2 & newcwv & 12.110 & 8.626 & 34.046 \\
+  Throughput Precise & DSL & 2 & vreno & 12.953 & 9.343 & 34.744 \\
+  \midrule
+  Throughput Precise & DSL & 3 & newcwv & 11.617 & 14.741 & 24.714 \\
+  Throughput Precise & DSL & 3 & vreno & 13.273 & 8.702 & 32.873 \\
+  \midrule
+  Throughput Precise & DSL & 5 & newcwv & 9.733 & 3.871 & 16.115 \\
+  Throughput Precise & DSL & 5 & vreno & 13.006 & 30.516 & 32.069 \\
+  \midrule
+  Throughput Precise & FTTC & 1 & newcwv & 23.829 & 3.655 & 35.051 \\
+  Throughput Precise & FTTC & 1 & vreno & 28.491 & 3.790 & 37.613 \\
+  \midrule
+  Throughput Precise & FTTC & 2 & newcwv & 14.585 & 4.745 & 35.859 \\
+  Throughput Precise & FTTC & 2 & vreno & 15.270 & 6.696 & 36.696 \\
+  \midrule
+  Throughput Precise & FTTC & 3 & newcwv & 12.323 & 3.364 & 27.362 \\
+  Throughput Precise & FTTC & 3 & vreno & 15.742 & 7.741 & 36.413 \\
+  \midrule
+  Throughput Precise & FTTC & 5 & newcwv & 10.266 & 4.681 & 16.057 \\
+  Throughput Precise & FTTC & 5 & vreno & 12.850 & 25.822 & 32.723 \\
+  \midrule
+  Throughput Precise & FTTP & 1 & newcwv & 35.176 & 11.147 & 65.329 \\
+  Throughput Precise & FTTP & 1 & vreno & 38.962 & 15.954 & 101.918 \\
+  \midrule
+  Throughput Precise & FTTP & 2 & newcwv & 15.511 & 41.240 & 35.862 \\
+  Throughput Precise & FTTP & 2 & vreno & 15.700 & 6.561 & 36.912 \\
+  \midrule
+  Throughput Precise & FTTP & 3 & newcwv & 13.227 & 13.043 & 29.249 \\
+  Throughput Precise & FTTP & 3 & vreno & 14.997 & 7.768 & 35.060 \\
+  \midrule
+  Throughput Precise & FTTP & 5 & newcwv & 10.147 & 2.765 & 17.236 \\
+  Throughput Precise & FTTP & 5 & vreno & 10.527 & 2.838 & 17.722 \\
+  \midrule
+  Throughput Safe & DSL & 1 & newcwv & 7.359 & 0.441 & 7.872 \\
+  Throughput Safe & DSL & 1 & vreno & 7.741 & 0.296 & 8.020 \\
+  \midrule
+  Throughput Safe & DSL & 2 & newcwv & 10.945 & 7.704 & 29.089 \\
+  Throughput Safe & DSL & 2 & vreno & 11.701 & 8.343 & 32.443 \\
+  \midrule
+  Throughput Safe & DSL & 3 & newcwv & 10.351 & 5.508 & 25.440 \\
+  Throughput Safe & DSL & 3 & vreno & 12.153 & 7.340 & 30.896 \\
+  \midrule
+  Throughput Safe & DSL & 5 & newcwv & 8.762 & 3.475 & 14.664 \\
+  Throughput Safe & DSL & 5 & vreno & 10.927 & 6.909 & 22.245 \\
+  \midrule
+  Throughput Safe & FTTC & 1 & newcwv & 21.535 & 2.952 & 32.087 \\
+  Throughput Safe & FTTC & 1 & vreno & 25.742 & 2.300 & 30.568 \\
+  \midrule
+  Throughput Safe & FTTC & 2 & newcwv & 13.244 & 4.269 & 30.169 \\
+  Throughput Safe & FTTC & 2 & vreno & 14.046 & 4.766 & 32.287 \\
+  \midrule
+  Throughput Safe & FTTC & 3 & newcwv & 11.166 & 3.132 & 27.794 \\
+  Throughput Safe & FTTC & 3 & vreno & 14.219 & 5.896 & 29.848 \\
+  \midrule
+  Throughput Safe & FTTC & 5 & newcwv & 9.242 & 2.407 & 16.334 \\
+  Throughput Safe & FTTC & 5 & vreno & 10.899 & 6.219 & 22.836 \\
+  \midrule
+  Throughput Safe & FTTP & 1 & newcwv & 31.918 & 9.773 & 57.483 \\
+  Throughput Safe & FTTP & 1 & vreno & 36.148 & 13.484 & 95.857 \\
+  \midrule
+  Throughput Safe & FTTP & 2 & newcwv & 13.296 & 4.654 & 30.885 \\
+  Throughput Safe & FTTP & 2 & vreno & 14.448 & 4.661 & 33.529 \\
+  \midrule
+  Throughput Safe & FTTP & 3 & newcwv & 11.825 & 3.365 & 27.481 \\
+  Throughput Safe & FTTP & 3 & vreno & 13.545 & 5.820 & 29.814 \\
+  \midrule
+  Throughput Safe & FTTP & 5 & newcwv & 9.174 & 2.542 & 17.085 \\
+  Throughput Safe & FTTP & 5 & vreno & 9.509 & 2.626 & 17.487 \\
+  \bottomrule
+
+\end{longtable}
+\twocolumn
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{figures/Throughput_Precise_1_client.pdf}
+  \caption{Calculated Throughput 1 Client}
+  \label{fig:throughput-precise-clients-1-app}
+\end{figure*}
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{figures/Throughput_Precise_2_clients.pdf}
+  \caption{Calculated Throughput 2 Clients}
+  \label{fig:throughput-precise-clients-2-app}
+\end{figure*}
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{figures/Throughput_Precise_3_clients.pdf}
+  \caption{Calculated Throughput 3 Clients}
+  \label{fig:throughput-precise-clients-3-app}
+\end{figure*}
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{figures/Throughput_Precise_5_clients.pdf}
+  \caption{Calculated Throughput 5 Clients}
+  \label{fig:throughput-precise-clients-5-app}
+\end{figure*}
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{figures/Throughput_Safe_1_client.pdf}
+  \caption{Advertised Throughput 1 Clients}
+  \label{fig:throughput-safe-clients-1-app}
+\end{figure*}
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{figures/Throughput_Safe_2_clients.pdf}
+  \caption{Advertised Throughput 2 Clients}
+  \label{fig:throughput-safe-clients-2-app}
+\end{figure*}
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{figures/Throughput_Safe_3_clients.pdf}
+  \caption{Advertised Throughput 3 Clients}
+  \label{fig:throughput-safe-clients-3-app}
+\end{figure*}
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{figures/Throughput_Safe_5_clients.pdf}
+  \caption{Advertised Throughput 5 Clients}
+  \label{fig:throughput-safe-clients-5-app}
+\end{figure*}
+
+
 %==================================================================================================
 \end{document}
 % vim: set ts=2 sw=2 tw=75 et ai:
