@@ -370,9 +370,6 @@ In HTTP video streaming playback stability is an important metric contributing t
 % in most papers, you don't need to cover anything more in an introduction.
 %
 
-\todo{
-  MTG: Reshape the first four paragraphs as below.
-}
 
 Video streaming over HTTP is commonplace, and comprises the majority of Internet traffic in many studies \cite{Sandvine-2019-global-internet-report}. Performance of HTTP adaptive streaming algorithms is generally good, and gives a high-quality user experience.
   
@@ -425,145 +422,169 @@ To the best of our knowledge, this is the first paper that studies New CWV's app
 
 We structure the remainder of this paper as follows. In section 2, we introduce previous work that motivates this paper, Section 3 describes our experimental setup. Section 4 discusses the obtained results. Chapter 5 lists other related work and finally chapter 6 concludes the paper.
 
+% \section{Background}
+% \label{sec:background}
+
+% \todo{MTG: Replace background with NewCWV impact on video. Keep some background content}
+
+% \todo{No paragraph about increasing flows or fair share}
+
+% % \begin{figure*}
+% %     \centering
+% %     \includegraphics[width=\linewidth]{figures/idle_periods_cwnd_RTO.pdf}
+% %     \caption{Idle Period CWND effect}
+% %     \label{fig:idle_cwnd_rto}
+% % \end{figure*}
+
+% % \begin{figure*}
+% %     \centering
+% %     \includegraphics{figures/cwv_idle.pdf}
+% %     \caption{Idle Period CWND effect}
+% %     \label{fig:idle_effect}
+% % \end{figure*}
+
+% \begin{itemize}
+%     \item Congestion Window Validation
+%     \item New Congestion Window Validation
+%     \item DASH Throughput
+% \end{itemize}
+
+
+% \todo{Diagram of Newcwv for Reno}
+
+% % Test case1:
+
+% % During init, connection is set to valid phase and pipeACK is set to undefined value.
+
+% % \textbf{Code}
+
+
+% % Test case 2:
+
+% % Sender updates pipeACK at least once every RTT.
+
+% % \textbf{Updated, every time cong\_avoid function is called, i.e., on every non-dubious ACK}
+
+% % Test case 3:
+
+% % PipeACK is set to undefined after loss recovery.
+
+% % \textbf{Init is called at the end of recovery. It sets PA to undefined}
+
+
+% % Test case 4:
+
+% % During validated phase, New CWV increases its CWND as a standard CC algorithm (e.g., Reno).
+
+% % \textbf{During VP New CWV reuses Reno's code}
+
+% % Test case 5:
+
+% % New CWV enters Non-validated phase when pipeACK < 1/2 * CWND
+
+% % \textbf{Demonstrated by sending traffic to build big enough CC, then halting sending and then sending with rate less than allowed by half CWND.}
+
+% % Test case 6:
+
+% % New CWV exits non-validated phase when pipeACK >= 1/2 * CWND
+
+% % \textbf{Upon init, as PA grows larger than half CWND, New CWV enters a valid phase} 
+
+% % Test case 7:
+
+% % Non-validated phase does not exceed 5 minutes
+
+% % \begin{table}[]
+% % \begin{tabular}{ll}
+% % \hline
+% % \multicolumn{1}{|l|}{Test Case}   & \multicolumn{1}{l|}{Verified}   \\ \hline
+% % \multicolumn{1}{|l|}{Test Case 1} & \multicolumn{1}{l|}{1} \\ \hline
+% % \multicolumn{1}{|l|}{Test Case 2} & \multicolumn{1}{l|}{1} \\ \hline
+% % \multicolumn{1}{|l|}{Test Case 3} & \multicolumn{1}{l|}{1} \\ \hline
+% % \multicolumn{1}{|l|}{Test Case 4} & \multicolumn{1}{l|}{1} \\ \hline
+% % \multicolumn{1}{|l|}{Test Case 5} & \multicolumn{1}{l|}{1} \\ \hline
+% % \multicolumn{1}{|l|}{Test Case 6} & \multicolumn{1}{l|}{1} \\ \hline
+% % \multicolumn{1}{|l|}{Test Case 7} & \multicolumn{1}{l|}{} \\ \hline
+% % \end{tabular}
+% % \end{table}
+
+% % Idle periods longer than the RTO reset the CWND value. This forces TCP Reno to re-enter slow-start. Known as Congestion Window Validation (Figure \ref{fig:idle_cwnd_rto}). The effect of CWND validation in Reno and CWND is shown on Figure \ref{fig:idle_effect}.
+
+% % New CWV is a refinement of CWV that addresses the following issue.
+
+% % Throughput algorithms continuously measure the available bandwidth. High CWND fluctuations, (f.e., as a result of an RTO idle reset) could be picked up by the application algorithm. This could lead to requesting representations that are not fully using or overload network's available capacity. In either case, this would lead to an increased number of representation switches, which is shown to reduce user's QoE.
+
+
+% The problem of TCP not being designed to carry long bursty traffic, such as HTTP video is well known. Even before that, there were proposals to optimise TCP for application limited traffic \cite{rfc2861-2000-padhye-congestion-window-validation}.
+
+% In standard window based congestion control algorithms, the transfer is network bound if the sender is fully utilising its congestion window capacity. The behaviour of that is well known, (e.g., during the slow-start the window will double every RTT until it sees loss and during the congestion avoidance phase the window will increase by 1 MSS packet every RTT). However, not all applications that use TCP would fully use their window capacity. Those are then said to be application limited, f.e., the application does not have enough data to send with a rate that the network currently offers. It has been found that during such phases the RTT could grow unrealistically large, as for example, TCP would continue to grow the window by 1 every RTT until it sees loss. In cases where the application cannot send as fast as the network allows it, the chances of observing loss due to high sending rate are low.
+
+% Another issue might arise if the application sends data in bursts over the same connection. In such cases, the value that the internal TCP connection had for the window might not be representative of the network state any more, depending on the duration of the idling period. For example, consider a single TCP application sending data over a 10Mbps link with no cross traffic. Then that connection could fully utilise the available capacity. But if the connection had begun the transfer, then paused and during the pause two more such application joined the network. Then the fair share if the first application resumed would be 3.3Mbps, but its internal state might be closer to the previously measured capacity of 10.
+
+% To overcome these issues RFC 2861 — Congestion window validation (CWV) was proposed \cite{rfc2861-2000-padhye-congestion-window-validation}. It does not allow the congestion window to grow during application limited periods and re-sets the TCP state after an idle period longer than the connection's retransmission timeout (RTO), i.e., reduces the window down to its initial value and forces new slow-start.
+
+% Since its proposal RFC 2861 has been adopted by the Linux kernel. However, research found that while beneficial for the network, the TCP modifications proposed by that congestion window validation were sometimes too conservative \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}. The authors discuss that particularly for HTTP adaptive streaming CWV negatively affects the stream performance, so they propose New Congestion Window Validation in RFC 7661 \cite{rfc7661-2015-fairhurst-new-cwnd-validation}. However, the authors show that New Congestion Window Validation normalises the TCP stream from the network's point of view and do not report on performance as seen by the application layer.
+
+% New Congestion Window Validation reuses the ideas of RFC 2861 with the main difference that it does not differentiate between application limited and long idle periods. It combines them in one state, which the authors call non-validated period. In it the congestion window will not grow beyond its slow-start threshold until the transfer becomes limited by the network or a loss is observed. Furthermore, New Congestion Window Validation does not allow this period to exceed 5 minutes. As of the time of writing this paper RFC 7661 still holds an experimental status and New CWV as defined there has not been implemented in the latest Linux kernels.
+
+% \todo{Overwhelm is "strong" language here}
+
+% The most notable difference between RFCs 2861 and 7661 is the reaction after an idle period (Figure \ref{fig:idle_effect}). An RFC 2861 validated connection would re-enter slow-start and thus temporary overwhelm the network to figure out the capacity limit. In contrast, an RFC 7661 connection would enter slow-start until it reaches its old slow-start threshold and begin congestion avoidance phase. For short bursty traffic such as video chunks in HTTP adaptive streaming. The lack of this initial window spike could mean more accurate capacity estimations for applications that performed this dividing the artefact's size by the transfer period.
+
+% In HTTP adaptive streaming's dash.js, the throughput algorithm does exactly that. Dash.js is a reference implementation provided by the DASH industry forum \cite{online-dashif}. The throughput algorithm is one of the three main adaptive strategies provided by dash.js. It is also currently a component of the default streaming strategy. In summary, the throughput algorithm selects appropriate bit-rate representation to request by measuring the throughput for the currently downloaded video chunks. It estimates the throughput by dividing the receipt time by the size of the received element. Therefore, the throughput algorithm benefits greatly from having accurate bandwidth estimations. Currently, throughput is not the default strategy but a part of it, as relying solely on the bandwidth might force the player to switch to a lower representation much earlier than needed to reflect some temporary congestion on the link. However, the throughput algorithm is essential component of the current default strategy and also is being heavily used for streams that cannot provide sufficient buffer ahead of time (e.g., live-streaming). Therefore, improving the performance of the throughput algorithm benefits the whole streaming ecosystem.
+
+% \begin{itemize}
+%     \item This means that using New Congestion Window Validation, it could obtain more accurate results.
+% \end{itemize}
+
 \section{Background}
 \label{sec:background}
 
-\todo{MTG: Replace background with NewCWV impact on video. Keep some background content}
+% \begin{enumerate}
+%   \item Bitrate selection is difficult
+%   \item Additionally, the client is aiming to mask network behaviour
+%   \item Sometimes the client cannot mask that abstraction well enough and issues appear resulting in poor ABR choices
+%   \item One reason for that poor performance is the transport - application interaction. Specifically, during on-off periods. Specifically with CWND size.
+%   \item TCP does this
+%   \item CWND validation has been proposed to prevent that
+%   \item New CWND validation was proposed
+%   \item It is unclear whether New CWND validation would influence the application layer.
+% \end{enumerate}
 
-\todo{No paragraph about increasing flows or fair share}
+HTTP video streaming works by transferring multiple pre-encoded video chunks from the streaming source to the client. The client then uses bit-rate adaptation algorithms to determine the encoding of each successive chunk. The goal of the client's algorithm is to maximise QoE, while meeting the underlying transport's capacity. This is a challenging task since different, often contradictory, QoE heuristics have to be met at the same time \cite{Seufert-2015-A-Survey-on-QoE-Dash}. Furthermore, since HTTP streaming uses mainly TCP to transfer the chunks, the bit rate selection's algorithm complexity rises.
 
-% \begin{figure*}
-%     \centering
-%     \includegraphics[width=\linewidth]{figures/idle_periods_cwnd_RTO.pdf}
-%     \caption{Idle Period CWND effect}
-%     \label{fig:idle_cwnd_rto}
-% \end{figure*}
+Previous work has identified that the interaction between TCP and HTTP can lead to poor link utilisation and perceived quality of expereience for HTTP adaptive connections \cite{Bae-2015-why-is-http-streaming-hard,Esteban-2012-Interactions-HTTP-TCP}. One impeding performance aspect of the interaction between the two layers is related to the On-Off nature of the video traffic.
 
-% \begin{figure*}
-%     \centering
-%     \includegraphics{figures/cwv_idle.pdf}
-%     \caption{Idle Period CWND effect}
-%     \label{fig:idle_effect}
-% \end{figure*}
+During the off periods, TCP has no way of keeping track of the network state. This is a known problem and RFC 2861 \cite{rfc2861-2000-padhye-congestion-window-validation} suggests that during such off periods TCP's congestion window should be invalidated. This is since the congestion window controls how many packets can be in-flight without being acknowledged and as the sender has no way of addressing the current network state after a restart, a conservative approach is taken. The connection is invalidated and TCP slow-start is re-entered. This approach has been adopted by the congestion control RFC \cite{rfc5681-congeston-control} and is currently the default TCP behaviour in Linux Kernel 5.4 series.
 
-\begin{itemize}
-    \item Congestion Window Validation
-    \item New Congestion Window Validation
-    \item DASH Throughput
-\end{itemize}
+However, while this works for TCP traffic in general, connections that spend a lot of their lifetime in off or application limited periods can suffer from reduced performance that originates in forcing the connection to re-enter slow-start multiple times during its lifetime \cite{Esteban-2012-Interactions-HTTP-TCP}. To address this issue an alternative approach, New Congestion Window Validation, was proposed \cite{rfc7661-2015-fairhurst-new-cwnd-validation}. Rather than re-setting the congestion window and forcing slow-start, this new approach aims at preserving the congestion window's state after restart. It has been shown that enabling this allows video connections to share the available bandwidth in a more fair fashion, compared to TCP NewReno \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}. Still, this work focussed primarily on the transport effect of introducing New Congestion Window Validation. The authors left exploring the DASH's application effect as future work. Additionally, it is known that an improved transport behaviour does not necessarily result in improved application performance \cite{Spiteri-2016-BOLA}.
 
+We believe, that current state-of-the-art streaming can benefit from improved performance, or otherwise a smoother video playout, if New Congestion Window Validation were enabled. Next, we outline the environment, which we used to test our hypothesis and later present the results from our study.
 
-\todo{Diagram of Newcwv for Reno}
-
-% Test case1:
-
-% During init, connection is set to valid phase and pipeACK is set to undefined value.
-
-% \textbf{Code}
+% The adaptive algorithms face the difficult task of delivering video while picking its ``best'' representations at any given point in time. This is since these algorithms need to simultaneously fulfil multiple criteria including: high stability, high quality, and low video stalls. These criteria can often conflict one another. For example, an algorithm always picking the lowest available representation will achieve low video stall time and high stability (since representations will not fluctuate), however, it will also display lower video quality, whereas perhaps higher one was possible. In a dynamic network, achieving a high index on one of these criterion also comes at the cost of observing a lower index in another. Modern adaptive algorithms try to balance that trade-off. They use either the pre-buffered capacity at the client or the immediate network state as a heuristic to aid them in the decision process. The former algorithms are known as buffer and the latter as throughput based.
 
 
-% Test case 2:
+% The goal of this paper is to show whether New Congestion Window Validation's improved transport performance translates to a smoother video playout in the application layer. Our hypothesis is that the faster congestion window resumption will enable the client to obtain more precise bandwidth estimations. Consequently, when the throughput estimation is the main quality heuristic (e.g., the throughput algorithm in dash.js) the improved precision could also lead to fewer quality switches and higher average bit-rate, directly impacting the achieved QoE.
 
-% Sender updates pipeACK at least once every RTT.
+% Since we are interested in how different congestion control algorithms affect HTTP video, we conduct our simulations using TCP Reno, which reportedly is used by Netflix \cite{Mishra-2019-the-great-internet-tcp-congestion-control-census}. Moreover, Netflix is the biggest HTTP video distributor accounting for 12.6\% of the global Internet traffic \cite{Sandvine-2019-global-internet-report}.
 
-% \textbf{Updated, every time cong\_avoid function is called, i.e., on every non-dubious ACK}
+% TCP Reno as implemented in the Linux Kernel 5.4 resets its slow-start threshold if an idle period longer than the RTO occurs. In contrast, as discussed in Section \ref{sec:background}, New Congestion Window Validation sustains its slow start threshold during such periods. This means that the former can resume transferring at its previous sending rate quicker.
 
-% Test case 3:
-
-% PipeACK is set to undefined after loss recovery.
-
-% \textbf{Init is called at the end of recovery. It sets PA to undefined}
-
-
-% Test case 4:
-
-% During validated phase, New CWV increases its CWND as a standard CC algorithm (e.g., Reno).
-
-% \textbf{During VP New CWV reuses Reno's code}
-
-% Test case 5:
-
-% New CWV enters Non-validated phase when pipeACK < 1/2 * CWND
-
-% \textbf{Demonstrated by sending traffic to build big enough CC, then halting sending and then sending with rate less than allowed by half CWND.}
-
-% Test case 6:
-
-% New CWV exits non-validated phase when pipeACK >= 1/2 * CWND
-
-% \textbf{Upon init, as PA grows larger than half CWND, New CWV enters a valid phase} 
-
-% Test case 7:
-
-% Non-validated phase does not exceed 5 minutes
-
-% \begin{table}[]
-% \begin{tabular}{ll}
-% \hline
-% \multicolumn{1}{|l|}{Test Case}   & \multicolumn{1}{l|}{Verified}   \\ \hline
-% \multicolumn{1}{|l|}{Test Case 1} & \multicolumn{1}{l|}{1} \\ \hline
-% \multicolumn{1}{|l|}{Test Case 2} & \multicolumn{1}{l|}{1} \\ \hline
-% \multicolumn{1}{|l|}{Test Case 3} & \multicolumn{1}{l|}{1} \\ \hline
-% \multicolumn{1}{|l|}{Test Case 4} & \multicolumn{1}{l|}{1} \\ \hline
-% \multicolumn{1}{|l|}{Test Case 5} & \multicolumn{1}{l|}{1} \\ \hline
-% \multicolumn{1}{|l|}{Test Case 6} & \multicolumn{1}{l|}{1} \\ \hline
-% \multicolumn{1}{|l|}{Test Case 7} & \multicolumn{1}{l|}{} \\ \hline
-% \end{tabular}
-% \end{table}
-
-% Idle periods longer than the RTO reset the CWND value. This forces TCP Reno to re-enter slow-start. Known as Congestion Window Validation (Figure \ref{fig:idle_cwnd_rto}). The effect of CWND validation in Reno and CWND is shown on Figure \ref{fig:idle_effect}.
-
-% New CWV is a refinement of CWV that addresses the following issue.
-
-% Throughput algorithms continuously measure the available bandwidth. High CWND fluctuations, (f.e., as a result of an RTO idle reset) could be picked up by the application algorithm. This could lead to requesting representations that are not fully using or overload network's available capacity. In either case, this would lead to an increased number of representation switches, which is shown to reduce user's QoE.
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=.5\textwidth]{figures/cwnd_growth.pdf}
+%   \caption{New CWV vs Reno Congestion Window Growth}
+%   \label{fig:cwnd-growth}
+% \end{figure}
 
 
-The problem of TCP not being designed to carry long bursty traffic, such as HTTP video is well known. Even before that, there were proposals to optimise TCP for application limited traffic \cite{rfc2861-2000-padhye-congestion-window-validation}.
+% \todo{Buffer bloated network less impactful on the latency}
 
-In standard window based congestion control algorithms, the transfer is network bound if the sender is fully utilising its congestion window capacity. The behaviour of that is well known, (e.g., during the slow-start the window will double every RTT until it sees loss and during the congestion avoidance phase the window will increase by 1 MSS packet every RTT). However, not all applications that use TCP would fully use their window capacity. Those are then said to be application limited, f.e., the application does not have enough data to send with a rate that the network currently offers. It has been found that during such phases the RTT could grow unrealistically large, as for example, TCP would continue to grow the window by 1 every RTT until it sees loss. In cases where the application cannot send as fast as the network allows it, the chances of observing loss due to high sending rate are low.
+% \todo{In Excessive buffer networks New CWV is less likely to fill the buffers}
 
-Another issue might arise if the application sends data in bursts over the same connection. In such cases, the value that the internal TCP connection had for the window might not be representative of the network state any more, depending on the duration of the idling period. For example, consider a single TCP application sending data over a 10Mbps link with no cross traffic. Then that connection could fully utilise the available capacity. But if the connection had begun the transfer, then paused and during the pause two more such application joined the network. Then the fair share if the first application resumed would be 3.3Mbps, but its internal state might be closer to the previously measured capacity of 10.
+% Furthermore, by not re-entering slow-start, New Congestion Window Validated connections remove the inherent initial capacity overshooting of TCP Reno and do not aggressively take more space in the network buffers, thus, being less aggressive overall and less likely to cause bufferbloat \cite{Gettys-2011-bufferbloat}. In addition, for smaller data transfers (e.g., video chunks: 120 Kb for the highest encoding \todo{Where does that come from}) the initial overshooting could introduce higher variance to systems trying to estimate the average throughput as a factor of the data size and the transfer time. In other words, we expect connections running New Congestion Window Validation to result in more stable capacity estimations from the HTTP client.
 
-To overcome these issues RFC 2861 — Congestion window validation (CWV) was proposed \cite{rfc2861-2000-padhye-congestion-window-validation}. It does not allow the congestion window to grow during application limited periods and re-sets the TCP state after an idle period longer than the connection's retransmission timeout (RTO), i.e., reduces the window down to its initial value and forces new slow-start.
-
-Since its proposal RFC 2861 has been adopted by the Linux kernel. However, research found that while beneficial for the network, the TCP modifications proposed by that congestion window validation were sometimes too conservative \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}. The authors discuss that particularly for HTTP adaptive streaming CWV negatively affects the stream performance, so they propose New Congestion Window Validation in RFC 7661 \cite{rfc7661-2015-fairhurst-new-cwnd-validation}. However, the authors show that New Congestion Window Validation normalises the TCP stream from the network's point of view and do not report on performance as seen by the application layer.
-
-New Congestion Window Validation reuses the ideas of RFC 2861 with the main difference that it does not differentiate between application limited and long idle periods. It combines them in one state, which the authors call non-validated period. In it the congestion window will not grow beyond its slow-start threshold until the transfer becomes limited by the network or a loss is observed. Furthermore, New Congestion Window Validation does not allow this period to exceed 5 minutes. As of the time of writing this paper RFC 7661 still holds an experimental status and New CWV as defined there has not been implemented in the latest Linux kernels.
-
-\todo{Overwhelm is "strong" language here}
-
-The most notable difference between RFCs 2861 and 7661 is the reaction after an idle period (Figure \ref{fig:idle_effect}). An RFC 2861 validated connection would re-enter slow-start and thus temporary overwhelm the network to figure out the capacity limit. In contrast, an RFC 7661 connection would enter slow-start until it reaches its old slow-start threshold and begin congestion avoidance phase. For short bursty traffic such as video chunks in HTTP adaptive streaming. The lack of this initial window spike could mean more accurate capacity estimations for applications that performed this dividing the artefact's size by the transfer period.
-
-In HTTP adaptive streaming's dash.js, the throughput algorithm does exactly that. Dash.js is a reference implementation provided by the DASH industry forum \cite{online-dashif}. The throughput algorithm is one of the three main adaptive strategies provided by dash.js. It is also currently a component of the default streaming strategy. In summary, the throughput algorithm selects appropriate bit-rate representation to request by measuring the throughput for the currently downloaded video chunks. It estimates the throughput by dividing the receipt time by the size of the received element. Therefore, the throughput algorithm benefits greatly from having accurate bandwidth estimations. Currently, throughput is not the default strategy but a part of it, as relying solely on the bandwidth might force the player to switch to a lower representation much earlier than needed to reflect some temporary congestion on the link. However, the throughput algorithm is essential component of the current default strategy and also is being heavily used for streams that cannot provide sufficient buffer ahead of time (e.g., live-streaming). Therefore, improving the performance of the throughput algorithm benefits the whole streaming ecosystem.
-
-\begin{itemize}
-    \item This means that using New Congestion Window Validation, it could obtain more accurate results.
-\end{itemize}
-
-\section{NewCwv Impact on video}
-\label{sec:newcwv-impact}
-
-The goal of this paper is to show whether New Congestion Window Validation's improved transport performance translates to a smoother video playout in the application layer. Our hypothesis is that the faster congestion window resumption will enable the client to obtain more precise bandwidth estimations. Consequently, when the throughput estimation is the main quality heuristic (e.g., the throughput algorithm in dash.js) the improved precision could also lead to fewer quality switches and higher average bit-rate, directly impacting the achieved QoE.
-
-Since we are interested in how different congestion control algorithms affect HTTP video, we conduct our simulations using TCP Reno, which reportedly is used by Netflix \cite{Mishra-2019-the-great-internet-tcp-congestion-control-census}. Moreover, Netflix is the biggest HTTP video distributor accounting for 12.6\% of the global Internet traffic \cite{Sandvine-2019-global-internet-report}.
-
-TCP Reno as implemented in the Linux Kernel 5.4 resets its slow-start threshold if an idle period longer than the RTO occurs. In contrast, as discussed in Section \ref{sec:background}, New Congestion Window Validation sustains its slow start threshold during such periods. This means that the former can resume transferring at its previous sending rate quicker.
-
-\begin{figure}
-  \centering
-  \includegraphics[width=.5\textwidth]{figures/cwnd_growth.pdf}
-  \caption{New CWV vs Reno Congestion Window Growth}
-  \label{fig:cwnd-growth}
-\end{figure}
-
-
-\todo{Buffer bloated network less impactful on the latency}
-
-\todo{In Excessive buffer networks New CWV is less likely to fill the buffers}
-
-Furthermore, by not re-entering slow-start, New Congestion Window Validated connections remove the inherent initial capacity overshooting of TCP Reno and do not aggressively take more space in the network buffers, thus, being less aggressive overall and less likely to cause bufferbloat \cite{Gettys-2011-bufferbloat}. In addition, for smaller data transfers (e.g., video chunks: 120 Kb for the highest encoding \todo{Where does that come from}) the initial overshooting could introduce higher variance to systems trying to estimate the average throughput as a factor of the data size and the transfer time. In other words, we expect connections running New Congestion Window Validation to result in more stable capacity estimations from the HTTP client.
-
-Stable bandwidth estimation is critical for environments such as dash.js. In those, the client attempts to gauge the current link capacity by dividing the downloaded content over the download period. It then uses this estimation as a heuristic to predict what video quality should be requested next. Naturally, this means that more stable estimations are likely to result in the same quality being requested, while higher variance might end up requesting too high or too low quality and so, respectively, failing to meet its deadlines or not fully utilising the link capacity. In either case this would directly impact the achieved video QoE.
+% Stable bandwidth estimation is critical for environments such as dash.js. In those, the client attempts to gauge the current link capacity by dividing the downloaded content over the download period. It then uses this estimation as a heuristic to predict what video quality should be requested next. Naturally, this means that more stable estimations are likely to result in the same quality being requested, while higher variance might end up requesting too high or too low quality and so, respectively, failing to meet its deadlines or not fully utilising the link capacity. In either case this would directly impact the achieved video QoE.
 
 % Hypothesis stated in the begining of the paragraph, no need to repeat it here.
 
