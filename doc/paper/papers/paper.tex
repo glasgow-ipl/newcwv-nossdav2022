@@ -622,7 +622,7 @@ In addition, we run tcpdump and record all packets on the client and the server,
 
 \section{Results}
 
-To test our hypothesis, we compare to TCP Reno video stream cases, one that does not use New CWV (the current kernel default), and one that does. To measure and quantify the application level performance, we use standard video performance metrics, namely, average bit-rate, average bit-rate oscillation, and rebuffer ratio (Figures \ref{} - \ref{}). Furthermore, to measure the transport layer impact, we collect throughput measurements as calculated by the receiver's adaptation algorithm (Figures \ref{} - \ref{}).
+To test our hypothesis, we compare to TCP Reno video stream cases, one that does not use New CWV (the current kernel default), and one that does. To measure and quantify the application level performance, we use standard video performance metrics, namely, average bit-rate, average bit-rate oscillation, and rebuffer ratio (Figures \ref{fig:throughput-clients-1} - \ref{fig:throughput-clients-5}). Furthermore, to measure the transport layer impact, we collect throughput measurements as calculated by the receiver's adaptation algorithm (Figures \ref{fig:avg-bitrate} - \ref{fig:rebuffer-ratio}).
 
 Additionally, we run each of our video scenarios within the environment introduced in \ref{sec:experimental-setup} with 1, 2, 3, and 5 different clients (receivers) that all attempt to request the video at the same time. Finally, we repeat each such instance ten times and then take the average values in order to reduce statistical noise. Following, we split the discussion into two sections: transport and application impact.
 
@@ -649,63 +649,72 @@ Additionally, we run each of our video scenarios within the environment introduc
 % NewCWV controlled connections have more stable rates, observed by the lower standard deviation in the throughput used by the client algorithm for 10 out of the 12 tested profiles. Additionally, we note that connections using NewCWV consistently measure a lower mean throughput value. In the FTTC case, the mean value reported by NewCWV is closer to the equilibrium value that would be obtained in the case where bandwidth was distributed evenly if all connections were active at the same time. Interestingly, this trend is not carried over the DSL and FTTP scenarios. In fact for the DSL scenarios both algorithms would often report a mean value, higher than the link's available bandwidth. We traced the root cause for this behaviour to be very large congestion window values that allow video chunks to be transmitted in low number of roundtrips, such that the monitoring unit cannot obtain a large enough sample to compute a ``representative'' value.
 % \todo{I think this occurs for Reno with DSL, since the off-periods are not always long enough to cause the connection to reset its state. Further investigation is needed.}
 
+Firstly, in order to present the transport behaviour more accurately, we collect two distinct but related throughout measurements, used by the client: precise and safe. Both are calculated for each received chunk. The former is simply the received bytes divided by the download time. The latter is a function that the dash.js client uses internally to select the next representation. The function takes the precise measurement, as well as historical data for previously measured bandwidth values on that connection and finally applies a safety factor ($<1.0$) to the result. In figures \ref{fig:throughput-clients-1} - \ref{fig:throughput-clients-5} we present the cumulative distribution function for all obtained bandwidth measurements.
+
+For the one client case, we obtain results showing that New CWV's faster CWND resumption after idle accounts for these flow being able to obtain higher bandwidth than Reno flows without New CWV. Similar results are also shown in \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}, confirming that our New CWV port was successful. These results also confirm our initial hypothesis that New CWV controlled flows should be able to get measurements closer to the available link speed, compared to Reno flows without New CWV. 
+
 \begin{figure*}
   \centering
-  % \includegraphics[width=\textwidth]{figures/Throughput_Precise_1_clients_cdf.pdf}
-  \caption{Calculated Throughput 1 Client}
-  \label{fig:throughput-precise-clients-1}
+  \includegraphics[width=\textwidth]{figures/Throughput_1_clients.pdf}
+  \caption{Throughput 1 Client}
+  \label{fig:throughput-clients-1}
 \end{figure*}
 
 \begin{figure*}
   \centering
-  % \includegraphics[width=\textwidth]{figures/Throughput_Precise_2_clients_cdf.pdf}
-  \caption{Calculated Throughput 2 Clients}
-  \label{fig:throughput-precise-clients-2}
+  \includegraphics[width=\textwidth]{figures/Throughput_2_clients.pdf}
+  \caption{Throughput 2 Clients}
+  \label{fig:throughput-clients-2}
 \end{figure*}
 
 \begin{figure*}
   \centering
-  % \includegraphics[width=\textwidth]{figures/Throughput_Precise_3_clients_cdf.pdf}
-  \caption{Calculated Throughput 3 Clients}
-  \label{fig:throughput-precise-clients-3}
+  \includegraphics[width=\textwidth]{figures/Throughput_3_clients.pdf}
+  \caption{Throughput 3 Clients}
+  \label{fig:throughput-clients-3}
 \end{figure*}
 
 \begin{figure*}
   \centering
-  % \includegraphics[width=\textwidth]{figures/Throughput_Precise_5_clients_cdf.pdf}
-  \caption{Calculated Throughput 5 Clients}
-  \label{fig:throughput-precise-clients-5}
+  \includegraphics[width=\textwidth]{figures/Throughput_5_clients.pdf}
+  \caption{Throughput 5 Clients}
+  \label{fig:throughput-clients-5}
+\end{figure*}
+
+
+\textbf{Application Effect:}
+
+In Figure \ref{fig:throughput-clients-5}, we see information about the throughput values. On top, we see the different thresholds that dash.js requires in order to select a higher quality. We can see that for both the DSL and FTTC scenarios, New CWV is able to obtain more bandwidth probes over the 1080p limit. Intuitively, this would suggest that in these cases New CWV should obtain higher bitrate. In other words, we expect New CWV connections, to request more segments of the highest quality. We can see that this expectation is confirmed by Figure \ref{fig:avg-bitrate}.
+
+Additionally, from Figure \ref{fig:avg-oscillations} can be observed that New CWV connections not only ramp up to the best available quality faster, but they also have more consistent measurements and better detect that the link has not changed. In contrast, Reno connections would oscillate more between the highest and second-highest quality which would create higher bit-rate oscillation.
+
+Finally, we observe that New CWV connections pace out their idle periods better and avoid synchronizing. This leads to fewer retransmitted packets and overall faster segment transmission. In turn, the client's buffers do not deplete as fast and thus New CWV connections enjoy lower rebuffer ratio, as shown on Figure \ref{fig:rebuffer-ratio}.
+
+
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{figures/Average_Bitrate.pdf}
+  \caption{Average Bit-rate}
+  \label{fig:avg-bitrate}
+\end{figure*}
+
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{figures/Average_Oscillations.pdf}
+  \caption{Average Bit-rate Oscillations}
+  \label{fig:avg-oscillations}
 \end{figure*}
 
 \begin{figure*}
   \centering
-  % \includegraphics[width=\textwidth]{figures/Throughput_Safe_1_clients_cdf.pdf}
-  \caption{Advertised Throughput 1 Clients}
-  \label{fig:throughput-safe-clients-1}
+  \includegraphics[width=\textwidth]{figures/Rebuffer_ratio.pdf}
+  \caption{Rebuffer Ratio}
+  \label{fig:rebuffer-ratio}
 \end{figure*}
 
-\begin{figure*}
-  \centering
-  % \includegraphics[width=\textwidth]{figures/Throughput_Safe_2_clients_cdf.pdf}
-  \caption{Advertised Throughput 2 Clients}
-  \label{fig:throughput-safe-clients-2}
-\end{figure*}
 
-\begin{figure*}
-  \centering
-  % \includegraphics[width=\textwidth]{figures/Throughput_Safe_3_clients_cdf.pdf}
-  \caption{Advertised Throughput 3 Clients}
-  \label{fig:throughput-safe-clients-3}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  % \includegraphics[width=\textwidth]{figures/Throughput_Safe_5_clients_cdf.pdf}
-  \caption{Advertised Throughput 5 Clients}
-  \label{fig:throughput-safe-clients-5}
-\end{figure*}
-
-\textbf{Application Effect:} 
 % We find that in all but two of the DSL profiles NewCWV connections would obtain a higher average playout bit-rate. Additionally, in all considered scenarios NewCWV showed a mean rebuffering value of under 0.6 seconds for the whole video, while Reno connections without NewCWV would on average enter rebuffering state for over a second in half of the considered scenarios. Peaking at an average of over 20 seconds of rebuffering for the 5 connections over FTTP case. In addition to the lower rebuffering time, we find that NewCWV also achieves comparable or lower mean oscillation in almost all cases.
 
 % Achieving high bitrate with low oscillation are desired properties for any bitrate selection algorithm. In our case, we see that using NewCWV enables the same algorithm to perform better for both of these variables. Previous found high oscillation values to cause poor video QoE \cite{Spiteri-2016-BOLA,Akhshabi-2012-http-adaptive-players-compete,Huang-2013-downtown-abbey}. Finally, the other desired property for any algorithm is the lower rebuffering ratio. Similarly, we see that New CWV enables the same algorithm to perform better in this scenario as well. In other words, the difference of New CWV's CWND resumption after idle is noticeable in the transport layer, enabling the same adaptation algorithm to achieve lower video oscillation and rebuffering with higher bitrate, or otherwise: smoother, higher quality video that does not wait for new content. This directly translates to an increased video QoE. So we conclude that enabling New CWV at the server leads to improved bitrate selection performance and thus higher QoE. This confirms our initial hypothesis.
@@ -717,13 +726,12 @@ Additionally, we run each of our video scenarios within the environment introduc
 
 % In terms of the calculated throughput, it should be noted that the New Congestion Window Validation connections consistently report lower throughput estimations compared to their counterpart. We reason this comes from the fact that New Congestion Window Validated connections are less aggressive and do not send as many bursts over the link capacity as the alternative. In turn these episodes where Reno overshoots account for the higher overall reported link bitrate.
 
-\todo{
-\begin{itemize}
-  \item Should we also look at what happens in the transport layer? I.e., how many idle periods does each connection have on average, how long they are, when they occur, etc.
-  \item The scenarios listed so far only looked at a single video stream being played. What about the scenarios where multiple streams are present?
-  \item Would a mathematical model of what happens after an idle period for Reno and New CWV help? It could find the numbers of additional players where the behaviour between the two could be different.
-\end{itemize}
-}
+% \todo{
+% \begin{itemize}
+%   \item Should we also look at what happens in the transport layer? I.e., how many idle periods does each connection have on average, how long they are, when they occur, etc.
+%   \item Would a mathematical model of what happens after an idle period for Reno and New CWV help? It could find the numbers of additional players where the behaviour between the two could be different.
+% \end{itemize}
+% }
 
 % As expected, we see that for the FTTP (all links?) link, the New Congestion Window validation simulations yielded a more accurate confidence interval with respect to the available link capacity. 
 
@@ -786,91 +794,6 @@ Additionally, we run each of our video scenarios within the environment introduc
 \end{table}
 
 % TODO: Heatmap with all 50 connections
-
-
-\begin{figure*}
-  \centering
-  \includegraphics{figures/Average_Bitrate_1_client.pdf}
-  \caption{Average Bit-rate 1 Client}
-  \label{fig:avg-bitrate-clients-1}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \includegraphics{figures/Average_Bitrate_2_clients.pdf}
-  \caption{Average Bit-rate 2 Clients}
-  \label{fig:avg-bitrate-clients-2}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \includegraphics{figures/Average_Bitrate_3_clients.pdf}
-  \caption{Average Bit-rate 3 Clients}
-  \label{fig:avg-bitrate-clients-3}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \includegraphics{figures/Average_Bitrate_5_clients.pdf}
-  \caption{Average Bit-rate 5 Clients}
-  \label{fig:avg-bitrate-clients-5}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \includegraphics{figures/Average_Oscillations_1_client.pdf}
-  \caption{Average Bit-rate Oscillation 1 Client}
-  \label{fig:avg-oscillation-clients-1}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \includegraphics{figures/Average_Oscillations_2_clients.pdf}
-  \caption{Average Bit-rate Oscillation 2 Clients}
-  \label{fig:avg-oscillation-clients-2}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \includegraphics{figures/Average_Oscillations_3_clients.pdf}
-  \caption{Average Bit-rate Oscillation 3 Clients}
-  \label{fig:avg-oscillation-clients-3}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \includegraphics{figures/Average_Oscillations_5_clients.pdf}
-  \caption{Average Bit-rate Oscillation 5 Clients}
-  \label{fig:avg-oscillation-clients-5}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \includegraphics{figures/Rebuffer_Ratio_1_client.pdf}
-  \caption{Re-buffer ratio 1 Client}
-  \label{fig:rebuffer-ratio-clients-1}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \includegraphics{figures/Rebuffer_Ratio_2_clients.pdf}
-  \caption{Re-buffer ratio 2 Clients}
-  \label{fig:rebuffer-ratio-clients-2}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \includegraphics{figures/Rebuffer_Ratio_3_clients.pdf}
-  \caption{Re-buffer ratio 3 Clients}
-  \label{fig:rebuffer-ratio-clients-3}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \includegraphics{figures/Rebuffer_Ratio_5_clients.pdf}
-  \caption{Re-buffer ratio 5 Clients}
-  \label{fig:rebuffer-ratio-clients-5}
-\end{figure*}
 
 % For all experiments, we stream a 635 second long SDR video from an Nginx server. The client is a Firefox instance using dash.js 3.1.3 using default parameters and "abrThroughput" as its adaptive strategy. We chose to set this strategy as it is one of the three current main ones and would best reflect the impact of accurate link capacity estimations. The video is encoded in 3 second chunks as prior work identified this gives the best trade-off in optimising network load, while minimising video stalls. 
 
