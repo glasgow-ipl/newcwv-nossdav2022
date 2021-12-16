@@ -266,31 +266,32 @@ FIGURES_FOLDER = ${PAPER_BUILD}/figures
 
 .PRECIOUS: ${FIGURES_FOLDER}/tmp/%/parsed_data.json
 
+RAW_DATA = ${foreach client, ${CLIENTS}, ${FIGURES_FOLDER}/tmp/${client}/parsed_data.json}
+
 # Tools to build before the PDF files. This is a list of executable files in
 # the bin/ directory:
 TOOLS = 
 
-FIGURES = $(foreach client, ${CLIENTS}, ${FIGURES_FOLDER}/Average_Bitrate_${client}_clients.pdf ${FIGURES_FOLDER}/Average_Oscillations_${client}_clients.pdf ${FIGURES_FOLDER}/Throughput_Precise_${client}_clients_cdf.pdf ${FIGURES_FOLDER}/Throughput_Safe_${client}_clients_cdf.pdf ${FIGURES_FOLDER}/Rebuffer_Ratio_${client}_clients.pdf)
+FIGURES_TRANSPORT = $(foreach client, ${CLIENTS},  ${FIGURES_FOLDER}/Throughput_${client}_clients.pdf)
+
+FIGURES_APPLICATION = ${FIGURES_FOLDER}/Average_Bitrate.pdf ${FIGURES_FOLDER}/Average_Oscillations.pdf ${FIGURES_FOLDER}/Rebuffer_Ratio.pdf
 
 #TODO: Logs as a dependency here
 ${FIGURES_FOLDER}/tmp/%/parsed_data.json: ${ROOT}/scripts/analytics/paper/plot_data.py
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --root /vagrant/logs/clients/$* --algs newcwv vreno --runs ${shell seq 1 10} --links ${LINKS} --parse 1 --target none
 
 #TODO need to fix parsed data dependency to allow for more clients
-${FIGURES_FOLDER}/Average_Bitrate_%_clients.pdf: ${FIGURES_FOLDER}/tmp/%/parsed_data.json
-	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "average bitrate" --clients $* --extension pdf
+${FIGURES_FOLDER}/Average_Bitrate.pdf: ${RAW_DATA}
+	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "average bitrate" --clients_combined ${CLIENTS} --extension pdf
 
-${FIGURES_FOLDER}/Average_Oscillations_%_clients.pdf: ${FIGURES_FOLDER}/tmp/%/parsed_data.json
-	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "average oscillations" --clients $* --extension pdf
+${FIGURES_FOLDER}/Average_Oscillations.pdf: ${RAW_DATA}
+	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "average oscillations" --clients_combined ${CLIENTS} --extension pdf
 
-${FIGURES_FOLDER}/Throughput_Precise_%_clients_cdf.pdf: ${FIGURES_FOLDER}/tmp/%/parsed_data.json
-	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "throughput precise" --clients $* --extension pdf
+${FIGURES_FOLDER}/Rebuffer_Ratio.pdf: ${RAW_DATA}
+	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "rebuffer ratio" --clients_combined ${CLIENTS} --extension pdf
 
-${FIGURES_FOLDER}/Throughput_Safe_%_clients_cdf.pdf: ${FIGURES_FOLDER}/tmp/%/parsed_data.json
-	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "throughput safe" --clients $* --extension pdf
-
-${FIGURES_FOLDER}/Rebuffer_Ratio_%_clients.pdf: ${FIGURES_FOLDER}/tmp/%/parsed_data.json
-	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "rebuffer ratio" --clients $* --extension pdf
+${FIGURES_FOLDER}/Throughput_%_clients.pdf: ${FIGURES_FOLDER}/tmp/%/parsed_data.json
+	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "throughput" --clients_combined ${CLIENTS} --clients $* --extension pdf
 
 ${FIGURES_FOLDER}/Average_Stalls_5_clients.pdf: ${FIGURES_FOLDER}/tmp/parsed_data.json
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "average stalls" --extension png
@@ -303,7 +304,7 @@ ${FIGURES_FOLDER}/Average_Stalls_5_clients.pdf: ${FIGURES_FOLDER}/tmp/parsed_dat
 # ${FIGURES}: figures
 
 # Master build rule:
-paper: ${FIGURES} check-make git-revision $(TOOLS) $(PDF_FILES)
+paper: ${FIGURES_APPLICATION} ${FIGURES_TRANSPORT} check-make git-revision $(TOOLS) $(PDF_FILES)
 
 # =================================================================================================
 # Project specific rules to download files:
