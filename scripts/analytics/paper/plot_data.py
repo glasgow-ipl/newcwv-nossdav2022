@@ -248,7 +248,7 @@ def plot_cdf_multiple(*, metric_names, data, links, algs, clients, extension):
         if idx == 0:
             ax.set_ylabel("CDF")
 
-    plt.gcf().set_size_inches(12, 3)
+    plt.gcf().set_size_inches(12, 2)
     plt.legend()
     save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', f'Throughput_{clients}_clients.{extension}')
     print(f'Saving {save_path}...')
