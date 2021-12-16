@@ -51,6 +51,7 @@ def main():
     with open('/vagrant/logs/tmp/result.json', 'w') as f:
         json.dump(estimates, f)
 
+
 def calculate_throughput(server_pcap_loc, init_time=None, interval=1):
     res = subprocess.run(f'tcpdump -n -r {server_pcap_loc}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -87,4 +88,4 @@ def calculate_throughput(server_pcap_loc, init_time=None, interval=1):
 
 if __name__ == '__main__':
     # main()
-    calculate_throughput('/vagrant/logs/tmp/server.pcap')
+    calculate_throughput('/vagrant/logs/clients/2/DSL/1_newcwv/server.pcap')
