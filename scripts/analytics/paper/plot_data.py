@@ -16,9 +16,41 @@ from constants import QUALITY_TO_BPS_3S_IETF
 import parse_dash_log
 
 
-def plot_boxplot(metric_name, data_aggregate, algs, clients, extension, ylabel=None):
+def plot_boxplot_multiple(*, metric_name, data, algs, links, extension, format_percent=False, y_label=''):
+    agg = []
+    x_labels = []
+    for c, link_aggregate in data.items():
+        for link in links:
+            for alg in algs:
+                plot_data = link_aggregate[link][alg][metric_name]
+                x_labels.append(f'{c} {link} {alg}')
+                agg.append(plot_data)
+
+    plt.boxplot(agg)
+    plt.xticks([i+1 for i in range(len(x_labels))], x_labels, rotation=90)
+    _, max_y = plt.ylim()
+    plt.ylim(bottom=0, top=max_y + .1*max_y)
+    if not y_label:
+        plt.ylabel(f'{metric_name} (kbps)')
+    else:
+        plt.ylabel(y_label)
+
+    if format_percent:
+        plt.axes().get_yaxis().set_major_formatter(PercentFormatter(1))
+
+    save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', f"{metric_name.replace(' ', '_')}.{extension}")
+    print(f"Saving {save_path}")
+    plt.gcf().set_size_inches(10, 3)
+    plt.savefig(save_path, bbox_inches='tight')
+    plt.clf()
+
+
+def plot_boxplot(metric_name, data_aggregate, algs, clients, extension, ylabel=None, format_percent=False, xticks=None):
     axs = []
 
+    if xticks:
+        algs = xticks
+    
     max_y = 0
     for idx, name in enumerate(data_aggregate[metric_name].keys()):
         if idx == 1:
@@ -32,11 +64,17 @@ def plot_boxplot(metric_name, data_aggregate, algs, clients, extension, ylabel=N
         plt.xticks(range(1, len(algs) + 1), algs)
         axs.append(ax)
 
-    for ax in axs:
+    for i, ax in enumerate(axs):
         ax.set_ylim(bottom=0, top=max_y)
+        if format_percent:
+            ax.get_yaxis().set_major_formatter(PercentFormatter(1))
+        if i != 0:
+            ax.set_yticklabels([])
 
     save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures')
     plt.gcf().set_size_inches(8, 3)
+
+
     fig_name = os.path.join(save_path, f'{metric_name.replace(" ", "_")}_{clients}_clients.{extension}')
     print(f"Saving {fig_name}")
     plt.savefig(fig_name, bbox_inches='tight')
@@ -174,6 +212,50 @@ def plot_cdf(metric_name, data_aggregate, clients, extension):
     plt.clf()
 
 
+def plot_cdf_multiple(*, metric_names, data, links, algs, clients, extension):
+    alg_mapping = {'newcwv': 'New CWV', 'vreno': 'Reno'}
+    for idx, link in enumerate(links):
+        ax = plt.subplot(1, 4, idx+1)
+        ax.set_title(link)
+
+        plot_data = []
+        for alg, stats in data[clients][link].items():
+            for metric in metric_names:
+                tmp = np.array(stats[metric])
+                plot_data.append((alg, metric, tmp))
+        
+        bin_l = min([min(x[2]) for x in plot_data]) * .9
+        bin_h = max([np.percentile(x[2], 99.9) for x in plot_data]) * 1.1
+        leap = .1
+
+        bins = np.arange(bin_l, bin_h, leap)
+
+        line_styles = {'Throughput Safe': '--', 'Throughput Precise': ':'}
+        colours = {'newcwv': 'red', 'vreno': 'blue'}
+        for item in plot_data:
+            alg, metric, raw_data = item
+            count, bins_count = np.histogram(raw_data, 100, range=(bin_l, bin_h))
+            pdf = count / sum(count)
+            cdf = np.cumsum(pdf)
+            ax.plot(bins_count[1:], cdf, label=f'{alg_mapping[alg]} {metric.split()[1]}', linestyle=line_styles[metric], c=colours[alg])
+
+        ax.set_ylim(bottom=0)
+        ax.axvline(0.44, c='brown',  label='480p')
+        ax.axvline(2.64, c='green',  label='720p')
+        ax.axvline(4.82, c='purple', label='1080p')
+
+        ax.set_xlabel("Bandwidth (Mbps)")
+        if idx == 0:
+            ax.set_ylabel("CDF")
+
+    plt.gcf().set_size_inches(12, 3)
+    plt.legend()
+    save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', f'Throughput_{clients}_clients.{extension}')
+    print(f'Saving {save_path}...')
+    plt.savefig(save_path, bbox_inches='tight')
+    plt.clf()
+
+
 def plot_data(*, links, algs, extension = 'png', clients=0, target='all'):
     if not clients:
         print('Client argument must be supplied and different from 0', file=sys.stderr)
@@ -208,16 +290,46 @@ def plot_data(*, links, algs, extension = 'png', clients=0, target='all'):
 
     if target.lower() == 'throughput precise' or target.lower() == 'all':
         # plot_histogram('Throughput Precise', data_aggregate=combined, clients=clients, extension=extension)
-        plot_cdf('Throughput Precise', data_aggregate=combined, clients=clients, extension=extension)
+        plot_cdf('Throughput Precise', data=combined, clients=clients, extension=extension)
     if target.lower() == 'throughput safe' or target.lower() == 'all':
         # plot_histogram('Throughput Safe', data_aggregate=combined, clients=clients, extension=extension)
-        plot_cdf('Throughput Safe', data_aggregate=combined, clients=clients, extension=extension)
+        plot_cdf('Throughput Safe', data=combined, clients=clients, extension=extension)
     if target.lower() == 'average bitrate' or target.lower() == 'all':
-        plot_boxplot('Average Bitrate', combined, algs, clients, extension)
+        plot_boxplot('Average Bitrate', combined, algs, clients, extension, xticks=['New CWV', 'Reno'])
     if target.lower() == 'average oscillations' or target.lower() == 'all':
-        plot_boxplot('Average Oscillations', combined, algs, clients, extension)
+        plot_boxplot('Average Oscillations', combined, algs, clients, extension, xticks=['New CWV', 'Reno'])
     if target.lower() == 'rebuffer ratio' or target.lower() == 'all':
-        plot_boxplot('Rebuffer Ratio', combined, algs, clients, extension, ylabel='Rebuffer Ratio')
+        plot_boxplot('Rebuffer Ratio', combined, algs, clients, extension, ylabel='Rebuffer Ratio', format_percent=True, xticks=['New CWV', 'Reno'])
+
+
+def plot_data_multiple(*, links, algs, extension = 'png', clients=0, target='all', clients_combined=None):
+    if not clients and target == 'throughput':
+        print('Client argument must be supplied and different from 0', file=sys.stderr)
+        sys.exit(1)
+
+    data_aggregate = {}
+    for c in clients_combined:
+        tmp_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp', c)
+        tmp_path = os.path.join(tmp_path, 'parsed_data.json')
+        print(f"Using file {tmp_path}")
+        with open(tmp_path, 'r') as f:
+            metrics = json.load(f)
+            print("Parsed data loaded")
+        data_aggregate[c] = metrics
+
+
+    if target.lower() == 'throughput' or target.lower() == 'all':
+        if target.lower() == 'all':
+            for c in data_aggregate:
+                plot_cdf_multiple(metric_names=['Throughput Precise', 'Throughput Safe'], data=data_aggregate, links=links, algs=algs, clients=str(c), extension=extension)    
+        else:    
+            plot_cdf_multiple(metric_names=['Throughput Precise', 'Throughput Safe'], data=data_aggregate, links=links, algs=algs, clients=str(clients), extension=extension)
+    if target.lower() == 'average bitrate' or target.lower() == 'all':
+        plot_boxplot_multiple(metric_name='Average Bitrate', data=data_aggregate, links=links, algs=algs, extension=extension)
+    if target.lower() == 'average oscillations' or target.lower() == 'all':
+        plot_boxplot_multiple(metric_name='Average Oscillations', data=data_aggregate, links=links, algs=algs, extension=extension)
+    if target.lower() == 'rebuffer ratio' or target.lower() == 'all':
+        plot_boxplot_multiple(metric_name='Rebuffer Ratio', data=data_aggregate, links=links, algs=algs, extension=extension, format_percent=True, y_label='Rebuffer Ratio')
 
 
 def parse_data(root, links, algs, numbers):
@@ -317,9 +429,10 @@ def main():
     numbers = range(1, 11)
     extension = 'png'
     clients = 5
-    parse_data(root=root, links=links, algs=algs, numbers=numbers)
-    plot_data(links, algs, extension, clients=clients, target='all')
-
+    clients_combined = ['1', '2', '3', '5']
+    # parse_data(root=root, links=links, algs=algs, numbers=numbers)
+    # plot_data(links=links, algs=algs, extension=extension, clients=clients, target='rebuffer ratio')
+    plot_data_multiple(links=links, algs=algs, extension=extension, clients=clients, target='throughput', clients_combined=clients_combined)
 
 
 if __name__ == '__main__':
@@ -338,8 +451,10 @@ if __name__ == '__main__':
 
     parser.add_argument('--parse', type=int, default=0)
     parser.add_argument('--extension', default='pdf')
-    parser.add_argument('--target', type=str.lower, choices=['all', 'none', 'average bitrate', 'average oscillations', 'throughput safe', 'throughput precise', 'rebuffer ratio'], default='all')
+    parser.add_argument('--target', type=str.lower, choices=['all', 'none', 'average bitrate', 'average oscillations', 'rebuffer ratio', 'throughput'], default='all')
     parser.add_argument('--clients', type=int, default=0)
+
+    parser.add_argument('--clients_combined', nargs='+')
 
     args = parser.parse_args()
 
@@ -353,4 +468,4 @@ if __name__ == '__main__':
     if args.parse:
         parse_data(root, links, algs, numbers)
     if args.target.lower() != 'none':
-        plot_data(links=links, algs=algs, extension=extension, clients=args.clients, target=target)
+        plot_data_multiple(links=links, algs=algs, extension=extension, clients=args.clients, clients_combined=args.clients_combined, target=target)
