@@ -56475,10 +56475,6 @@ function ThroughputHistory(config) {
     if (throughputMeasureTime !== 0) {
       throughput = Math.round(8 * downloadBytes / throughputMeasureTime); // bits/ms = kbits/s
     }
-    if(!('estimations' in settings.get())) {
-      settings.get()['estimations'] = {'precise': {}, 'average': {}};
-    }
-    settings.get()['estimations']['precise'][new Date().getTime()] = [throughput, httpRequest.url, downloadBytes, httpRequest._tfinish.getTime(), httpRequest.tresponse.getTime(), throughputMeasureTime, httpRequest.tresponse.getTime(), httpRequest.trequest.getTime(), downloadTimeInMilliseconds, JSON.stringify(httpRequest.trace)];
 
     checkSettingsForMediaType(mediaType);
 
@@ -56497,6 +56493,11 @@ function ThroughputHistory(config) {
       clearSettingsForMediaType(mediaType);
     }
 
+    if(!('estimations' in settings.get())) {
+      settings.get()['estimations'] = {'precise': {}, 'average': {}};
+    }
+    settings.get()['estimations']['precise'][new Date().getTime()] = [throughput, httpRequest.url, downloadBytes, httpRequest._tfinish.getTime(), httpRequest.tresponse.getTime(), throughputMeasureTime, httpRequest.tresponse.getTime(), httpRequest.trequest.getTime(), downloadTimeInMilliseconds, JSON.stringify(httpRequest.trace)];
+    
     throughputDict[mediaType].push(throughput);
 
     if (throughputDict[mediaType].length > MAX_MEASUREMENTS_TO_KEEP) {
