@@ -370,10 +370,9 @@ In HTTP video streaming playback stability is an important metric contributing t
 % in most papers, you don't need to cover anything more in an introduction.
 %
 
-
-Video streaming over HTTP is commonplace, and comprises the majority of Internet traffic in many studies \cite{Sandvine-2019-global-internet-report}. Performance of HTTP adaptive streaming algorithms is generally good, and gives a high-quality user experience.
+Video streaming over HTTP is commonplace, and comprises the majority of Internet traffic according to \cite{Sandvine-2019-global-internet-report}. Performance of HTTP adaptive streaming algorithms is generally good, and gives a high-quality user experience.
   
-It has, however, been observed that throughput-based HTTP adaptive streaming algorithms can sometimes perform poorly \cite{Spiteri-2016-BOLA}. In some cases, due to interactions between TCP congestion control and the on-off nature of chunked video delivery \cite{Akhshabi-2012-http-adaptive-players-compete,Stohr-2017-where-are-the-sweet-spots-maci}. TCP Congestion Window Validation \cite{rfc7661-2015-fairhurst-new-cwnd-validation, rfc2861-2000-padhye-congestion-window-validation} has been proposed to address this, by allowing TCP connections to restart faster after idle periods. Previous studies \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv} have shown that this helps transport-level performance, but have not investigated the impact on video QoE. Improved transport performance does not immediately translate into improved application performance due to the discrete requirements set by the different encodings and since modern players would require a stable, long-lived connection improvement, before responding by requesting video with higher bitrate. 
+It has, however, been observed that throughput-based HTTP adaptive streaming algorithms can sometimes perform poorly \cite{Spiteri-2016-BOLA,Kua-2017-a-survey-rate-adaptation-dash}. In some cases, due to interactions between TCP congestion control and the on-off nature of chunked video delivery \cite{Akhshabi-2012-http-adaptive-players-compete,Stohr-2017-where-are-the-sweet-spots-maci} or because of TCP Congestion Window (CWND) validation \cite{rfc2861-2000-padhye-congestion-window-validation}. While this has been shown to prevent TCP clients from sending using old knowledge of the network, \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv} showed that CWND validation can have a negative impact on on-off TCP application's throughput, such as Internet video. Following, one of the authors proposed an extension \cite{rfc7661-2015-fairhurst-new-cwnd-validation}, called New Congestion Window Validation (New CWV) has been proposed to address this. While they show that the throughput issue for on-off traffic, such as video, has been resolved, the authors have not investigated the QoE impact on the video. In the domain of Internet video this is essential, since improved transport performance does not immediately translate into improved application performance. For example, due to a high discrepancy between the video's bandwidth requirements and the available link capacity, or since modern players (using dash.js) require a stable long-lived connection stability to influence the bit-rate selection process \cite{Spiteri-2019-from-theory-to-practice-sabre}.
 
 % Paragraph 1: Motivation. At a high level, what is the problem area you
 % are working in and why is it important? It is important to set the larger
@@ -406,7 +405,7 @@ It has, however, been observed that throughput-based HTTP adaptive streaming alg
 % State your contributions: these drive the entire paper.  Contributions
 % should be refutable claims, not vague generic statements.
 
-In this paper we show whether New CWV's restart after idle behaviour translates into an increased video playback stability and more generally: increased video QoE. To test our hypothesis, we compare two video streams using TCP Reno. One where New CWV is disabled (the current default) and one where it is enabled. To measure stability and overall QoE we collect standard video performance metrics: average bit-rate, bit-rate oscillation, and video stall time. Furthermore, to quantify the impact of New CWV with respect to the inferred network state at the client, we also record the immediate and smoothened client's throughput estimations for each delivered video chunk. We carry our experiments using TCP Reno, as previous study found that it is widely used for video delivery \cite{Mishra-2019-the-great-internet-tcp-congestion-control-census}.
+In this paper we show whether New CWV's restart after idle behaviour translates into an increased video playback stability and more generally: increased video QoE. To test our hypothesis, we compare two video streams using TCP Reno, one where New CWV is disabled (the current default) and one where it is enabled. To measure stability and overall QoE we collect standard video performance metrics: average video bit-rate, average video bit-rate oscillation, and video stall time. Furthermore, to quantify the impact of New CWV with respect to the inferred network state at the client, we also record the immediate and smoothened client's current link capacity estimations for each delivered video chunk. We carry our experiments using TCP Reno, as previous study found that it is widely used for video delivery \cite{Mishra-2019-the-great-internet-tcp-congestion-control-census}.
 
 % Paragraph 4: What are the differences between your work, and what others
 % have done? Keep this at a high level, as you can refer to future sections
@@ -414,7 +413,7 @@ In this paper we show whether New CWV's restart after idle behaviour translates 
 % for the reader to know what is new about this work compared to other work
 % in the area.
 
-To the best of our knowledge, this is the first paper that studies New CWV's application-layer impact (i.e., video stability). Nazir et al. \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv} studied New CWV's effect on the transport layer. Other related work proposed new application algorithms to control video representation choices\cite{Mok-2012-qdash,Huang-2015-A-buffer-based-approach-to-rate-adaptation-bba, Yin-2015-a-control-theoritic-approach}. In contrast, we only change the transport algorithm and leave the application as is. Hence, studying the transport choice's impact on the application. Finally, \cite{Bhat-2017-not-so-quic} consider replacing the transport protocol altogether from TCP to QUIC but find that it currently brings little to no benefit. 
+To the best of our knowledge, this is the first paper that studies New CWV's application-layer impact (i.e., video stability). Nazir et al. \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv} studied New CWV's effect on the transport layer, and we validate their results. Other related work proposed new application algorithms to control video representation choices\cite{Mok-2012-qdash,Huang-2015-A-buffer-based-approach-to-rate-adaptation-bba, Yin-2015-a-control-theoritic-approach}. In contrast, we only change the transport algorithm and leave the application as is. Hence, studying the transport choice's impact on the application. Finally, \cite{Bhat-2017-not-so-quic} consider replacing the transport protocol altogether from TCP to QUIC but find that it currently brings little to no benefit. 
 
 % Paragraph 5: "We structure the remainder of this paper as follows." Give
 % the reader a road-map for the rest of the paper. Try to avoid redundant
@@ -590,20 +589,21 @@ We believe, that current state-of-the-art streaming can benefit from improved pe
 
 \section{Evaluating New CWV for Video}
 
-We conduct two sets of measurements. First, we look at the impact of the new CWV algorithm on transport level behaviour, and measure the extent to which adaptive streaming applications using TCP with the new CWV algorithm obtain more consistent throughput estimates. Second, we turn to application level metrics, and measure impact on the selected video bit rate and buffer occupancy. This allows us to investigate whether the different behaviour in the transport results in different application behaviour. 
+We look at the impact of the new CWV algorithm on transport level behaviour, and measure the extent to which adaptive streaming applications using TCP with the new CWV algorithm obtain more consistent throughput estimates. We next turn to application level metrics, and measure impact on the selected video bit rate and buffer occupancy. This allows us to investigate whether the different behaviour in the transport results in different application behaviour. 
 
 \subsection{Experimental Setup}
 \label{sec:experimental-setup}
 
-We evaluated our work using an emulated dumbbell topology network in Mininet running on Ubuntu 20.04. On one of the far ends of the topology sits an nginx (version 1.18) HTTP/2 server and on the other, there are dash.js (version 4.0.0) client(s) using Throughput as their bit-rate selection algorithm running on Firefox (version 91). The server had Reno running as its congestion control algorithm. For the first set of the experiments New CWV was switched off, and for the second it was enabled. We tested each scenario with 1, 2, 3, and 5 clients. 
+% Overivew
+To evaluate the effect of New CWV on video we used an emulated dumbbell topology network in Mininet running on Ubuntu 20.04 as shown in figure \ref{fig}.
+% Server
+ The server is HTTP/2 powered by nginx (version 1.18). The server uses TCP New Reno as its congestion control algorithm. For the first set of experiments we had New CWV switched off, and then enabled it for the second set.
+%  Client
+ The clients are Firefox (version 91) instances using dash.js (version 4.0.0) with the Throughput algorithm as originally described by \cite{Spiteri-2019-from-theory-to-practice-sabre} and has been updated with different dash.js rollouts. We tested each congestion control setting with 1, 2, 3, and 5 clients simultaneously requesting video.
+ 
+The current state-of-the-art adaptation algorithm in dash.js is Dynamic \cite{Spiteri-2019-from-theory-to-practice-sabre}. Essentially, it comprises two components: (i) the throughput algorithm, and (ii) Enhanced version of the BOLA algorithm \cite{Spiteri-2016-BOLA}. Here, we focus only on the first component and use that for our experiments.
 
-Throughput is currently one of the three default algorithms in dash.js and since New CWV mainly changes the transport behaviour, we expect it to have the biggest impact there. However, the results we find are transferable to the current state of the art, as this algorithm is part of the default implementation.
-
-The RTT between the client and the server is 40 ms. An average value measured from a residential network in the United Kingdom to a corresponding video CDN. The routers' queues are set equal to the bandwidth delay product.
-
-We picked three different bandwidth profiles representative of DSLv2, FTTC, and FTTP links in the United Kingdom \cite{online-ofcom-report} (Table \ref{tab:experiments-network}).
-
-Figure \ref{fig:experimental-setup} provides a visual representation of the setup introduced so far.
+The RTT between the client and the server is 40 ms, an average value measured from the author's residential network to a Netflix's CDN. The routers' queues are set equal to the bandwidth delay product. We picked three different bandwidth profiles representative of DSLv2, FTTC, and FTTP links in the United Kingdom \cite{online-ofcom-report} (Table \ref{tab:experiments-network}).
 
 \begin{figure}
   \centering
@@ -612,7 +612,7 @@ Figure \ref{fig:experimental-setup} provides a visual representation of the setu
   \label{fig:experimental-setup}
 \end{figure}
 
-Finally, to eliminate noise, we run each of these 10 times before averaging and reporting results. The dataset presented includes data accumulated over 240 runs (2 algorithms * 3 link types * 4 client variations * 10 repetitions). This accounts for over 2538 minutes of video playtime or otherwise over 42.3 hours.
+Finally, to eliminate noise, we run each \textit{congestion control setting, number of clients, link type} combination 10 times before averaging and reporting results. The dataset presented includes data accumulated over 240 runs (2 algorithms * 3 link types * 4 client variations * 10 repetitions). This accounts for over 2538 minutes or otherwise 42.3 hours of video playtime.
 
 The streamed video is Blender's Big Buck Bunny \cite{online-bbb} (Table \ref{tab:experiments-video} for Details).
 
@@ -648,7 +648,7 @@ In addition, we run tcpdump and record all packets on the client and the server,
 
 % We have conducted multiple experiments with  1, 2, 3, and 5 clients for DSL, FTTC, and FTTP representative scenarios. Below we provide a summary of the key findings.
 
-\subsection{Transport Effect:} 
+\subsection{Impact on Transport Performance} 
 % NewCWV controlled connections have more stable rates, observed by the lower standard deviation in the throughput used by the client algorithm for 10 out of the 12 tested profiles. Additionally, we note that connections using NewCWV consistently measure a lower mean throughput value. In the FTTC case, the mean value reported by NewCWV is closer to the equilibrium value that would be obtained in the case where bandwidth was distributed evenly if all connections were active at the same time. Interestingly, this trend is not carried over the DSL and FTTP scenarios. In fact for the DSL scenarios both algorithms would often report a mean value, higher than the link's available bandwidth. We traced the root cause for this behaviour to be very large congestion window values that allow video chunks to be transmitted in low number of roundtrips, such that the monitoring unit cannot obtain a large enough sample to compute a ``representative'' value.
 % \todo{I think this occurs for Reno with DSL, since the off-periods are not always long enough to cause the connection to reset its state. Further investigation is needed.}
 
@@ -687,7 +687,7 @@ For the one client case, we obtain results showing that New CWV's faster CWND re
 \end{figure*}
 
 
-\subsection{Application Effect:}
+\subsection{Impact on Video QoE}
 
 To quantify the effect of the different throughput measurements with respect to the achieved QoE, for each run, we calculate average bit-rate, average bit-rate oscillations, and rebuffer ratio.
 
