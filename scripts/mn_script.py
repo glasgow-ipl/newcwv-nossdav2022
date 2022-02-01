@@ -156,8 +156,8 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
     hosts = [server]
     hosts.extend(client_hosts)
     for host in hosts:
-        host.cmd('ethtool -K ' + str(server.intf()) + ' gso off')
-        host.cmd('ethtool --offload ' + str(server.intf()) + ' tso off')
+        host.cmd('ethtool -K ' + str(host.intf()) + ' gso off')
+        host.cmd('ethtool --offload ' + str(host.intf()) + ' tso off')
 
     # Create root folder for experiment data
     if os.path.exists(pcap_path):
