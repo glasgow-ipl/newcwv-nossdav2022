@@ -12,7 +12,7 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.
 sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 
 import parse_access_log
-from constants import QUALITY_TO_BPS_3S_IETF
+from constants import QUALITY_TO_BPS_3S_IETF, VIDEO_CACHED_RESPONSE_MS
 import parse_dash_log
 
 
@@ -30,6 +30,7 @@ def plot_boxplot_multiple(*, metric_name, data, algs, links, extension, format_p
     plt.xticks([i+1 for i in range(len(x_labels))], x_labels, rotation=90)
     _, max_y = plt.ylim()
     plt.ylim(bottom=0, top=max_y + .1*max_y)
+    # print(max_y + .1*max_y)
     if not y_label:
         plt.ylabel(f'{metric_name} (kbps)')
     else:
@@ -40,7 +41,7 @@ def plot_boxplot_multiple(*, metric_name, data, algs, links, extension, format_p
 
     save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', f"{metric_name.replace(' ', '_')}.{extension}")
     print(f"Saving {save_path}")
-    plt.gcf().set_size_inches(10, 3)
+    plt.gcf().set_size_inches(10, 2.5)
     plt.savefig(save_path, bbox_inches='tight')
     plt.clf()
 
@@ -244,12 +245,22 @@ def plot_cdf_multiple(*, metric_names, data, links, algs, clients, extension):
         ax.axvline(2.64, c='green',  label='720p')
         ax.axvline(4.82, c='purple', label='1080p')
 
+        link_cap = 0
+        if link == 'DSL':
+            link_cap = 10
+        elif link == 'FTTC':
+            link_cap = 50
+        elif link == 'FTTP':
+            link_cap = 145
+
+        ax.axvline(link_cap, c='black', label='Link Cpacity')
+
         ax.set_xlabel("Bandwidth (Mbps)")
         if idx == 0:
             ax.set_ylabel("CDF")
 
-    plt.gcf().set_size_inches(12, 2)
-    plt.legend()
+    plt.gcf().set_size_inches(13, 2)
+    ax.legend(loc='upper center', bbox_to_anchor=(-0.7, -0.25), ncol=4)
     save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', f'Throughput_{clients}_clients.{extension}')
     print(f'Saving {save_path}...')
     plt.savefig(save_path, bbox_inches='tight')
@@ -379,7 +390,7 @@ def parse_data(root, links, algs, numbers):
                     safe_list = list(safe.values())
 
                     ## matching debug format
-                    precise_list = [el[0] for el in precise_list]
+                    precise_list = [el[0] for el in precise_list if el[-2] > VIDEO_CACHED_RESPONSE_MS]
                     ######
 
                     precise_avg = np.average(precise_list)
@@ -419,7 +430,9 @@ def parse_data(root, links, algs, numbers):
     tmp_path = os.path.join(tmp_path, 'parsed_data.json')
     with open(tmp_path, 'w') as f:
         json.dump(metrics, f, indent=4)
-        print("Parsed data saved")
+
+    print(f"Parsed data saved {tmp_path}")
+
 
 
 def main():
