@@ -1,3 +1,4 @@
+from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
 from matplotlib.ticker import PercentFormatter
 import os
@@ -14,36 +15,66 @@ sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 import parse_access_log
 from constants import QUALITY_TO_BPS_3S_IETF, VIDEO_CACHED_RESPONSE_MS
 import parse_dash_log
-
+import count_lost_packets
 
 def plot_boxplot_multiple(*, metric_name, data, algs, links, extension, format_percent=False, y_label=''):
-    agg = []
+    x_labels_dic = {'newcwv': 'New CWV', 'vreno': 'No New CWV'}
+
+    agg = {alg: [] for alg in algs}
     x_labels = []
+    agg = {l: {c: {alg: [] for alg in algs} for c in data.keys()} for l in links}
     for c, link_aggregate in data.items():
         for link in links:
             for alg in algs:
                 plot_data = link_aggregate[link][alg][metric_name]
-                x_labels.append(f'{c} {link} {alg}')
-                agg.append(plot_data)
+                x_labels.append(f'{c} client(s)')
+                agg[link][c][alg].append(plot_data)
 
-    plt.boxplot(agg)
-    plt.xticks([i+1 for i in range(len(x_labels))], x_labels, rotation=90)
-    _, max_y = plt.ylim()
-    plt.ylim(bottom=0, top=max_y + .1*max_y)
+    max_y = 0
+    fig, axs = plt.subplots(nrows=len(links), ncols=len(data.keys()))
+    axs: Axes
+    for i, link in enumerate(agg):
+        for j, clients in enumerate(agg[link]): 
+            for pos, (alg, data) in enumerate(agg[link][clients].items()):
+                ax = axs[i, j] if len(links) > 1 else axs[j]
+                ax: Axes
+                ax.boxplot(data, positions=2*np.arange(1, len(data) + 1) - pos, labels=[x_labels_dic[alg] for _ in range(len(data))])
+                # ax.set_xticks(rotation=90)
+                ax.tick_params(axis='x', rotation=15)
+                ax.set_title(f'{clients} client(s) {link}')
+                max_y = max(max_y, ax.get_ylim()[1])
+                
+
+    for i, link in enumerate(agg):
+        for j, clients in enumerate(agg[link]): 
+            ax = axs[i, j] if len(links) > 1 else axs[j]
+            ax.set_ylim(0, max_y + .1*max_y)
+            if metric_name.lower() == 'rebuffer ratio':
+                ax.get_yaxis().set_major_formatter(PercentFormatter(1))
+    
+    # newcwv = plt.boxplot(agg['newcwv'], medianprops={'color': 'red'}, boxprops={'color': 'red'}, positions=2*np.arange(1, len(agg['newcwv']) + 1) - 1)
+    # reno = plt.boxplot(agg['vreno'], medianprops={'color': 'blue'}, boxprops={'color': 'blue'}, positions=(2*np.arange(1, len(agg['vreno']) + 1)))
+    # for i, alg in enumerate(algs):
+    #     plt.boxplot(agg[alg], positions=[2*x - i for x in range(1, len(agg[alg])+1)])
+    
+    # plt.legend([newcwv['boxes'][0], reno['boxes'][0]], ['New CWV', 'Reno'])
+    # plt.xticks([i+1 for i in range(len(x_labels))], x_labels, rotation=75)
+    # _, max_y = plt.ylim()
+    # plt.ylim(bottom=0, top=max_y + .1*max_y)
     # print(max_y + .1*max_y)
-    if not y_label:
-        plt.ylabel(f'{metric_name} (kbps)')
-    else:
-        plt.ylabel(y_label)
+    # if not y_label:
+    #     plt.ylabel(f'{metric_name} (kbps)')
+    # else:
+    #     plt.ylabel(y_label)
 
-    if format_percent:
-        plt.axes().get_yaxis().set_major_formatter(PercentFormatter(1))
+    # for ax in axs:
+    #     ax.get_yaxis().set_major_formatter(PercentFormatter(1))
 
     save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', f"{metric_name.replace(' ', '_')}.{extension}")
     print(f"Saving {save_path}")
-    plt.gcf().set_size_inches(10, 2.5)
-    plt.savefig(save_path, bbox_inches='tight')
-    plt.clf()
+    fig.set_size_inches(15, 10)
+    fig.savefig(save_path, bbox_inches='tight')
+    # plt.clf()
 
 
 def plot_boxplot(metric_name, data_aggregate, algs, clients, extension, ylabel=None, format_percent=False, xticks=None):
@@ -235,10 +266,11 @@ def plot_cdf_multiple(*, metric_names, data, links, algs, clients, extension):
         colours = {'newcwv': 'red', 'vreno': 'blue'}
         for item in plot_data:
             alg, metric, raw_data = item
+            metric_display = 'Instantaneous' if metric.split()[1] == 'Safe' else 'Smoothened'
             count, bins_count = np.histogram(raw_data, 100, range=(bin_l, bin_h))
             pdf = count / sum(count)
             cdf = np.cumsum(pdf)
-            ax.plot(bins_count[1:], cdf, label=f'{alg_mapping[alg]} {metric.split()[1]}', linestyle=line_styles[metric], c=colours[alg])
+            ax.plot(bins_count[1:], cdf, label=f'{alg_mapping[alg]} {metric_display}', linestyle=line_styles[metric], c=colours[alg])
 
         ax.set_ylim(bottom=0)
         ax.axvline(0.44, c='brown',  label='480p')
@@ -260,7 +292,7 @@ def plot_cdf_multiple(*, metric_names, data, links, algs, clients, extension):
             ax.set_ylabel("CDF")
 
     plt.gcf().set_size_inches(13, 2)
-    ax.legend(loc='upper center', bbox_to_anchor=(-0.7, -0.25), ncol=4)
+    ax.legend(loc='upper center', bbox_to_anchor=(-0.2, -0.3), ncol=4)
     save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', f'Throughput_{clients}_clients.{extension}')
     print(f'Saving {save_path}...')
     plt.savefig(save_path, bbox_inches='tight')
@@ -355,11 +387,31 @@ def parse_data(root, links, algs, numbers):
     thr_precise = []
     thr_safe = []
     delays = []
+
+    drop_data = {}
     
     for link in links:
         for alg in algs:
             for number in numbers:
                 path = os.path.join(root, link, f'{number}_{alg}')
+
+                # client_aggregate = drop_data.get(number, {})
+                link_aggregate = drop_data.get(link, {})
+                alg_aggregate = link_aggregate.get(alg, {i: 0 for i in range(700)})
+
+                dropped_packets_server = count_lost_packets.count_lost_packets(path)
+                for id_seq, (dropped_timestamps, occurence) in dropped_packets_server.items():
+                    # the first _occurence_ packet were lost, record them with their timestamps
+                    for i, relative_time in enumerate(dropped_timestamps):
+                        if i == occurence:
+                            break
+                        drop_count = alg_aggregate.get(relative_time, 0)
+                        alg_aggregate[relative_time] = drop_count + 1
+                
+                link_aggregate[alg] = alg_aggregate
+                # client_aggregate[link] = link_aggregate
+                drop_data[link] = link_aggregate
+                
 
                 access_log = os.path.join(path, 'nginx_access.log')
                 quality_aggregate = parse_access_log.get_qualities(access_log)
@@ -423,6 +475,7 @@ def parse_data(root, links, algs, numbers):
         metrics[link] = tmp
         tmp = {}
 
+    metrics['dropped_packets'] = drop_data
     metrics['clients'] = len(metric_files)
 
     tmp_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp', str(metrics['clients']))
@@ -434,6 +487,131 @@ def parse_data(root, links, algs, numbers):
     print(f"Parsed data saved {tmp_path}")
 
 
+def plot_bitrate_distribution(log_root):
+    quality_indexes = {k: i for i, k in enumerate(QUALITY_TO_BPS_3S_IETF.keys())}
+    quality_distribution_alg_link_clients = {}
+
+    clients = os.listdir(log_root)
+    for num_clients in clients:
+        client_root = os.path.join(log_root, num_clients)
+        links = sorted(os.listdir(client_root))
+        quality_distribution_alg_link = quality_distribution_alg_link_clients.get(num_clients, {})
+        for link in links:
+            link_root = os.path.join(client_root, link)
+            runs = sorted(os.listdir(link_root))
+            quality_distribution_alg = quality_distribution_alg_link.get(link, {})
+            for run in runs:
+                access_log = os.path.join(link_root, run, 'nginx_access.log')
+                quality_report = parse_access_log.get_qualities(access_log)
+                if 'newcwv' in run:
+                    quality_distribution = quality_distribution_alg.get('newcwv', {})
+                else:
+                    quality_distribution = quality_distribution_alg.get('reno', {})
+
+                for _client, report in quality_report.items():
+                    items = list(report.items())
+                    previous = quality_indexes[items[0][1][1]]
+                    for _chunk, (_time, quality) in items[1:]:
+                        current = quality_indexes[quality] 
+                        offset =  current - previous
+                        previous = current
+                        quality_distribution[offset] = quality_distribution.get(offset, 0) + 1
+            
+                if 'newcwv' in run:
+                    quality_distribution_alg['newcwv'] = quality_distribution
+                else:
+                    quality_distribution_alg['reno'] = quality_distribution
+
+            quality_distribution_alg_link[link] = quality_distribution_alg
+
+        quality_distribution_alg_link_clients[num_clients] = quality_distribution_alg_link
+
+
+    fig, axs = plt.subplots(2, 4)
+    clients = ['1', '2', '3', '5']
+    links = ['DSL', 'FTTC']
+    algs = ['newcwv', "reno"]
+    WIDTH = .4
+    for i, client in enumerate(clients):
+        for j, link in enumerate(links):
+            y_lim = 0
+            for k, alg in enumerate(algs):
+                plot_dic = {k: v for k, v in quality_distribution_alg_link_clients[client][link][alg].items() if k != 0}
+                # plot_dic = quality_distribution_alg_link_clients[client][link][alg]
+                if plot_dic:
+                    labels, heights = zip(*plot_dic.items())
+                else:
+                    labels = []
+                    heights = []
+                all_elements = sum(quality_distribution_alg_link_clients[client][link][alg].values())
+                positions = np.array(labels)
+                if k == 0:
+                    positions = positions + WIDTH / 2
+                else:
+                    positions = positions - WIDTH / 2
+                
+                ax = axs[i] if len(links) == 1 else axs[j, i]
+
+                # print(i, j)
+                ax.bar(positions, heights, width=WIDTH, label=alg if i==1 and j==0 else '_no_label')
+                ax.set_title(f'{link} {client} Clients')
+                ax.set_xlim(-3, 3)
+                y_lim = max(y_lim, ax.get_ylim()[1])
+
+                skip_five_range = np.arange(0, 101, 10)
+                ax.set_yticks([x/100 * all_elements for x in skip_five_range])
+                ax.set_yticklabels(skip_five_range)
+                # print(all_elements)
+                ax.get_yaxis().set_major_formatter(PercentFormatter(all_elements))
+                ax.get_yaxis().set_ticks([y_tick / 100 * all_elements for y_tick in range(0, 11, 2)])
+                TWENTY_PERCENT = .1 * all_elements
+                ax.set_ylim(0, TWENTY_PERCENT)
+                
+            #     print(all_elements)
+            # for ax in axs:
+            #     # ax.set_ylim(top=y_lim)
+            #     # print(y_lim)
+            #     ax.get_yaxis().set_major_formatter(PercentFormatter(ax.get_ylim()[1]))
+
+    fig.legend(bbox_to_anchor=(0.95, 0.9))
+    fig.set_size_inches(16, 7)
+    extension = 'pdf'
+    fig_name = f'/vagrant/doc/paper/figures/bitrate_derivative_distribution.{extension}'
+    print(f"Saving {fig_name}")
+    fig.savefig(fig_name, bbox_inches='tight')
+
+
+def plot_packet_loss(root):
+    clients_combined = ['1', '2', '3', '5']
+    link_types = ['DSL', 'FTTC', 'FTTP']
+    # if not clients and target == 'throughput':
+    #     print('Client argument must be supplied and different from 0', file=sys.stderr)
+    #     sys.exit(1)
+
+    data_aggregate = {}
+    for c in clients_combined:
+        tmp_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp', c)
+        tmp_path = os.path.join(tmp_path, 'parsed_data.json')
+        print(f"Using file {tmp_path}")
+        with open(tmp_path, 'r') as f:
+            metrics = json.load(f)
+            print("Parsed data loaded")
+        data_aggregate[c] = metrics['dropped_packets']
+
+        # print(data_aggregate.items())
+        # fig, axs = plt.subplots(1, 3)
+        # for key in clients_combined:
+        #     for link in link_types:
+    plt.plot(data_aggregate['1']['DSL']['newcwv'].values(), color='r', alpha=.5, label='New CWV')
+    plt.plot(data_aggregate['1']['DSL']['vreno'].values(), color='b', alpha =.5, label='Reno')
+
+    # plt.xlim(left=100, right=110)
+    fig_name = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'test.png')
+    plt.legend()
+    print(f"saved {fig_name}")
+    plt.savefig(fig_name)
+
+        
 
 def main():
     root = '/vagrant/logs/clients/5'
