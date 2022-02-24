@@ -353,7 +353,7 @@
   %  - Say what your solution achieves
   %  - Say what follows from your solution
 
-In HTTP video streaming playback stability is an important metric contributing to the user's quality of experience. Throughput adaptive algorithms are known to achieve lower levels of playback stability than their buffer-based counterparts. New congestion window validation is a proposal aiming to keep the transport's transfer rate more stable. This paper shows how this reflects the playback stability. We find that while new congestion window validation stabilises the transfer rate in the transport layer this does not translate to a significant difference in the application's playback stability. 
+In HTTP video streaming playback stability is an important metric contributing to the user's quality of experience. Throughput adaptive algorithms are known to achieve lower levels of playback stability than their buffer-based counterparts. New congestion window validation is a proposal aiming to keep the transport's transfer rate more stable. This paper shows that this transport change also translates to improved playback stability. We find that enabling New CWV can reduce the rebuffering events with up to \todo{}\% and limit the representation switches by \todo{}\%. Finally, open a discussion about future transport modifications that could further improve playback stability. 
 
 \end{abstract}
 \maketitleACM
@@ -405,7 +405,7 @@ It has, however, been observed that throughput-based HTTP adaptive streaming alg
 % State your contributions: these drive the entire paper.  Contributions
 % should be refutable claims, not vague generic statements.
 
-In this paper we show whether New CWV's restart after idle behaviour translates into an increased video playback stability and more generally: increased video QoE. To test our hypothesis, we compare two video streams using TCP Reno, one where New CWV is disabled (the current default) and one where it is enabled. To measure stability and overall QoE we collect standard video performance metrics: average video bit-rate, average video bit-rate oscillation, and video stall time. Furthermore, to quantify the impact of New CWV with respect to the inferred network state at the client, we also record the immediate and smoothened client's current link capacity estimations for each delivered video chunk. We carry our experiments using TCP Reno, as previous study found that it is widely used for video delivery \cite{Mishra-2019-the-great-internet-tcp-congestion-control-census}.
+In this paper we show whether New CWV's restart after idle behaviour translates into an increased video playback stability and more generally: increased video QoE. To test our hypothesis, we compare two video streams using TCP New Reno, one where New CWV is disabled (the current default) and one where it is enabled. In the rest of the paper we refer to the former as New Reno and to the latter as New CWV. To measure stability and overall QoE we collect standard video performance metrics: average video bit-rate, average video bit-rate oscillation, and video stall time. Furthermore, to quantify the impact of New CWV with respect to the inferred network state at the client, we also record the immediate and smoothened client's current link capacity estimations for each delivered video chunk. We carry our experiments using TCP New Reno, as previous study found that it is widely used for video delivery \cite{Mishra-2019-the-great-internet-tcp-congestion-control-census}.
 
 % Paragraph 4: What are the differences between your work, and what others
 % have done? Keep this at a high level, as you can refer to future sections
@@ -550,15 +550,18 @@ We structure the remainder of this paper as follows. In section 2, we introduce 
 %   \item It is unclear whether New CWND validation would influence the application layer.
 % \end{enumerate}
 
-HTTP video streaming works by transferring multiple pre-encoded video chunks from the streaming source to the client. The client then uses bit-rate adaptation algorithms to determine the encoding of each successive chunk. The goal of the client's algorithm is to maximise QoE, while meeting the underlying transport's capacity. This is a challenging task since different, often contradictory, QoE heuristics have to be met at the same time \cite{Seufert-2015-A-Survey-on-QoE-Dash}. Furthermore, since HTTP streaming uses mainly TCP to transfer the chunks, the bit rate selection's algorithm complexity rises.
+HTTP video streaming works by transferring multiple pre-encoded video chunks from the streaming source to the client. The client then uses bit-rate adaptation algorithms to determine the encoding of each successive chunk. The goal of the client's algorithm is to maximise QoE, while meeting the underlying transport's available capacity. This is a challenging task since different, often contradictory QoE heuristics have to be met at the same time \cite{Seufert-2015-A-Survey-on-QoE-Dash}. 
+% Furthermore, since HTTP streaming uses mainly TCP to transfer the chunks, the bit rate selection's algorithm complexity rises.
 
-Previous work has identified that the interaction between TCP and HTTP can lead to poor link utilisation and perceived quality of expereience for HTTP adaptive connections \cite{Bae-2015-why-is-http-streaming-hard,Esteban-2012-Interactions-HTTP-TCP}. One impeding performance aspect of the interaction between the two layers is related to the On-Off nature of the video traffic.
+Previous work has identified that the interaction between TCP and HTTP can lead to poor link utilisation and perceived quality of experience for HTTP adaptive connections \cite{Bae-2015-why-is-http-streaming-hard,Esteban-2012-Interactions-HTTP-TCP}. One impeding performance aspect of the interaction between the two layers is related to the On-Off nature of the video traffic.
 
-During the off periods, TCP has no way of keeping track of the network state. This is a known problem and RFC 2861 \cite{rfc2861-2000-padhye-congestion-window-validation} suggests that during such off periods TCP's congestion window should be invalidated. This is since the congestion window controls how many packets can be in-flight without being acknowledged and as the sender has no way of addressing the current network state after a restart, a conservative approach is taken. The connection is invalidated and TCP slow-start is re-entered. This approach has been adopted by the congestion control RFC \cite{rfc5681-congeston-control} and is currently the default TCP behaviour in Linux Kernel 5.4 series.
+During the off periods, TCP has no way of keeping track of the network state and therefore has no knowledge of the available capacity. To address this, RFC 2861 \cite{rfc2861-2000-padhye-congestion-window-validation} suggests that during these periods the TCP congestion window should be reset to its original value, essentially forcing a new slow-start phase to be initiated once the connection resumes sending. This method has been accepted by the TCP congestion control standard \cite{rfc5681-congeston-control} and is currently enabled by default in the latest stable Linux Kernel (5.4) series.
 
-However, while this works for TCP traffic in general, connections that spend a lot of their lifetime in off or application limited periods can suffer from reduced performance that originates in forcing the connection to re-enter slow-start multiple times during its lifetime \cite{Esteban-2012-Interactions-HTTP-TCP}. To address this issue an alternative approach, New Congestion Window Validation, was proposed \cite{rfc7661-2015-fairhurst-new-cwnd-validation}. Rather than re-setting the congestion window and forcing slow-start, this new approach aims at preserving the congestion window's state after restart. It has been shown that enabling this allows video connections to share the available bandwidth in a more fair fashion, compared to TCP NewReno \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}. Still, this work focussed primarily on the transport effect of introducing New Congestion Window Validation. The authors left exploring the DASH's application effect as future work. Additionally, it is known that an improved transport behaviour does not necessarily result in improved application performance \cite{Spiteri-2016-BOLA}.
+However, while this works well for many types of TCP traffic that do not expect to observe many application limited periods, it does not work well for connections that naturally observe many such periods, for example, Internet adaptive video. It has been shown that those can suffer from reduced performance caused by this forceful slow-start after idle behaviour \cite{Esteban-2012-Interactions-HTTP-TCP}. To address this issue an alternative approach, New Congestion Window Validation, was proposed \cite{rfc7661-2015-fairhurst-new-cwnd-validation}. Rather than resetting the congestion window and forcing slow-start, this new approach aims at preserving the congestion window's state after an idle period has been observed. It has been shown that enabling this allows video connections to share the available bandwidth in a more fair fashion, compared to TCP New Reno \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}. Still, this work focussed primarily on the transport effect of introducing New Congestion Window Validation. The authors left exploring the DASH's application effect as future work. Additionally, it is known that an improved transport behaviour does not necessarily result in improved application performance \cite{Spiteri-2016-BOLA}.
 
-We believe, that current state-of-the-art streaming can benefit from improved performance, or otherwise a smoother video playout, if New Congestion Window Validation were enabled. Next, we outline the environment, which we used to test our hypothesis and later present the results from our study.
+The difference between having New CWND and not having it is shown on Figure \ref{fig:transmission-after-idle}. It shows the congestion window growth after an idle period has been observed on a connection. It can be seen that New Reno (Fig \ref{fig:transmission-after-idle-reno}) re-enters slow-start, doubling its send window until loss is observed, while New CWV (Fig \ref{fig:transmission-after-idle-newcwv}) is able to reuse prior congestion window size knowledge and only doubles its rate during the first three bursts at which point it reaches its old congestion window value and proceeds in a congestion avoidance phase. Overall, this results in fewer lost packets, more consistent and predictable sending rate.
+
+We believe, that this difference in the transport layer would enable applications measuring the available bandwidth capacity would get more consistent results. In turn, for applications such as adaptive video clients that consistency could transfer to the application layer and enable such clients to request more consistent representations. Thus reducing the bit-rate oscillations and improving stability. Next, we outline the environment, which we used to test our hypothesis and later present the results from our study.
 
 % The adaptive algorithms face the difficult task of delivering video while picking its ``best'' representations at any given point in time. This is since these algorithms need to simultaneously fulfil multiple criteria including: high stability, high quality, and low video stalls. These criteria can often conflict one another. For example, an algorithm always picking the lowest available representation will achieve low video stall time and high stability (since representations will not fluctuate), however, it will also display lower video quality, whereas perhaps higher one was possible. In a dynamic network, achieving a high index on one of these criterion also comes at the cost of observing a lower index in another. Modern adaptive algorithms try to balance that trade-off. They use either the pre-buffered capacity at the client or the immediate network state as a heuristic to aid them in the decision process. The former algorithms are known as buffer and the latter as throughput based.
 
@@ -585,7 +588,7 @@ We believe, that current state-of-the-art streaming can benefit from improved pe
 
 % Stable bandwidth estimation is critical for environments such as dash.js. In those, the client attempts to gauge the current link capacity by dividing the downloaded content over the download period. It then uses this estimation as a heuristic to predict what video quality should be requested next. Naturally, this means that more stable estimations are likely to result in the same quality being requested, while higher variance might end up requesting too high or too low quality and so, respectively, failing to meet its deadlines or not fully utilising the link capacity. In either case this would directly impact the achieved video QoE.
 
-% Hypothesis stated in the begining of the paragraph, no need to repeat it here.
+% Hypothesis stated in the beginning of the paragraph, no need to repeat it here.
 
 \section{Evaluating New CWV for Video}
 \label{sec:evaluation}
@@ -602,7 +605,7 @@ To evaluate the effect of New CWV on video we used an emulated dumbbell topology
 %  Client
  The clients are Firefox (version 91) instances using dash.js (version 4.0.0) with the Throughput algorithm as originally described by \cite{Spiteri-2019-from-theory-to-practice-sabre} and has been updated with different dash.js rollouts. We tested each congestion control setting with 1, 2, 3, and 5 clients simultaneously requesting video.
  
-The current state-of-the-art adaptation algorithm in dash.js is Dynamic \cite{Spiteri-2019-from-theory-to-practice-sabre}. Essentially, it comprises two components: (i) the throughput algorithm, and (ii) Enhanced version of the BOLA algorithm \cite{Spiteri-2016-BOLA}. Here, we focus only on the first component and use that for our experiments.
+The current state-of-the-art adaptation algorithm in dash.js is Dynamic \cite{Spiteri-2019-from-theory-to-practice-sabre}. Essentially, it comprises two components: (i) the throughput algorithm, and (ii) Enhanced version of the BOLA algorithm \cite{Spiteri-2016-BOLA}. Here, we focus only on the first component and use that for our experiments. Our work investigates the throughput algorithm's behaviour as it is most affected by the immediate client bandwidth estimations at any given time. Our results generalise to the behaviour of the DYNAMIC algorithm, as it uses throughput, not only during the start of a connection, but also in cases where the client buffer is low or in low-latency, live streaming, making throughput a significant contributor to the overall performance of DYNAMIC.
 
 The RTT between the client and the server is 40 ms, an average value measured from the author's residential network to a Netflix's CDN. The routers' queues are set equal to the bandwidth delay product. We picked three different bandwidth profiles representative of DSLv2, FTTC, and FTTP links in the United Kingdom \cite{online-ofcom-report} (Table \ref{tab:experiments-network}).
 
@@ -613,11 +616,11 @@ The RTT between the client and the server is 40 ms, an average value measured fr
   \label{fig:experimental-setup}
 \end{figure}
 
-Finally, to eliminate noise, we run each \textit{congestion control setting, number of clients, link type} combination 10 times before averaging and reporting results. The dataset presented includes data accumulated over 240 runs (2 algorithms * 3 link types * 4 client variations * 10 repetitions). This accounts for over 2538 minutes or otherwise 42.3 hours of video playtime.
+Finally, to eliminate noise, we run each \textit{congestion control setting, number of clients, and link type} combinations 10 times before averaging and reporting results. The dataset presented includes data accumulated over 240 runs (2 algorithms * 3 link types * 4 client variations * 10 repetitions). This accounts for over 2538 minutes or otherwise 42.3 hours of video playtime.
 
 The streamed video is Blender's Big Buck Bunny \cite{online-bbb} (Table \ref{tab:experiments-video} for Details).
 
-Finally, we modify the Linux Kernel's (5.4.0) logger timestamps to be RFC 3339 compliant in order to enable better event tracking. We also provide a ported version of New Congestion Window Validation \cite{rfc7661-2015-fairhurst-new-cwnd-validation} for that kernel. We also modify Reno to log various CWND related events.
+Finally, we modify the Linux Kernel's (5.4.0) logger timestamps to be RFC 3339 compliant in order to enable better event tracking. We also provide a ported version of New Congestion Window Validation \cite{rfc7661-2015-fairhurst-new-cwnd-validation} for that kernel. We also modify New Reno to log various CWND related events.
 
 From application's point of view, during each run we collect the client's bandwidth estimations. Additionally, to evaluate the video QoE impact we collect information to report average bit-rate, average bit-rate oscillations, and re-buffer ratio as these are standard video metrics directly related to the user's QoE \cite{Spiteri-2019-from-theory-to-practice-sabre, Yin-2015-a-control-theoritic-approach, Dobrian-2013-understanding-the-impact-of-video-quality}.
 
@@ -651,38 +654,49 @@ In addition, we run tcpdump and record all packets on the client and the server,
 
 \subsection{Impact on Transport Performance} 
 % NewCWV controlled connections have more stable rates, observed by the lower standard deviation in the throughput used by the client algorithm for 10 out of the 12 tested profiles. Additionally, we note that connections using NewCWV consistently measure a lower mean throughput value. In the FTTC case, the mean value reported by NewCWV is closer to the equilibrium value that would be obtained in the case where bandwidth was distributed evenly if all connections were active at the same time. Interestingly, this trend is not carried over the DSL and FTTP scenarios. In fact for the DSL scenarios both algorithms would often report a mean value, higher than the link's available bandwidth. We traced the root cause for this behaviour to be very large congestion window values that allow video chunks to be transmitted in low number of roundtrips, such that the monitoring unit cannot obtain a large enough sample to compute a ``representative'' value.
-% \todo{I think this occurs for Reno with DSL, since the off-periods are not always long enough to cause the connection to reset its state. Further investigation is needed.}
 
+New CWV alters the CWND sizing behaviour after idle for active TCP connections. Therefore, since different CWND values are exhibited during the chunk's transfer, we expect the client to receive and report different values regarding the available bandwidth. 
 
-New CWV alters the CWND sizing behaviour after idle for active TCP connections. Therefore, since different CWND values are exhibited during the chunk's transfer, we expect the client to receive and report different values regarding the current link capacity. 
+To evaluate our hypothesis, we collect two of the client's available bandwidth measurements. The first is the raw estimate obtained by dividing the number of received bytes over the download time. The second, estimation is what gets fed to the throughput algorithm. This value is a function of the current measurement probe, already explained, and additional factors such as, historical capacity data, ``safety" factors, etc. In short, the former is the raw available bandwidth measurement as seen by the client, and the latter is what gets fed to the throughput algorithm. We call the former ``instantiations" and the latter ``smoothened" estimate. These values are shown in Figure \ref{fig:throughput-clients}.
 
-To evaluate our hypothesis, we collect two of the client's link capacity measurements. The first is the raw estimate obtained by dividing the number of received bytes over the download time. The second, estimation is what gets fed to the throughput algorithm. This value is a function of the current measurement probe, already explained, and additional factors such as, historical capacity data, ``safety" factors, etc. In short, the former is the raw link capacity measurement as seen by the client, and the latter is what gets fed to the throughput algorithm. We call the former ``precise" and the latter ``safe" estimate. These values are shown in Figure \ref{fig:throughput-clients}.
+Figure \ref{fig:throughput-clients} validates New CWV's behaviour compared to New Reno as reported by \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}. That is, New CWV's CDF has a steeper gradient. This supports our initial hypothesis that the streaming clients measuring the available bandwidth will be able to obtain more consistent results since the amount of lost packets is reduced (Figure \ref{fig:transmission-after-idle}), or otherwise the goodput is increased. Moreover, it can be seen that the different resumption after idle policy resulted in lower overall available bandwidth measurements. This is since New CWV will not hit the available capacity cap as fast as New Reno. However, this pre-emptive mechanism allows for higher consistency on links where nearly all of the available bandwidth is used (FTTC scenarios in Figure \ref{fig:throughput-clients}).
 
-Figure \ref{fig:throughput-clients} validate New CWV's behaviour compared to Reno as reported by \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}. That is, New CWV's CDF has a steeper gradient, meaning that more values fall within the same range, making the New CWV measurement probes more consistent or otherwise less varying. Additionally, it can be seen that the different resumption after idle policy resulted in overall slightly lower throughput reports. We account this to the fact that New CWV does not re-enter slow-start after idle or otherwise does not overshoot it's window. 
+\begin{figure*}
+  \centering
+    \subfloat[New Reno]{
+      \includegraphics[width=.5\textwidth, keepaspectratio]{figures/lost_packets_vreno.pdf}
+      \label{fig:transmission-after-idle-reno}
+    }
+    \subfloat[New CWV]{
+      \includegraphics[width=.5\textwidth, keepaspectratio]{figures/lost_packets_newcwv.pdf}
+      \label{fig:transmission-after-idle-newcwv}
+    }
+    \caption{Transmission After Idle Period}
+    \label{fig:transmission-after-idle}
+\end{figure*}
 
-
-\todo{Can include data for average number of lost packets per connection to provide more transport descriptive metrics.}
+However, our packet loss results (Figure \ref{fig:transmission-after-idle}) differ from those reported by \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}. They have observed similar loss values for New Reno and New CWV. However, we observe New Reno to lose more packets at a rate close to 1:10 for New Reno. Figure \ref{fig:transmission-after-idle}, shows the transfer patterns for a video chunk after an idle period. For readability, we have plotted the behaviour of a single video chunk, but it is representative and applies to any such video chunk transfer. It can be seen that the majority of the packets lost by New Reno are near the end of its slow-start period when it grows its send window beyond the underlying link's capacity. In contrast, since New CWV only enters slow-start with an upper bound of its previously known window value, New CWV is able to enter congestion avoidance faster without the need to lose packets after sending at a higher than the link's supported rate. This explains the higher loss values that we have observed for New Reno compared to New CWV.  
 
 
   \begin{figure*}
     \centering
     \subfloat[1 Client]{
-      \includegraphics[width=\textwidth, height=.18\paperheight, keepaspectratio]{figures/Throughput_1_clients.pdf}
+      \includegraphics[height=.18\paperheight]{figures/Throughput_1_clients.pdf}
       \label{fig:throughput-clients-1}
     }
     \\
     \subfloat[2 Clients]{
-      \includegraphics[width=\textwidth, height=.18\paperheight, keepaspectratio]{figures/Throughput_2_clients.pdf}
+      \includegraphics[height=.18\paperheight]{figures/Throughput_2_clients.pdf}
       \label{fig:throughput-clients-2}
     }
     \\
     \subfloat[3 Clients]{
-      \includegraphics[width=\textwidth, height=.18\paperheight, keepaspectratio]{figures/Throughput_3_clients.pdf}
+      \includegraphics[height=.18\paperheight]{figures/Throughput_3_clients.pdf}
       \label{fig:throughput-clients-3}
     }
     \\
     \subfloat[5 Clients]{
-      \includegraphics[width=\textwidth, height=.18\paperheight, keepaspectratio]{figures/Throughput_5_clients.pdf}
+      \includegraphics[height=.18\paperheight]{figures/Throughput_5_clients.pdf}
       \label{fig:throughput-clients-5}
     }
     \caption{Dash.js Client Throughput measurements}
@@ -720,34 +734,56 @@ Figure \ref{fig:throughput-clients} validate New CWV's behaviour compared to Ren
 
 \subsection{Impact on Video QoE}
 
-We next, look at what is the QoE impact of the different bandwidth values obtained by New CWV and Reno, discussed earlier. To measure the QoE difference, we collect standard video QoE metrics, namely, average bit-rate, average bit-rate oscillations, and rebuffer ratio.
+We next, look at what is the QoE impact of the different bandwidth values obtained by New CWV and New Reno, discussed earlier. To measure the QoE difference, we collect standard video QoE metrics, namely, average bit-rate oscillations, and rebuffer ratio. Additionally, we look at the absolute difference in requested video encodings. For brevity, we have omitted the FTTP results from Figures \ref{fig:avg-oscillations}, \ref{fig:rebuffer-ratio}, and \ref{fig:bitrate-switches} as in all of these cases the FTTP connections did not see any stability issues, i.e., no rebuffering events and downloaded encodings at the maximum possible rate.
 
-Figure \ref{fig:avg-bitrate} shows that New CWV can achieve lower average bit-rate compared to Reno in scenarios with restricted link capacity and multiple clients. For instance, We can see that the difference for the DSL link with 3 clients is most noticeable. To explain this behaviour, we can look at figure \ref{fig:throughput-clients-3}. Under the DSL part, we see that New CWV has more probes falling under the 720p threshold. Naturally, this means that the client would assume 720p is not supported and would request lower quality chunks. This will then translate to a reduced overall average bit-rate of the rendered video.
+Figure \ref{fig:avg-oscillations}, shows that New CWV exhibits lower bit-rate oscillation compared to New Reno. Lower oscillation is associated with a higher QoE index, as frequent representation switches are found decremental to the QoE \todo{\cite{}}. We note that in some cases with a restricted link capacity and multiple clients (e.g., 3 clients on a DSL link), New Reno would request more higher encoding chunks compared to New CWV. However, it can be seen that the network cannot support these higher encoding chunks consistently, evident by the higher oscillation New Reno achieves in those cases. A similar pattern is seen with respect to the rebuffer ratio (Figure \ref{fig:rebuffer-ratio}). In other words, the inconsistent available bandwidth values seen by the application caused by New Reno's resumption after idle behaviour can trick the application layer into requesting video chunks that it cannot support and thus hindering the overall QoE.
 
-Figure \ref{fig:avg-oscillations} on the other hand, shows that New CWV exhibits lower bit-rate oscillation compared to Reno. Lower oscillation is associated with a higher QoE index, as users do not like big changes in the picture quality \todo{\cite{}}. Looking at the 3 clients on DSL example again, we see that the associated higher bit-rate comes with higher bit-rate oscillation. In other words, more changes in the picture quality occur with Reno. A similar pattern can be seen on Figure \ref{fig:rebuffer-ratio}. For the same instance, we see that New CWV's mean rebuffer value is under 2\%, while Reno's is over 2\% accounting for a difference on average with 4 more seconds spend rebuffering for the Reno case. This pattern of slightly higher bit-rate, coming at the expense of higher oscillation and higher rebuffer ratio generalises for the other constrained link, multi-client cases presented here.
 
-Overall, we conclude that using video encoded as per the current recommendations on discrete links representative of the network. New CWV brings higher video stability for links with constrained capacity where multiple clients are competing for throughput. However, this comes with the tradeoff of delivering lower overall bit-rate, but also exhibiting lower picture quality switches and decreased time spend on rebuffering events.
+Furthermore, Figure \ref{fig:bitrate-switches} provides additional bitrate switch frequency data. For brevity, we have only shown the DSL case, as for the FTTC and FTTP there was little to no encoding derivation. Here, we show the absolute encoding difference between every played video chunk and its subsequent one. For example, if both played video chunks were of the same encoding their difference absolute difference is zero. If the subsequent chunk is of the next higher encoding their difference is +1, and if it is of the next lower encoding the difference is -1, etc. Reusing the 3 clients example, we see that New Reno experiences quality switches for 13\% of its requested chunks, whereas New CWV experiences 7\%. That 6\% accounts for over 18 seconds of longer video stability achieved by New CWV.
+
+From our experiments so far, we conclude that New CWV achieves higher video stability when multiple clients are competing on a constrained link. This stability comes in the form of lower overall bit-rate or otherwise lower average picture quality but with improved encoding stability and decreased rebuffering time. We have observed this behaviour mainly on the simulated DSL link, since our highest video encoding is just under 5Mbps, but in practice higher encodings are also used. \todo{\cite{}}.
+
+
+\subsection{Summary}
+
+So far, we have validated the throughput reports in \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv} (Fig \ref{fig:throughput-clients}) and observed higher packet loss for connections not using New CWV (Fig \ref{fig:transmission-after-idle}). Furthermore, the presented results confirm our initial hypothesis that New CWV's more persistent bandwidth measurements as observed in \ref{fig:throughput-clients} translate to more consistent representation switches, shown by the lower bit-rate derivative variance for New CWV connections (Figure \ref{fig:bitrate-switches}). Finally, we have also observed that the more consistent measurements better match the available network conditions, allowing clients using New CWV to better predict the network's capabilities and request chunks that can be timely delivered. This is shown by the lower stall time for New CWV connections (Figure \ref{fig:rebuffer-ratio}).
 
 % Finally, we observe that New CWV connections pace out their idle periods better and avoid synchronizing. This leads to fewer retransmitted packets and overall faster segment transmission. In turn, the client's buffers do not deplete as fast and thus New CWV connections enjoy lower rebuffer ratio, as shown on Figure \ref{fig:rebuffer-ratio}.
 
+% \begin{figure*}
+%     \centering
+    % \subfloat[Average Bitrate]{
+    %   \includegraphics[width=\textwidth, height=.25\paperheight, keepaspectratio]{figures/Average_Bitrate.pdf}
+    %   \label{fig:avg-bitrate}
+    % }
+    % \\
+  
+
 \begin{figure*}
-    \centering
-    \subfloat[Average Bitrate]{
-      \includegraphics[width=\textwidth, height=.25\paperheight, keepaspectratio]{figures/Average_Bitrate.pdf}
-      \label{...}
-    }
-    \\
-    \subfloat[Average Osillations]{
-      \includegraphics[width=\textwidth, height=.25\paperheight, keepaspectratio]{figures/Average_Oscillations.pdf}
-      \label{...}
-    }
-    \\
-    \subfloat[Rebuffer Ratio]{
-      \includegraphics[width=\textwidth, height=.25\paperheight, keepaspectratio]{figures/Rebuffer_ratio.pdf}
-      \label{...}
-    }
-    \caption{QoE Metrics}
-    \label{...}
+  
+
+    % \subfloat[Average Oscillations]{
+      \includegraphics[width=\textwidth]{figures/Average_Oscillations.pdf}
+
+      \caption{Average Bitrate Oscillations}
+      \label{fig:avg-oscillations}
+    % }
+\end{figure*}
+    % \\
+\begin{figure*}
+    % \subfloat[Rebuffer Ratio]{
+      \includegraphics[width=\textwidth, keepaspectratio]{figures/Rebuffer_ratio.pdf}
+    % }
+    \caption{Rebuffer Ratio}
+    \label{fig:rebuffer-ratio}
+    % \label{fig:QoE-metrics}
+\end{figure*}
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth, keepaspectratio]{figures/bitrate_derivative_distribution.pdf}
+  \caption{Absolute Bitrate Switches}
+  \label{fig:bitrate-switches}
 \end{figure*}
 
 % \begin{figure*}
@@ -1041,6 +1077,14 @@ In Section \ref{sec:evaluation}, we saw that New CWV improves video stability by
 
 %==================================================================================================
 \section{Related Work}
+
+New CWV enhances the previously proposed validation idea \cite{rfc2861-2000-padhye-congestion-window-validation}. Similar to its predecessor it solves the issue of invalidating the TCP state, after the TCP transfer was application and not network limited but it does so in a more network friendly way, without the need to re-enter slow-start and lose packets to gauge the available link's capacity. That is, New CWV alters TCP's send-rate. The idea of changing TCP's rate is not new, an idea proposed in the late 90s suggests how TCP rate can be modeled as a function of packet loss \cite{Mathis-1997-the-macroscopic-behavior-tcp}. Another proposal \cite{Padhye-1998-modelling-tcp-throughput} refines that idea later. This way of defining TCP friendliness and predicting rate behaviours have in turn been used as basis in different protocol proposals \cite{rfc-5348-tfrc,Rossi-2010-ledbat,Arun-2018-copa} and other multimedia oriented ones \cite{Carlucci-2016-Analysis-WebRTC,Choi-2007-fairer-tfrc}.
+
+
+Additionally, after the MPEG-DASH video standard, work on improving the performance of adaptive algorithms has resurged. During that time, three main concepts for adaptive algorithms have been proposed: throughput based \cite{Sun-2016-cs2p, Jiang-2012-improving-fairness-http-video-festive}, buffer based \cite{Spiteri-2016-BOLA,Huang-2015-A-buffer-based-approach-to-rate-adaptation-bba}, and hybrid \cite{Spiteri-2019-from-theory-to-practice-sabre,Wang-2016-squad}. Rate based solutions \cite{Li-2014-probe-and-adapt-panda,Liu-2011-rate-adaptation} have also been proposed, but as of the time of writing this paper have not made it to the reference de-facto standard DASH implementation \footnote{https://github.com/Dash-Industry-Forum/dash.js}.
+
+
+As different adaptation algorithms were proposed, the need of metrics to evaluate and compare them arose. Early research provided metrics to evaluate the perceived QoE \cite{Cranley-2006-user-perception-adapting-video}. However, later \cite{Balachandran-2012-quest-for-internet-video-qoe} argued that no single combination of low-level metrics can provide a good QoE score for measuring video. Since then, QoE defining research relied on modelling and predictive patterns, however, a single agreed upon metric to measure to QoE has still not been found. Nevertheless, regardless of the metrics used, the gains that a single adaptation strategy can offer have reached a point of diminishing returns. This is supported by the volume of proposals on adaptive algorithms that are being published. However, we have still identified cases where the current best practices fail to perform well (e.g., constrained links with multiple clients). Additionally, we have shown that changes in the transport layer can help these cases, without using different application algorithms. Therefore, we argue that future work in the area might benefit from looking at improving the transport behaviour again. 
 
 
 % This should come near the end, and focusing on discussing how your work
