@@ -277,24 +277,26 @@ FIGURES_TRANSPORT = $(foreach client, ${CLIENTS},  ${FIGURES_FOLDER}/Throughput_
 FIGURES_APPLICATION = ${FIGURES_FOLDER}/Average_Bitrate.pdf ${FIGURES_FOLDER}/Average_Oscillations.pdf ${FIGURES_FOLDER}/Rebuffer_Ratio.pdf
 
 #TODO: Logs as a dependency here
-${FIGURES_FOLDER}/tmp/%/parsed_data.json: ${ROOT}/scripts/analytics/paper/plot_data.py
-	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --root /vagrant/logs/clients/$* --algs newcwv vreno --runs ${shell seq 1 10} --links ${LINKS} --parse 1 --target none
+${FIGURES_FOLDER}/tmp/%/parsed_data.json: ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/parse_data.py ${ROOT}/scripts/analytics/paper/count_lost_packets.py ${ROOT}/scripts/analytics/paper/parse_access_log.py ${ROOT}/scripts/analytics/paper/parse_dash_log.py
+	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --root /vagrant/logs/clients/$* --algs newcwv vreno --runs ${shell seq 1 10} --links ${LINKS} --parse 1 --target none
 
 #TODO need to fix parsed data dependency to allow for more clients
-${FIGURES_FOLDER}/Average_Bitrate.pdf: ${RAW_DATA}
-	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "average bitrate" --clients_combined ${CLIENTS} --extension pdf
+${FIGURES_FOLDER}/Average_Bitrate.pdf: ${RAW_DATA} ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py
+	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${LINKS} --target "average bitrate" --clients_combined ${CLIENTS} --extension pdf
 
-${FIGURES_FOLDER}/Average_Oscillations.pdf: ${RAW_DATA}
-	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "average oscillations" --clients_combined ${CLIENTS} --extension pdf
+AVERAGE_OSCILLATIONS_LINKS = DSL FTTC
+${FIGURES_FOLDER}/Average_Oscillations.pdf: ${RAW_DATA} ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py
+	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${AVERAGE_OSCILLATIONS_LINKS} --target "average oscillations" --clients_combined ${CLIENTS} --extension pdf
 
-${FIGURES_FOLDER}/Rebuffer_Ratio.pdf: ${RAW_DATA}
-	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "rebuffer ratio" --clients_combined ${CLIENTS} --extension pdf
+REBUFFER_RATIO_LINKS = DSL FTTC
+${FIGURES_FOLDER}/Rebuffer_Ratio.pdf: ${RAW_DATA} ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py
+	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${REBUFFER_RATIO_LINKS} --target "rebuffer ratio" --clients_combined ${CLIENTS} --extension pdf
 
-${FIGURES_FOLDER}/Throughput_%_clients.pdf: ${FIGURES_FOLDER}/tmp/%/parsed_data.json
-	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "throughput" --clients_combined ${CLIENTS} --clients $* --extension pdf
+${FIGURES_FOLDER}/Throughput_%_clients.pdf: ${FIGURES_FOLDER}/tmp/%/parsed_data.json ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py
+	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${LINKS} --target "throughput" --clients_combined ${CLIENTS} --clients $* --extension pdf
 
-${FIGURES_FOLDER}/Average_Stalls_5_clients.pdf: ${FIGURES_FOLDER}/tmp/parsed_data.json
-	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "average stalls" --extension png
+# ${FIGURES_FOLDER}/Average_Stalls_5_clients.pdf: ${FIGURES_FOLDER}/tmp/parsed_data.json
+# 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "average stalls" --extension png
 
 # figures: ${ROOT}/scripts/analytics/paper/plot_data.py ${TEST_LOGS}
 # 	@echo 'Generating Figures'

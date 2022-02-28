@@ -26,21 +26,29 @@ def get_ack_info(pcap_file):
         tokens = line.split()
         sender = tokens[2]
         flags = tokens[6]
-        if '10.0.0.1' in sender and 'S' not in flags and 'F' not in flags and 'seq' in line:
-            filtered.append(line)
+        seq = tokens[8]
+        if '10.0.0.1' in sender and 'S' not in flags and 'F' not in flags and 'seq' in line and '8000' not in sender:
+            if 'R' in flags and ':' not in seq:
+                print(f'Skipping {line}, contains RST and no SEQ')
+            else:
+                filtered.append(line)
     
     time_ack = []
     for line in filtered:
-        tokens = line.split()
-        seq = tokens[8]
-        seq = int(seq.split(':')[1][:-1])
-        time_delta_str = tokens[0]
-        hours, minutes, seconds = time_delta_str.split(':')
-        seconds, microseconds = seconds.split('.')
-        td = datetime.timedelta(hours=int(hours), minutes=int(minutes), seconds=int(seconds), microseconds=int(microseconds))
-        time_ack.append((td.total_seconds(), seq))
+        try:
+            tokens = line.split()
+            seq = tokens[8]
+            seq = int(seq.split(':')[1][:-1])
+            time_delta_str = tokens[0]
+            hours, minutes, seconds = time_delta_str.split(':')
+            seconds, microseconds = seconds.split('.')
+            td = datetime.timedelta(hours=int(hours), minutes=int(minutes), seconds=int(seconds), microseconds=int(microseconds))
+            time_ack.append((td.total_seconds(), seq))
+        except Exception as e:
+            print(line)
+            raise e
 
     return time_ack
 
 if __name__ == '__main__':
-    plot_ack_info('/vagrant/logs/clients/1/DSL/1_newcwv/server.pcap')
+    plot_ack_info('/vagrant/logs/clients/5/FTTP/4_vreno/server.pcap')

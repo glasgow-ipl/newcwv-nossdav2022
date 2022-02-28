@@ -5,17 +5,13 @@ import os
 import numpy as np
 import sys
 import json
-import glob
-import argparse
 
 PACKAGE_PARENT = '..'
 SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__))))
 sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 
 import parse_access_log
-from constants import QUALITY_TO_BPS_3S_IETF, VIDEO_CACHED_RESPONSE_MS
-import parse_dash_log
-import count_lost_packets
+from constants import QUALITY_TO_BPS_3S_IETF
 
 def plot_boxplot_multiple(*, metric_name, data, algs, links, extension, format_percent=False, y_label=''):
     x_labels_dic = {'newcwv': 'New CWV', 'vreno': 'No New CWV'}
@@ -129,7 +125,6 @@ def plot_stall_histogram(metric_name, data_aggregate, clients, extension):
         print(f"Removed {len(newcwv_all) - len(newcwv)} newcwv elements")
         reno = np.extract(reno_all > 0, reno_all)
         print(f"Removed {len(reno_all) - len(reno)} nreno elements")
-
 
         leap = 2000
         
@@ -316,8 +311,6 @@ def plot_data(*, links, algs, extension = 'png', clients=0, target='all'):
         metrics = json.load(f)
         print("Parsed data loaded")
         
-
-
     clients = metrics['clients']    
 
     combined = {}
@@ -375,118 +368,6 @@ def plot_data_multiple(*, links, algs, extension = 'png', clients=0, target='all
         plot_boxplot_multiple(metric_name='Rebuffer Ratio', data=data_aggregate, links=links, algs=algs, extension=extension, format_percent=True, y_label='Rebuffer Ratio')
 
 
-def parse_data(root, links, algs, numbers):
-    metrics = {}
-
-    tmp = {alg: {} for alg in algs}
-
-    bitrates = []
-    oscillations = []
-    throughput_precise = []
-    throughput_safe = []
-    thr_precise = []
-    thr_safe = []
-    delays = []
-
-    drop_data = {}
-    
-    for link in links:
-        for alg in algs:
-            for number in numbers:
-                path = os.path.join(root, link, f'{number}_{alg}')
-
-                # client_aggregate = drop_data.get(number, {})
-                link_aggregate = drop_data.get(link, {})
-                alg_aggregate = link_aggregate.get(alg, {i: 0 for i in range(700)})
-
-                dropped_packets_server = count_lost_packets.count_lost_packets(path)
-                for id_seq, (dropped_timestamps, occurence) in dropped_packets_server.items():
-                    # the first _occurence_ packet were lost, record them with their timestamps
-                    for i, relative_time in enumerate(dropped_timestamps):
-                        if i == occurence:
-                            break
-                        drop_count = alg_aggregate.get(relative_time, 0)
-                        alg_aggregate[relative_time] = drop_count + 1
-                
-                link_aggregate[alg] = alg_aggregate
-                # client_aggregate[link] = link_aggregate
-                drop_data[link] = link_aggregate
-                
-
-                access_log = os.path.join(path, 'nginx_access.log')
-                quality_aggregate = parse_access_log.get_qualities(access_log)
-                avg_bitrates = []
-                avg_oscillations = []
-                for _client, trace in quality_aggregate.items():
-                    _times, qualities = zip(*[value for _key, value in sorted(trace.items())])
-                    # print(f"Average bitrate for {_client} is {parse_access_log.calculate_avg_bitrate(qualities, QUALITY_TO_BPS_3S_IETF)}")
-                    # print(f"Average Osc of client {_client} is {parse_access_log.calculate_avg_oscillation(qualities, QUALITY_TO_BPS_3S_IETF)}")
-                    avg_bitrates.append(parse_access_log.calculate_avg_bitrate(qualities, QUALITY_TO_BPS_3S_IETF))
-                    avg_oscillations.append(parse_access_log.calculate_avg_oscillation(qualities, QUALITY_TO_BPS_3S_IETF))
-
-                # print(avg_bitrates)
-                avg_bitrate = np.average(avg_bitrates)
-                # print(avg_bitrate)
-                avg_oscillation = np.average(avg_oscillations)
-                bitrates.append(avg_bitrate / 1_000_000)
-                # print(bitrates)
-                oscillations.append(avg_oscillation / 1_000_000)
-
-                metrics_pattern = os.path.join(path, 'dashjs_metrics*.json')
-                metric_files = glob.glob(metrics_pattern)
-
-                for metrics_path in metric_files:
-                    estimates = parse_dash_log.get_throughput_estimates(metrics_path)
-                    (_, precise), (_, safe) = estimates.items()
-                    precise_list = list(precise.values())
-                    safe_list = list(safe.values())
-
-                    ## matching debug format
-                    precise_list = [el[0] for el in precise_list if el[-2] > VIDEO_CACHED_RESPONSE_MS]
-                    ######
-
-                    precise_avg = np.average(precise_list)
-                    safe_avg = np.average(safe_list)
-                    throughput_precise.append(precise_avg)
-                    throughput_safe.append(safe_avg)
-                    thr_precise.extend([x / 1000 for x in precise_list]) # Mbps
-                    thr_safe.extend([x / 1000 for x in safe_list]) # Mbps
-                    
-                    delays.append(parse_dash_log.get_delay(metrics_path) / parse_dash_log.get_playtime(metrics_path) )
-
-            print(f"Delays: {delays}")
-            # Out of simulations calculate the average of the averages
-            tmp[alg] = {'Average Bitrate': bitrates,
-                        'Average Oscillations': oscillations,
-                        'Throughput Precise': thr_precise,
-                        'Throughput Safe': thr_safe,
-                        'Rebuffer Ratio': delays,
-                        }
-
-            bitrates = []
-            oscillations = []
-            throughput_precise = []
-            throughput_safe = []
-            thr_precise = []
-            thr_safe = []
-            delays = []
-
-        # Went through all algorithms, record stats    
-        metrics[link] = tmp
-        tmp = {}
-
-    metrics['dropped_packets'] = drop_data
-    metrics['clients'] = len(metric_files)
-
-    tmp_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp', str(metrics['clients']))
-    os.makedirs(tmp_path, exist_ok=True)
-    tmp_path = os.path.join(tmp_path, 'parsed_data.json')
-    with open(tmp_path, 'w') as f:
-        json.dump(metrics, f, indent=4)
-
-    print(f"Parsed data saved {tmp_path}")
-
-
 def plot_bitrate_distribution(log_root):
     quality_indexes = {k: i for i, k in enumerate(QUALITY_TO_BPS_3S_IETF.keys())}
     quality_distribution_alg_link_clients = {}
@@ -527,9 +408,9 @@ def plot_bitrate_distribution(log_root):
         quality_distribution_alg_link_clients[num_clients] = quality_distribution_alg_link
 
 
-    fig, axs = plt.subplots(2, 4)
+    fig, axs = plt.subplots(1, 4)
     clients = ['1', '2', '3', '5']
-    links = ['DSL', 'FTTC']
+    links = ['DSL']
     algs = ['newcwv', "reno"]
     WIDTH = .4
     for i, client in enumerate(clients):
@@ -552,8 +433,9 @@ def plot_bitrate_distribution(log_root):
                 
                 ax = axs[i] if len(links) == 1 else axs[j, i]
 
+                label_map = {'reno': 'No New CWV', 'newcwv': 'New CWV'}
                 # print(i, j)
-                ax.bar(positions, heights, width=WIDTH, label=alg if i==1 and j==0 else '_no_label')
+                ax.bar(positions, heights, width=WIDTH, label=label_map[alg] if i==1 and j==0 else '_no_label')
                 ax.set_title(f'{link} {client} Clients')
                 ax.set_xlim(-3, 3)
                 y_lim = max(y_lim, ax.get_ylim()[1])
@@ -574,8 +456,8 @@ def plot_bitrate_distribution(log_root):
             #     ax.get_yaxis().set_major_formatter(PercentFormatter(ax.get_ylim()[1]))
 
     fig.legend(bbox_to_anchor=(0.95, 0.9))
-    fig.set_size_inches(16, 7)
-    extension = 'pdf'
+    fig.set_size_inches(16, 3)
+    extension = 'png'
     fig_name = f'/vagrant/doc/paper/figures/bitrate_derivative_distribution.{extension}'
     print(f"Saving {fig_name}")
     fig.savefig(fig_name, bbox_inches='tight')
@@ -628,35 +510,7 @@ def main():
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
+        plot_bitrate_distribution('/vagrant/logs/clients')
+        exit()
         main()
         sys.exit(0)
-
-    parser = argparse.ArgumentParser(description="")
-    
-    parser.add_argument('--links', nargs='+', required=True)
-    parser.add_argument('--algs', nargs='+', required=True)
-    
-    # Required for parsing the data
-    parser.add_argument('--root')
-    parser.add_argument('--runs', nargs='+', type=int)
-
-    parser.add_argument('--parse', type=int, default=0)
-    parser.add_argument('--extension', default='pdf')
-    parser.add_argument('--target', type=str.lower, choices=['all', 'none', 'average bitrate', 'average oscillations', 'rebuffer ratio', 'throughput'], default='all')
-    parser.add_argument('--clients', type=int, default=0)
-
-    parser.add_argument('--clients_combined', nargs='+')
-
-    args = parser.parse_args()
-
-    root = args.root
-    links = args.links
-    algs = args.algs
-    numbers = args.runs
-    extension = args.extension
-    target = args.target
-
-    if args.parse:
-        parse_data(root, links, algs, numbers)
-    if args.target.lower() != 'none':
-        plot_data_multiple(links=links, algs=algs, extension=extension, clients=args.clients, clients_combined=args.clients_combined, target=target)
