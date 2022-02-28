@@ -305,8 +305,9 @@ ${FIGURES_FOLDER}/Throughput_%_clients.pdf: ${FIGURES_FOLDER}/tmp/%/parsed_data.
 
 # ${FIGURES}: figures
 
+#TODO: Master rule should depend on {FIGURES_APPLICATION} {$FIGURES_TRANSPORT}
 # Master build rule:
-paper: ${FIGURES_APPLICATION} ${FIGURES_TRANSPORT} check-make git-revision $(TOOLS) $(PDF_FILES)
+paper: check-make git-revision $(TOOLS) $(PDF_FILES)
 
 # =================================================================================================
 # Project specific rules to download files:
