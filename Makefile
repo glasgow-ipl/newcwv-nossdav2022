@@ -1,4 +1,4 @@
-ROOT:=.
+ROOT:=/vagrant
 
 DASH_ALG=abrThroughput
 MPD_LOCATION=data/ietf/bbb.mpd
@@ -307,6 +307,9 @@ ${FIGURES_FOLDER}/Throughput_%_clients.pdf: ${FIGURES_FOLDER}/tmp/%/parsed_data.
 
 # Master build rule:
 paper: ${FIGURES_APPLICATION} ${FIGURES_TRANSPORT} check-make git-revision $(TOOLS) $(PDF_FILES)
+
+# Build a paper without pre-building the figures
+paper-quick: check-make git-revision $(TOOLS) $(PDF_FILES)
 
 # =================================================================================================
 # Project specific rules to download files:
