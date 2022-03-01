@@ -284,11 +284,11 @@ ${FIGURES_FOLDER}/tmp/%/parsed_data.json: ${ROOT}/scripts/analytics/paper/plot_d
 ${FIGURES_FOLDER}/Average_Bitrate.pdf: ${RAW_DATA} ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${LINKS} --target "average bitrate" --clients_combined ${CLIENTS} --extension pdf
 
-AVERAGE_OSCILLATIONS_LINKS = DSL FTTC
+AVERAGE_OSCILLATIONS_LINKS = DSL
 ${FIGURES_FOLDER}/Average_Oscillations.pdf: ${RAW_DATA} ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${AVERAGE_OSCILLATIONS_LINKS} --target "average oscillations" --clients_combined ${CLIENTS} --extension pdf
 
-REBUFFER_RATIO_LINKS = DSL FTTC
+REBUFFER_RATIO_LINKS = DSL
 ${FIGURES_FOLDER}/Rebuffer_Ratio.pdf: ${RAW_DATA} ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${REBUFFER_RATIO_LINKS} --target "rebuffer ratio" --clients_combined ${CLIENTS} --extension pdf
 

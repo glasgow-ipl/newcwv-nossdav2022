@@ -39,7 +39,9 @@ def plot_boxplot_multiple(*, metric_name, data, algs, links, extension, format_p
                 ax.tick_params(axis='x', rotation=15)
                 ax.set_title(f'{clients} client(s) {link}')
                 max_y = max(max_y, ax.get_ylim()[1])
-                
+
+                if i == 0 and j == 0:
+                    ax.set_ylabel(y_label)
 
     for i, link in enumerate(agg):
         for j, clients in enumerate(agg[link]): 
@@ -68,7 +70,7 @@ def plot_boxplot_multiple(*, metric_name, data, algs, links, extension, format_p
 
     save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', f"{metric_name.replace(' ', '_')}.{extension}")
     print(f"Saving {save_path}")
-    fig.set_size_inches(15, 10)
+    fig.set_size_inches(15, 3)
     fig.savefig(save_path, bbox_inches='tight')
     # plt.clf()
 
@@ -363,7 +365,7 @@ def plot_data_multiple(*, links, algs, extension = 'png', clients=0, target='all
     if target.lower() == 'average bitrate' or target.lower() == 'all':
         plot_boxplot_multiple(metric_name='Average Bitrate', data=data_aggregate, links=links, algs=algs, extension=extension)
     if target.lower() == 'average oscillations' or target.lower() == 'all':
-        plot_boxplot_multiple(metric_name='Average Oscillations', data=data_aggregate, links=links, algs=algs, extension=extension)
+        plot_boxplot_multiple(metric_name='Average Oscillations', data=data_aggregate, links=links, algs=algs, extension=extension, y_label="Mbps")
     if target.lower() == 'rebuffer ratio' or target.lower() == 'all':
         plot_boxplot_multiple(metric_name='Rebuffer Ratio', data=data_aggregate, links=links, algs=algs, extension=extension, format_percent=True, y_label='Rebuffer Ratio')
 
@@ -417,8 +419,8 @@ def plot_bitrate_distribution(log_root):
         for j, link in enumerate(links):
             y_lim = 0
             for k, alg in enumerate(algs):
-                plot_dic = {k: v for k, v in quality_distribution_alg_link_clients[client][link][alg].items() if k != 0}
-                # plot_dic = quality_distribution_alg_link_clients[client][link][alg]
+                # plot_dic = {k: v for k, v in quality_distribution_alg_link_clients[client][link][alg].items() if k != 0}
+                plot_dic = quality_distribution_alg_link_clients[client][link][alg]
                 if plot_dic:
                     labels, heights = zip(*plot_dic.items())
                 else:
@@ -434,30 +436,17 @@ def plot_bitrate_distribution(log_root):
                 ax = axs[i] if len(links) == 1 else axs[j, i]
 
                 label_map = {'reno': 'No New CWV', 'newcwv': 'New CWV'}
-                # print(i, j)
+                heights = [100 * h / all_elements for h in heights]
                 ax.bar(positions, heights, width=WIDTH, label=label_map[alg] if i==1 and j==0 else '_no_label')
                 ax.set_title(f'{link} {client} Clients')
                 ax.set_xlim(-3, 3)
-                y_lim = max(y_lim, ax.get_ylim()[1])
 
-                skip_five_range = np.arange(0, 101, 10)
-                ax.set_yticks([x/100 * all_elements for x in skip_five_range])
-                ax.set_yticklabels(skip_five_range)
-                # print(all_elements)
-                ax.get_yaxis().set_major_formatter(PercentFormatter(all_elements))
-                ax.get_yaxis().set_ticks([y_tick / 100 * all_elements for y_tick in range(0, 11, 2)])
-                TWENTY_PERCENT = .1 * all_elements
-                ax.set_ylim(0, TWENTY_PERCENT)
+                ax.set_yscale('log')
+                ax.set_ylim(top= 100)
                 
-            #     print(all_elements)
-            # for ax in axs:
-            #     # ax.set_ylim(top=y_lim)
-            #     # print(y_lim)
-            #     ax.get_yaxis().set_major_formatter(PercentFormatter(ax.get_ylim()[1]))
-
     fig.legend(bbox_to_anchor=(0.95, 0.9))
     fig.set_size_inches(16, 3)
-    extension = 'png'
+    extension = 'pdf'
     fig_name = f'/vagrant/doc/paper/figures/bitrate_derivative_distribution.{extension}'
     print(f"Saving {fig_name}")
     fig.savefig(fig_name, bbox_inches='tight')
