@@ -224,7 +224,7 @@
 \frenchspacing
 
 % Prevent hyphenation of all upper case words:
-\uchyph=0
+%\uchyph=0
 
 % The ACM style needs \maketitle after the abstract, but the other styles
 % want it before; these macros hide the difference and are used below:
@@ -353,7 +353,8 @@
   %  - Say what your solution achieves
   %  - Say what follows from your solution
 
-  TCP new congestion window validation modifies TCP congestion control to allow a sender to restart more quickly after certain idle periods. HTTP adaptive streaming video flows exhibit on-off behaviour, with frequent idle periods. Previous work has shown that TCP new congestion window validation can improve transport performance for such video flows. In this paper, we explore whether it also improves video playback stability. We find that enabling new congestion window validation can reduce video re-buffering events with up to \todo{\%}; and limit the representation switches by \todo{\%}. 
+HTTP adaptive streaming video flows exhibit on-off behaviour, with frequent idle periods, which can interact poorly with TCP's congestion control algorithms. New Congestion Window Validation (New CWV) modifies TCP to allow senders to restart more quickly after certain idle periods. While previous work has shown that New CWV can improve \emph{transport} performance for streaming video, it remains to demonstrate that this translates to improved \emph{application} level performance, in terms of playback stability. In this paper, we show that enabling New CWV can reduce video re-buffering events by up to \todo{\%}, and limit representation switches by \todo{\%}, without any changes to existing
+rate adaptation algorithms.
 
 \end{abstract}
 \maketitleACM
