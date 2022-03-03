@@ -464,7 +464,7 @@ New CWV has been shown to improve the \emph{transport} layer performance of rate
 \section{Evaluating New CWV for Video}
 \label{sec:evaluation}
 
-In the following, we first describe our experimental setup (§\ref{sec:experimental-setup}), and use this to look at the impact on the transport layer, and measure the extent to which streaming applications using New CWV obtain more consistent throughput estimates (§\ref{sec:transport-impact}). Then, in §\ref{sec:QoE-impact}, we investigate how the identified different transport behaviour impacts the application layer and more specifically the achieved video QoE. Finally, in §\ref{sec:summary} we summarize our findings.
+We first describe our experimental setup (\S\ref{sec:experimental-setup}), and use this to look at the impact on the transport layer, and measure the extent to which streaming applications using New CWV obtain more consistent throughput estimates (\S\ref{sec:transport-impact}). We then investigate how this transport behaviour impacts the application layer, and, more specifically, video QoE (\S\ref{sec:QoE-impact}). Finally,  we summarise our findings (\S\ref{sec:summary}).
 
 %--------------------------------------------------------------------------------------------------
 \subsection{Experimental Setup}
@@ -478,26 +478,19 @@ In the following, we first describe our experimental setup (§\ref{sec:experimen
 \end{figure}
 
 % Overview
-To evaluate the effect of New CWV on video we used an emulated dumbbell topology network in Mininet running on Ubuntu 20.04 as shown in Figure \ref{fig:experimental-setup}.
+Our evaluation testbed consists of an emulated network in Mininet, running on Ubuntu 20.04, as shown in Figure \ref{fig:experimental-setup}. Both the server and its clients use TCP New Reno, which is widely used for video delivery~\cite{Mishra-2019-the-great-internet-tcp-congestion-control-census}. In addition, both are running a modified Linux Kernel (5.4.0). The modifications include a version of New CWV ported to that kernel, alongside RFC 3339~\todo{\cite{..}}-compliant timestamps, to enable better event tracking, and more verbose \texttt{cwnd} event tracking. \texttt{tcpdump} is used at all endpoints to enable network activity to be reconstructed.
+
 % Server
- The server is HTTP/2 nginx (version 1.18). It uses TCP New Reno as its congestion control algorithm.
+The server uses \texttt{nginx} (version 1.18), with HTTP/2 delivery enabled. The server provides three representations of Big Buck Bunny~\cite{online-bbb}, encoded at 480p (requiring bandwidth of 0.44Mbps), 720p (2.64Mbps), and 1080p (4.82Mbps). Each representation is provided in chunks that are 3 seconds in duration.
 
  %  Client
- The clients are Firefox (version 91) using dash.js (version 4.0.0) that use Throughput as their adaptive algorithm. The current state-of-the-art adaptation algorithm in dash.js is Dynamic \cite{Spiteri-2019-from-theory-to-practice-sabre}. It comprises two components, namely, the throughput algorithm, and Enhanced version of the BOLA algorithm \cite{Spiteri-2016-BOLA}. Here, we focus only on the first component and use that for our experiments. Our work investigates the throughput algorithm's behaviour as it is most affected by the immediate client bandwidth estimations at any given time. Our results generalise to the behaviour of the DYNAMIC algorithm, as it uses throughput, not only during the start of a connection, but also in cases where the client buffer is low or in low-latency, live streaming, making throughput a significant contributor to the overall performance of DYNAMIC.
+Each client uses Firefox (version 91) with the dash.js (version 4.0.0) player. While the current state-of-the-art rate adaptation algorithm is DYNAMIC~\cite{Spiteri-2019-from-theory-to-practice-sabre}, we opt to use the throughput algorithm for our experiments. DYNAMIC combines the throughput algorithm with an enhanced version of the BOLA algorithm~\cite{Spiteri-2016-BOLA}. By using the throughput algorithm, our evaluations focus on the impact that the transport layer has on throughput estimation at the application layer. Our findings are applicable to the DYNAMIC algorithm, especially in scenarios where the throughput algorithm operates (e.g., in low-latency, live streaming applications).
 
+The network is configured a bottleneck RTT of 40ms, a reasonable value to emulate connections within the UK. The routers' queues are set equal to the bandwidth delay product. Three different bandwidth profiles are evaluated, representing DSLv2 (10Mbps), FTTC (50Mbps), and FTTP (145Mbps) links in the UK~\cite{online-ofcom-report}.
 
-The network is configured with RTT between the client and the server is 40 ms, an average value measured from the author's residential network to a Netflix's CDN. The routers' queues are set equal to the bandwidth delay product. We picked three different bandwidth profiles representative of DSLv2, FTTC, and FTTP links in the United Kingdom \cite{online-ofcom-report}.
+To evaluate the impact of congestion and competing flows, each simulation was run with multiple clients (1, 2, 3, and 5 clients) simultaneously requesting video. Finally, to reduce noise, we ran each combination of CWV or New CWV, number of clients, and link type, 10 times before reporting the average results. The dataset presented includes data accumulated from 240 simulations (\emph{2 algorithms $\times$ 3 link types $\times$ 4 client variations $\times$ 10 repetitions}). 
 
-To evaluate the performance, we use Blender's Big Buck Bunny \cite{online-bbb}.
-
-We ran simulations with and without New CWV for each link combination with 1, 2, 3, and 5 clients simultaneously requesting video. Furthermore, to eliminate noise, we run each \textit{congestion control setting, number of clients, and link type} combinations 10 times before averaging and reporting results. The dataset presented includes data accumulated over 240 runs (2 algorithms * 3 link types * 4 client variations * 10 repetitions). 
-
-Finally, we modify the Linux Kernel's (5.4.0) logger timestamps to be RFC 3339 compliant in order to enable better event tracking. We also provide a ported version of New Congestion Window Validation \cite{rfc7661-2015-fairhurst-new-cwnd-validation} for that kernel. We also modify New Reno to log various CWND related events.
-
-
-During each run we collect the client's bandwidth estimations. Additionally, to evaluate the video QoE impact we collect information to report average bit-rate, average bit-rate oscillations, and re-buffer ratio as these are standard video metrics directly related to the user's QoE \cite{Spiteri-2019-from-theory-to-practice-sabre, Yin-2015-a-control-theoritic-approach, Dobrian-2013-understanding-the-impact-of-video-quality}.
-
-In addition, we run tcpdump and record all packets on the client and the server, so we can reconstruct the network activity.
+During each run we collect the client's bandwidth estimations. Additionally, to evaluate the video QoE impact we collect information to report average bitrate, average bitrate oscillation, and re-buffer ratio, given that these are standard video metrics directly related to the user's QoE \cite{Spiteri-2019-from-theory-to-practice-sabre, Yin-2015-a-control-theoritic-approach, Dobrian-2013-understanding-the-impact-of-video-quality}.
 
 %--------------------------------------------------------------------------------------------------
 \subsection{Impact on Transport Performance} 
