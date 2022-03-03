@@ -496,61 +496,45 @@ During each run we collect the client's bandwidth estimations. Additionally, to 
 \subsection{Impact on Transport Performance} 
 \label{sec:transport-impact}
 
-New CWV alters the CWND sizing behaviour, allowing it to recover faster, after an idle period in an active TCP connection. Therefore, we expect the client to report more stable values regarding the available link bandwidth. 
-
-To evaluate our hypothesis, we collect two of the client's available bandwidth measurements. The first is the raw estimate obtained by dividing the number of received bytes over the download time. The second, estimation is what gets fed to the throughput algorithm. This value is a function of the current measurement probe, already explained, and additional factors such as, historical capacity data, ``safety" factors, etc. In short, the former is the raw available bandwidth measurement as seen by the client, and the latter is what gets fed to the throughput algorithm. We call the former ``instantaneous" and the latter ``smoothened" estimate. These values are shown in Figure \ref{fig:throughput-clients}.
-
-Figure \ref{fig:throughput-clients} validates the behaviour where New CWV is enabled reported by \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}. That is, New CWV's CDF has a steeper gradient. This supports our initial hypothesis that the streaming clients measuring the available bandwidth will be able to obtain more consistent results since the amount of lost packets is reduced (Figure \ref{fig:transmission-after-idle}), or otherwise the goodput is increased. Moreover, it can be seen that the different resumption after idle policy resulted in lower overall available bandwidth measurements. This is since when New CWV is enabled, connections will not hit the available capacity cap as fast. However, this pre-emptive mechanism allows for higher consistency on links where nearly all of the available bandwidth is used (FTTC scenarios in Figure \ref{fig:throughput-clients}).
-
-However, our packet loss results (Figure \ref{fig:transmission-after-idle}) differ from those reported by \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}. They have observed similar loss values both when New CWV is enabled and when it is disabled. However, we observe that when disabled, connections lose more packets at a rate close to 1:10 compared to when enabled. Figure \ref{fig:transmission-after-idle}, shows the transfer patterns for a video chunk after an idle period. For readability, we have shown the slow-start period of a single video chunk download, but it applies to any such transfer. It can be seen that when New CWV is absent the majority of the packets lost are near the end of the slow-start period when the CWND size allows for transferring data beyond the link's capacity. In contrast, since New CWV only enters slow-start with an upper bound of its previously known window value, New CWV is able to enter congestion avoidance faster without losing packets as a result of a large CWND value. This explains the higher loss values that we have observed.
-
-
-\todo{Figure 3: remove FTTP, organize DSL, FTTC as in Fig 4 (landscape)}
+As described in Section~\ref{sec:background}, New CWV alters TCP's \texttt{cwnd} sizing behaviour, allowing for faster recovery after idle periods. Therefore, we expect the client to report more stable throughput estimates. 
 
   \begin{figure*}
     \centering
     \subfloat[1 Client]{
-      \includegraphics[height=.18\paperheight]{figures/Throughput_1_clients.pdf}
+      \includegraphics[height=.15\paperheight]{figures/Throughput_1_clients.pdf}
       \label{fig:throughput-clients-1}
     }
     \\
     \subfloat[2 Clients]{
-      \includegraphics[height=.18\paperheight]{figures/Throughput_2_clients.pdf}
+      \includegraphics[height=.15\paperheight]{figures/Throughput_2_clients.pdf}
       \label{fig:throughput-clients-2}
     }
     \\
     \subfloat[3 Clients]{
-      \includegraphics[height=.18\paperheight]{figures/Throughput_3_clients.pdf}
+      \includegraphics[height=.15\paperheight]{figures/Throughput_3_clients.pdf}
       \label{fig:throughput-clients-3}
     }
     \\
     \subfloat[5 Clients]{
-      \includegraphics[height=.18\paperheight]{figures/Throughput_5_clients.pdf}
+      \includegraphics[height=.15\paperheight]{figures/Throughput_5_clients.pdf}
       \label{fig:throughput-clients-5}
     }
-    \caption{Dash.js Client Throughput measurements}
+    \caption{Dash.js Client Throughput measurements \todo{Figure 3: remove FTTP, organize DSL, FTTC as in Fig 4 (landscape)}}
     \label{fig:throughput-clients}
   \end{figure*}
+
+To evaluate this hypothesis, we collect two of the client's available bandwidth measurements. The first is the raw estimate obtained by dividing the number of received bytes by time taken to download them. The second estimation, used by the application level adaptation algorithm, is a function of the raw bandwidth estimate, already explained, and additional factors, including historical values. We refer to the former as the \emph{instantaneous} and the latter the \emph{smoothed} estimate.
+
+Figure~\ref{fig:throughput-clients} shows CDFs of the instantaneous and smoothed bandwidth estimates. Intuitively, steeper lines indicate more consistent estimates: that is, a greater proportion of the estimates fall within a tighter range of values. As shown in Figure~\ref{fig:throughput-clients}, New CWV tends to report bandwidth estimates that are more consistent. This validates both our initial hypothesis, and the results reported by Nazir et al.~\cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}. We also find that New CWV produces bandwidth estimates that are lower overall. This is since when New CWV is enabled, connections will not hit the available capacity cap as fast. However, this pre-emptive mechanism allows for higher consistency on links where nearly all of the available bandwidth is used (FTTC scenarios in Figure \ref{fig:throughput-clients}). \todo{not sure what the last couple of sentences are trying to say}.
+
+
+However, our packet loss results (Figure \ref{fig:transmission-after-idle}) differ from those reported by Nazir et al.~\cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}. They observed similar loss values with and without New CWV enabled, while we observe that when disabled, connections lose more packets (at a rate close to 1:10) compared to when enabled. Figure \ref{fig:transmission-after-idle} shows the transfer patterns for a single video chunk after an idle period. It can be seen that when New CWV is disabled the majority of the packets lost are near the end of the slow-start period, when the \texttt{cwnd} size allows for transferring data beyond the link's capacity \todo{words, backref to sec 2 diagram}. In contrast, since New CWV enters slow-start with an upper bound of its previous window value, New CWV is able to enter congestion avoidance faster without losing packets as a result of a large \texttt{cwnd} value. This explains the higher loss values that we have observed.
+
+\todo{pick out concrete numbers, layer in}
 
 %--------------------------------------------------------------------------------------------------
 \subsection{Impact on Video QoE}
 \label{sec:QoE-impact}
-
-We next look at the QoE impact of the discussed earlier bandwidth values obtained when New CWV is active. To measure the QoE difference we collect standard video QoE metrics, namely, oscillations, and rebuffer ratio. Additionally, we look at the absolute difference in requested video encodings. For brevity, we have omitted the FTTP results from Figures \ref{fig:avg-oscillations}, \ref{fig:rebuffer-ratio}, and \ref{fig:bitrate-switches} as in all of these cases the FTTP connections did not see any stability issues, i.e., no rebuffering events and downloaded encodings at the maximum possible rate.
-
-Figure \ref{fig:avg-oscillations}, shows that when using New CWV connections observe lower bit-rate oscillation. Lower oscillation is associated with a higher QoE index, as frequent representation switches are found decremental to the QoE \todo{\cite{}}. We note that in some cases with a restricted link capacity and multiple clients (e.g., 3 clients on a DSL link), connections that do not use New CWV may request higher video encodings. However, it can be seen that the network cannot support these higher encoding chunks consistently. Evident by the higher oscillation the connections achieve in those cases. A similar pattern is seen with respect to the rebuffer ratio (Figure \ref{fig:rebuffer-ratio}). In other words, the inconsistent available bandwidth values seen by the application layer for connections that do not use New CWV immediately following the resumption after idle behaviour can trick the adaptive algorithm in requesting video chunks that cannot be supported by the network which in turn increases the oscillations and rebuffering. Thus hindering the overall QoE.
-
-
-Furthermore, Figure \ref{fig:bitrate-switches} provides additional bitrate switch frequency data. For brevity, we have only shown the DSL case, as for the FTTC and FTTP there was little to no encoding derivation. We show the absolute encoding difference between every played video chunk and its subsequent one. For example, if both played video chunks were of the same encoding their difference absolute difference is zero. If the subsequent chunk is of the next higher encoding their difference is +1, and if it is of the next lower encoding the difference is -1, etc. Reusing the 3 clients example, we see that connections without New CWV experience quality switches for 13\% of their requested chunks, whereas connections with New CWV experience 7\%. That 6\% accounts for over 18 seconds of longer video stability achieved by New CWV.
-
-From our experiments so far, we conclude that New CWV achieves higher video stability when multiple clients are competing on a constrained link. This stability comes in the form of lower overall bit-rate or otherwise lower average picture quality but with improved encoding stability and decreased rebuffering time. We have observed this behaviour mainly on the simulated DSL link, since our highest video encoding is just under 5Mbps, but in practice higher encodings are also used. \todo{\cite{}}.
-
-%--------------------------------------------------------------------------------------------------
-\subsection{Summary}
-\label{sec:summary}
-
-So far, we have validated the throughput reports in \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv} (Fig \ref{fig:throughput-clients}) and observed higher packet loss for connections not using New CWV (Fig \ref{fig:transmission-after-idle}). Furthermore, the presented results confirm our initial hypothesis that New CWV's more persistent bandwidth measurements as observed in \ref{fig:throughput-clients} translate to more consistent representation switches, shown by the lower bit-rate derivative variance for New CWV connections (Figure \ref{fig:bitrate-switches}). Finally, we have also observed that the more consistent measurements better match the available network conditions, allowing clients using New CWV to better predict the network's capabilities and request chunks that can be timely delivered. This is shown by the lower stall time for New CWV connections (Figure \ref{fig:rebuffer-ratio}).
-  
 
 \begin{figure*}
     % \subfloat[Average Oscillations]{
@@ -577,11 +561,24 @@ So far, we have validated the throughput reports in \cite{Nazir-2014-performance
   \label{fig:bitrate-switches}
 \end{figure*}
 
-%==================================================================================================
-\section{Discussion}
-\label{sec:discussion}
+Next, we determine whether the improved transport layer performance of New CWV translates into improved QoE at the application layer. To measure this, we look at bitrate, bitrate oscillation, and rebuffer ratio. For brevity, we have omitted the FTTP results from Figures~\ref{fig:avg-oscillations}, \ref{fig:rebuffer-ratio}, and \ref{fig:bitrate-switches} as in all of these cases the FTTP connections did not see any stability issues (i.e., no rebuffering events and downloaded encodings at the maximum possible rate). This is expected, given its high link capacity, and the relatively low maximum bandwidth requirement of our encoded video.
 
-In Section \ref{sec:evaluation}, we saw that New CWV improves video stability by sacrificing some rendered picture quality for links with restrained capacities and multiple clients. We also, observed that when the there is sufficient link capacity to satisfy the most demanding representation, as expected the rendered quality is high and there are no stability issues. In other words, if the network resources are oversupplied with regard to the highest video requirement, there are no issues.  However, if the client is able to download at rate over the highest representation requirement, then whether the download happens 20\% or 50\% faster, makes no significant impact. The only real benefit is that the buffers at the client would fill quicker. Therefore, clients can potentially impose a maximum limit to their desired download rate and leave the rest of the link unused for other flows.
+Figure \ref{fig:avg-oscillations} shows average bitrate oscillation. \todo{one/two sentences intuition about the scale}. Bitrate oscillation is typically lower when New CWV is enabled, and this is associated with improved QoE~\todo{\cite{..}}. This is a result of the higher, and less consistent, bandwidth estimates observed when New CWV is not enabled, as described in Section~\ref{sec:transport-impact}. These higher estimates lead to the client requesting chunks at a bitrate that the network cannot ultimately support, leading to increased oscillations and lower QoE. A similar pattern can be seen in Figure~\ref{fig:rebuffer-ratio}, which shows the rebuffer ratio.
+
+Figure \ref{fig:bitrate-switches} shows the absolute number of bitrate switches observed in the DSL and FTTC simulations. The plot shows the frequency and magnitude of per-chunk bitrate switches. For example, if both played video chunks were of the same encoding their difference absolute difference is zero. If the subsequent chunk is of the next higher encoding the difference is 1, and if it is of the next lower encoding the difference is -1, and so forth. In the DSL scenario, with 3 clients, we find that connections without New CWV experience quality switches for 13\% of their requested chunks, compared to 7\% for connections with New CWV enabled. This leads to an additional 18 seconds of longer video stability achieved by New CWV. \todo{this last number doesn't feel very intuitive.}
+
+We conclude that New CWV achieves higher video stability when multiple clients are competing on a constrained link, with improved encoding stability and decreased rebuffering time. We have observed this behaviour mainly on the simulated DSL link, since our highest video encoding is just under 5Mbps, but in practice higher encodings are also used~\todo{\cite{}}.
+
+\todo{pick out concrete numbers, layer in}
+
+%--------------------------------------------------------------------------------------------------
+\subsection{Summary}
+\label{sec:summary}
+
+We have validated the throughput results observed by Nazir et al.~\cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv} (Figure~\ref{fig:throughput-clients}), but with observed higher packet loss where New CWV is not enabled (Figure~\ref{fig:transmission-after-idle}). Furthermore, our results confirm our initial hypothesis that New CWV's more consistent bandwidth measurements (Figure~\ref{fig:throughput-clients}) translate to fewer representation switches (Figure \ref{fig:bitrate-switches}). Finally, we also observed that the more consistent measurements better match the available network conditions, allowing clients using New CWV to better predict the network's capabilities and request chunks that can be delivered on time (Figure \ref{fig:rebuffer-ratio}).
+
+%In Section \ref{sec:evaluation}, we saw that New CWV improves video stability by sacrificing some rendered picture quality for links with restrained capacities and multiple clients. We also, observed that when the there is sufficient link capacity to satisfy the most demanding representation, as expected the rendered quality is high and there are no stability issues. In other words, if the network resources are oversupplied with regard to the highest video requirement, there are no issues.  However, if the client is able to download at rate over the highest representation requirement, then whether the download happens 20\% or 50\% faster, makes no significant impact. The only real benefit is that the buffers at the client would fill quicker. Therefore, clients can potentially impose a maximum limit to their desired download rate and leave the rest of the link unused for other flows.
+% ^ not sure what this adds: might just need rewording
 
 %==================================================================================================
 \section{Related Work}
