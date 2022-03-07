@@ -428,7 +428,21 @@ We structure the remainder of this paper as follows. In Section~\ref{sec:backgro
 \section{Background}
 \label{sec:background}
 
-\todo{Hand-crafted figure showing how CWND changes during slow-start after idle}
+\begin{figure*}
+  \centering
+    \subfloat[New CWV]{
+      \includegraphics[width=.45\textwidth,]{figures/new_cwv.pdf}
+      \label{fig:newcwv}
+    }
+    \subfloat[No New CWV]{
+      \includegraphics[width=.45\textwidth]{figures/cwv.pdf}
+      \label{fig:cwv}
+    }
+
+    \caption{CWND Growth After Idle}
+    \label{fig:cwnd-growth-after-idle}
+\end{figure*}
+
 
 In HTTP adaptive streaming, a server provides pre-encoded video chunks at multiple bitrates, with the client, using a rate adaptation algorithm, determining the best representation to request at any given time. The goal of the client is to maximise QoE within the network's capacity. This is a challenge: different, often contradictory, QoE heuristics need be considered simultaneously~\cite{Seufert-2015-A-Survey-on-QoE-Dash}. 
 % Furthermore, since HTTP streaming uses mainly TCP to transfer the chunks, the bit rate selection's algorithm complexity rises.
@@ -444,15 +458,15 @@ While this approach works well~\todo{\cite{..}} for bulk, network-limited applic
 \begin{figure}[t!]
   \centering
     \subfloat[CWV]{
-      \includegraphics[width=.35\textwidth, keepaspectratio]{figures/lost_packets_vreno.pdf}
+      \includegraphics[width=.45\textwidth, keepaspectratio]{figures/lost_packets_vreno.pdf}
       \label{fig:transmission-after-idle-reno}
     }
     \\
     \subfloat[New CWV]{
-      \includegraphics[width=.35\textwidth, keepaspectratio]{figures/lost_packets_newcwv.pdf}
+      \includegraphics[width=.45\textwidth, keepaspectratio]{figures/lost_packets_newcwv.pdf}
       \label{fig:transmission-after-idle-newcwv}
     }
-    \caption{Resumption after an idle period \todo{different markers, larger font}}
+    \caption{Resumption after an idle period}
     \label{fig:transmission-after-idle}
 \end{figure}
 
@@ -512,28 +526,16 @@ Figure \ref{fig:throughput-clients} validates the behaviour where New CWV is ena
 However, our packet loss results (Figure \ref{fig:transmission-after-idle}) differ from those reported by \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}. They have observed similar loss values both when New CWV is enabled and when it is disabled. However, we observe that when disabled, connections lose more packets at a rate close to 1:10 compared to when enabled. Figure \ref{fig:transmission-after-idle}, shows the transfer patterns for a video chunk after an idle period. For readability, we have shown the slow-start period of a single video chunk download, but it applies to any such transfer. It can be seen that when New CWV is absent the majority of the packets lost are near the end of the slow-start period when the CWND size allows for transferring data beyond the link's capacity. In contrast, since New CWV only enters slow-start with an upper bound of its previously known window value, New CWV is able to enter congestion avoidance faster without losing packets as a result of a large CWND value. This explains the higher loss values that we have observed.
 
 
-\todo{Figure 3: remove FTTP, organize DSL, FTTC as in Fig 4 (landscape)}
-
   \begin{figure*}
     \centering
-    \subfloat[1 Client]{
-      \includegraphics[height=.18\paperheight]{figures/Throughput_1_clients.pdf}
-      \label{fig:throughput-clients-1}
+    \subfloat[DSL]{
+      \includegraphics[width=\textwidth]{figures/Throughput_DSL.pdf}
+      \label{fig:throughput-clients-DSL}
     }
     \\
-    \subfloat[2 Clients]{
-      \includegraphics[height=.18\paperheight]{figures/Throughput_2_clients.pdf}
-      \label{fig:throughput-clients-2}
-    }
-    \\
-    \subfloat[3 Clients]{
-      \includegraphics[height=.18\paperheight]{figures/Throughput_3_clients.pdf}
-      \label{fig:throughput-clients-3}
-    }
-    \\
-    \subfloat[5 Clients]{
-      \includegraphics[height=.18\paperheight]{figures/Throughput_5_clients.pdf}
-      \label{fig:throughput-clients-5}
+    \subfloat[FTTC]{
+      \includegraphics[width=\textwidth]{figures/Throughput_FTTC.pdf}
+      \label{fig:throughput-clients-FTTC}
     }
     \caption{Dash.js Client Throughput measurements}
     \label{fig:throughput-clients}
@@ -559,23 +561,12 @@ From our experiments so far, we conclude that New CWV achieves higher video stab
 So far, we have validated the throughput reports in \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv} (Fig \ref{fig:throughput-clients}) and observed higher packet loss for connections not using New CWV (Fig \ref{fig:transmission-after-idle}). Furthermore, the presented results confirm our initial hypothesis that New CWV's more persistent bandwidth measurements as observed in \ref{fig:throughput-clients} translate to more consistent representation switches, shown by the lower bit-rate derivative variance for New CWV connections (Figure \ref{fig:bitrate-switches}). Finally, we have also observed that the more consistent measurements better match the available network conditions, allowing clients using New CWV to better predict the network's capabilities and request chunks that can be timely delivered. This is shown by the lower stall time for New CWV connections (Figure \ref{fig:rebuffer-ratio}).
   
 
-\begin{figure*}
-    % \subfloat[Average Oscillations]{
-      \includegraphics[width=\textwidth]{figures/Average_Oscillations.pdf}
 
-      \caption{Average Bitrate Oscillations}
-      \label{fig:avg-oscillations}
-    % }
-\end{figure*}
-    % \\
-\begin{figure*}
-    % \subfloat[Rebuffer Ratio]{
-      \includegraphics[width=\textwidth, keepaspectratio]{figures/Rebuffer_Ratio.pdf}
-    % }
+\begin{figure}
+      \includegraphics[width=.45\textwidth, keepaspectratio]{figures/Rebuffer_Ratio.pdf}
     \caption{Rebuffer Ratio}
     \label{fig:rebuffer-ratio}
-    % \label{fig:QoE-metrics}
-\end{figure*}
+\end{figure}
 
 \begin{figure*}
   \centering
