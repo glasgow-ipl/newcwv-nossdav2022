@@ -14,6 +14,8 @@ bin/
 *.pdf
 *.png
 
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -148,6 +150,12 @@ tmp/
 
 # Paper figures
 doc/paper/figures/
+!doc/paper/figures/bitrate_derivative_distribution.pdf
+!doc/paper/figures/cwv.pdf
+!doc/paper/figures/new_cwb.pdf
+!doc/paper/figures/lost_packets_newcwv.pdf
+!doc/paper/figures/los_packets_reno.pdf
+!doc/paper/figures/Rebuffer_Ratio.pdf
 doc/paper/git-revision
 doc/paper/index.html
 # Tex build files
