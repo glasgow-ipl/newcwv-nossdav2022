@@ -451,7 +451,7 @@ Throughput-based rate adaptation algorithms use an estimate of the current netwo
 
 During off, or otherwise idle, periods, TCP's knowledge of the network's capacity becomes stale. To avoid sending with possibly unrepresentative window, the Congestion Window Validation~\cite{rfc2861-2000-padhye-congestion-window-validation} algorithm resets TCP's congestion window (\texttt{cwnd}) to its initial value and forces the connection to re-enter slow-start. This has become standard practice~\cite{rfc5681-congeston-control}, and is enabled by default in the latest stable Linux kernel (5.4).
 
-While this approach has been employed and worked for bulk, network-limited applications. It is unsuitable for rate-limited applications, including HTTP adaptive streaming~\cite{Esteban-2012-Interactions-HTTP-TCP}. To address this, New Congestion Window Validation~\cite{rfc7661-2015-fairhurst-new-cwnd-validation} has been proposed. Rather than resetting the congestion window and forcing slow-start, New CWV preserves the congestion window's state after an idle period has been observed and uses that as a prompt that it should enter congestion avoidance (Figure~\ref{fig:cwnd-growth-after-idle}). 
+While this approach has been employed and worked for bulk, network-limited applications. It is unsuitable for rate-limited applications, including HTTP adaptive streaming~\cite{Esteban-2012-Interactions-HTTP-TCP}. To address this, New Congestion Window Validation~\cite{rfc7661-2015-fairhurst-new-cwnd-validation} has been proposed. One of New CWV's modification is that rather than relying on loss to re-discover an appropriate CWND value after an idle period, New CWV preserves the CWND before the idle period as its slow-start threshold (ssthresh), i.e., it uses that value to later exit the slow-start phase (Figure~\ref{fig:cwnd-growth-after-idle}).
 
 \begin{figure}[t!]
   \centering
@@ -469,7 +469,7 @@ While this approach has been employed and worked for bulk, network-limited appli
     \label{fig:transmission-after-idle}
 \end{figure}
 
-Figure~\ref{fig:transmission-after-idle} shows the impact of New CWV when resuming sending after an idle period. As shown, with CWV (Figure~\ref{fig:transmission-after-idle-reno}), the connection re-enters slow-start, doubling its send window until loss is observed, while with New CWV (Figure~\ref{fig:transmission-after-idle-newcwv}) reuses the prior congestion window size and only doubles its rate during the first three bursts, at which point it reaches its old congestion window value and proceeds in a congestion avoidance phase. Overall, this results in fewer lost packets, and a more consistent and predictable sending rate.
+The impact of this concept is shown on Figure~\ref{fig:transmission-after-idle}. In it, New CWV uses previously set ssthresh value and leaves slow-start early. This results in New CWV connections not experiencing any packet loss (Figure~\ref{fig:transmission-after-idle-newcwv}), after reaching their set ssthresh value in the third burst. In contrast, if the same connection used CWV, the senders would not have a set ssthresh value and would see more packet loss as they were sending faster than was capable of carrying, forth burst and end of third (Figure~\ref{fig:transmission-after-idle-reno}). Overall, New CWV results in fewer lost packets, and a more consistent and predictable sending rate.
 
 New CWV has been shown to improve the \emph{transport} layer performance of rate-limited applications when compared with CWV~\cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}. It remains to show how this translates into \emph{application} layer performance, particularly since this is not guaranteed~\cite{Spiteri-2016-BOLA}. We hypothesise that New CWV will enable applications to obtain more consistent throughput estimates, and, in turn, improve the stability of throughput-based rate adaptation algorithms.
 
@@ -491,20 +491,6 @@ We first describe our experimental setup (\S\ref{sec:experimental-setup}), and u
 \label{sec:experimental-setup}
 
 
-\begin{figure*}[]
-  \centering
-  \subfloat[DSL]{
-    \includegraphics[width=\textwidth]{figures/Throughput_DSL.pdf}
-    \label{fig:throughput-clients-DSL}
-  }
-  \\
-  \subfloat[FTTC]{
-    \includegraphics[width=\textwidth]{figures/Throughput_FTTC.pdf}
-    \label{fig:throughput-clients-FTTC}
-  }
-  \caption{Dash.js Client Throughput measurements}
-  \label{fig:throughput-clients}
-\end{figure*}
 
 % Overview
 Our evaluation testbed consists of an emulated network in Mininet, running on Ubuntu 20.04, as shown in Figure \ref{fig:experimental-setup}. Both the server and its clients use TCP New Reno, which is widely used for video delivery~\cite{Mishra-2019-the-great-internet-tcp-congestion-control-census}. In addition, both are running a modified Linux Kernel (5.4.0). The modifications include a version of New CWV ported to that kernel, alongside RFC 3339~\cite{rfc3339-precise-timestamps}-compliant timestamps, to enable better event tracking, and more verbose \texttt{cwnd} event tracking. \texttt{tcpdump} is used at all endpoints to enable network activity to be reconstructed.
@@ -529,10 +515,31 @@ New CWV alters the CWND sizing behaviour, allowing it to recover faster, after a
 
 To evaluate our hypothesis, we collect two of the client's available bandwidth measurements. The first, the estimate obtained by dividing the number of received bytes over the download time. The second, the estimate that gets fed to the throughput algorithm. This value is a function of the current immediate measurement, and additional factors including, historical measurement data, ``safety" or smoothening factors, etc. In short, the former is the available bandwidth measurement as seen by end-point, and the latter is the input value to the algorithm. We call the former ``instantaneous" and the latter ``smoothened" estimate.
 
+\begin{figure*}[t!]
+  \centering
+  \subfloat[DSL]{
+    \includegraphics[width=\textwidth]{figures/Throughput_DSL.pdf}
+    \label{fig:throughput-clients-DSL}
+  }
+  \\
+  \subfloat[FTTC]{
+    \includegraphics[width=\textwidth]{figures/Throughput_FTTC.pdf}
+    \label{fig:throughput-clients-FTTC}
+  }
+  \caption{Dash.js Client Throughput measurements}
+  \label{fig:throughput-clients}
+\end{figure*}
 
 Figure \ref{fig:throughput-clients} validates the behaviour when New CWV is enabled reported by \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}. It also supports our initial hypothesis that the streaming clients measuring the available bandwidth will be able to obtain more consistent results since the amount of lost packets is reduced (Figure \ref{fig:transmission-after-idle}). It can be seen that the obtained measurements are more consistent and less variable by inspecting the Figure. For example, in all FTTC scenarios (Figure \ref{fig:throughput-clients-FTTC}), New CWV has a steeper gradient. This means that there were commutatively more measurements that fell into the same or close region, making the obtained measurements more consistent. It should also be noted that while the reported values were more consistent, they were also lower, compared to these achieved by CWV. This is since, CWV would always reach the maximum link capacity because of its longer slow-start phase. However, as we show later these higher values could lead the throughput algorithm into making bit-rate selection decisions that cannot be supported by the network layer.
 
-Our packet loss results (Figure \ref{..} \todo{Need a better packet loss metric here}) differ from those reported by \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}. They have observed similar loss values both when New CWV is enabled and when it is not. In comparison, we observe that when New CWV is not enabled, connections lose more packets at a rate close to 1:10 compared to when it is enabled. We already explained why this happens for chunked video delivery in Section \ref{sec:background}.
+\begin{figure}[t!]
+  \centering
+  \includegraphics[width=.45\textwidth]{figures/lost_packets.pdf}
+  \caption{Lost Packets DSL}
+  \label{fig:lost-packets}
+\end{figure}
+
+Our packet loss results (Figure \ref{fig:lost-packets}) differ from those reported by \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}. They have observed similar loss values both when New CWV is enabled and when it is not. In comparison, we observe that New CWV to consistently have much lower loss rates, compared to standard CWV. Reportedly, we see that New CWV connections have as high as 2\% less overall lost packets in the 1 and 5 client scenarios. We explain this difference with the scenario explained in Section \ref{sec:background} and shown on Figure \ref{fig:transmission-after-idle}.
 
 % To evaluate this hypothesis, we collect two of the client's available bandwidth measurements. The first is the raw estimate obtained by dividing the number of received bytes by time taken to download them. The second estimation, used by the application level adaptation algorithm, is a function of the raw bandwidth estimate, already explained, and additional factors, including historical values. We refer to the former as the \emph{instantaneous} and the latter the \emph{smoothed} estimate.
 
@@ -540,8 +547,6 @@ Our packet loss results (Figure \ref{..} \todo{Need a better packet loss metric 
 
 
 % However, our packet loss results (Figure \ref{fig:transmission-after-idle}) differ from those reported by Nazir et al.~\cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}. They observed similar loss values with and without New CWV enabled, while we observe that when disabled, connections lose more packets (at a rate close to 1:10) compared to when enabled. Figure \ref{fig:transmission-after-idle} shows the transfer patterns for a single video chunk after an idle period. It can be seen that when New CWV is disabled the majority of the packets lost are near the end of the slow-start period, when the \texttt{cwnd} size allows for transferring data beyond the link's capacity \todo{words, backref to sec 2 diagram}. In contrast, since New CWV enters slow-start with an upper bound of its previous window value, New CWV is able to enter congestion avoidance faster without losing packets as a result of a large \texttt{cwnd} value. This explains the higher loss values that we have observed.
-
-\todo{pick out concrete numbers, layer in}
 
 %--------------------------------------------------------------------------------------------------
 \subsection{Impact on Video QoE}
