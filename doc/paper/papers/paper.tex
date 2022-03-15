@@ -442,7 +442,7 @@ We structure the remainder of this paper as follows. In Section~\ref{sec:backgro
 \end{figure}
 
 
-In HTTP adaptive streaming, a server provides pre-encoded video chunks at multiple bitrates, with the client, using a rate adaptation algorithm, determining the best representation to request at any given time. The goal of the client is to maximise QoE within the network's capacity. This is a challenge: different, often contradictory, QoE heuristics need be considered simultaneously~\cite{Seufert-2015-A-Survey-on-QoE-Dash}. 
+In HTTP adaptive streaming, a server provides pre-encoded video chunks in different representations, each encoded at multiple bit rates, while the client, using a rate adaptation algorithm, determines the best representation to request at any given time. The goal of the client is to maximise QoE within the network's capacity. This is a challenge: different, often contradictory, QoE heuristics need be considered simultaneously~\cite{Seufert-2015-A-Survey-on-QoE-Dash}. 
 % Furthermore, since HTTP streaming uses mainly TCP to transfer the chunks, the bit rate selection's algorithm complexity rises.
 
 Throughput-based rate adaptation algorithms use an estimate of the current network conditions to determine the representation that should be requested. These algorithms require a stable and accurate estimate in order to perform well. However, the interaction between streaming video's on-off traffic pattern, and TCP's congestion control algorithms, can lead to significant fluctuations in throughput, impacting the performance of throughput-based adaptation algorithms.
