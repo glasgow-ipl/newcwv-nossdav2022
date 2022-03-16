@@ -319,7 +319,11 @@ ${FIGURES_FOLDER}/Throughput_clients_%.pdf:
 paper: ${FIGURES_APPLICATION} ${FIGURES_TRANSPORT} check-make git-revision $(TOOLS) $(PDF_FILES)
 
 # Build a paper without pre-building the figures
-paper-quick: check-make git-revision $(TOOLS) $(PDF_FILES)
+paper-quick: check-make git-revision $(TOOLS)
+	@sh   $(PAPER_BUILD)/bin/latex-build.sh doc/paper/papers/paper.tex
+	@perl $(PAPER_BUILD)/bin/check-for-duplicate-words.perl doc/paper/papers/paper.tex
+	@sh   $(PAPER_BUILD)/bin/check-for-todo.sh              doc/paper/papers/paper.tex
+	cp $(PAPER_BUILD)/papers/paper.pdf $(PAPER_BUILD)/papers/paper_$(shell cat $(PAPER_BUILD)/git-revision).pdf
 
 # =================================================================================================
 # Project specific rules to download files:
