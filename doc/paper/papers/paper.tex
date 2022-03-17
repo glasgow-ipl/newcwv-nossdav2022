@@ -1,289 +1,24 @@
-%==================================================================================================
-% LaTeX paper template - use as a starting point for structuring a research paper.
-%
-% Written by Colin Perkins (https://csperkins.org/)
-% 2002-2018
-%
-% To the extent possible under law, the author(s) have dedicated all copyright and
-% related and neighbouring rights to this software to the public domain worldwide.
-% This template is distributed without any warranty.
-%
-% You should have received a copy of the CC0 Public Domain Dedication along with
-% this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
-%
-% NOTE: The above Public Domain Dedication applies only to the LaTeX paper
-% template distributed from https://github.com/csperkins/project-template
-% in the file papers/example.tex. Unless explicitly stated, modifications 
-% or additions to that template are copyright by their respective authors.
-%==================================================================================================
-
-%==================================================================================================
-% General advice on technical writing:
-%  - George Gopen and Judith Swan, "The Science of Scientific Writing",
-%    American Scientist, Nov/Dec 1990. 
-%    http://www.americanscientist.org/issues/num2/the-science-of-scientific-writing/1
-%  - Stephen Pinker, "The Sense of Style: The Thinking Person's Guide to
-%    Writing in the 21st Century", Penguin, Sept 2014. ISBN 0525427929.
-%
-% The paper writing advice in the comments is derived from talks and articles
-% by Simon Peyton-Jones, Jim Kurose, Henning Schulzrinne, and Jim Bednar: 
-%  - http://research.microsoft.com/~simonpj/papers/giving-a-talk/giving-a-talk.htm
-%  - http://research.microsoft.com/~simonpj/papers/giving-a-talk/writing-a-paper-slides.pdf
-%  - http://gaia.cs.umass.edu/kurose/talks/top_10_tips_for_writing_a_paper.ppt
-%  - http://www-net.cs.umass.edu/kurose/writing/intro-style.html
-%  - http://www.cs.columbia.edu/~hgs/etc/writing-style.html
-%  - http://homepages.inf.ed.ac.uk/jbednar/writingtips.html
-%  - http://www.gabbay.org.uk/blog/paper-writing.html
-%  - http://homes.cs.washington.edu/~mernst/advice/write-technical-paper.html
-%  - http://dx.doi.org/10.1371/journal.pcbi.1005619
-%
-% LaTeX usage notes:
-%  - http://www.read.seas.harvard.edu/~kohler/latex.html
-%
-%==================================================================================================
-
-%==================================================================================================
-% The \documentclass{} macro specifies the overall style. For computer
-% networking papers, common options are:
-%
-%   \documentclass[twocolumn,a4paper]{article}  % Base LaTeX style
-%   \documentclass[conference]{IEEEtran}        % IEEE Conference
-%   \documentclass[10pt,sigconf]{acmart}        % ACM SIGCOMM conference
-%
-% The IEEE and ACM templates are included in the lib/tex/inputs directory,
-% but check for updates and use the version specified by the conference or
-% journal to which you're submitting.
-
 \documentclass[10pt,sigconf,anonymous]{acmart}
 \synctex=1
 \graphicspath{{figures/}{doc/paper/}}
-
-% The following packages are recommended, and should be available in most
-% standard LaTeX installations (or from https://www.ctan.org/). Note that 
-% the order in which packages are loaded is significant.
-
-% Basic extensions recommended for all LaTeX documents:
-%   nag        Warn about common problems with LaTeX files
-%   inputenc   Specify the character set used in .tex files
-%   babel      Language-specific typography and hyphenation
-%   microtype  Improved typography when generating PDF files
-
 \usepackage[l2tabu,orthodox]{nag}
 \usepackage[utf8x]{inputenc}
 \usepackage[british]{babel}
-\usepackage{ifpdf}
-\usepackage{longtable}
-\ifpdf
-  \usepackage{microtype}
-\fi
-
-% The AMS mathematics library greatly extends and improves mathematics
-% support in LaTeX (see http://ctan.org/pkg/amsmath for details). When
-%  preparing multi-line numbered equations, be sure to use:
-%
-%   \begin{align}
-%     ...
-%   \end{align} 
-%
-% rather than:
-%
-%   \begin{eqnarray}
-%     ...
-%   \end{eqnarray}.  
-%
-% when this package is loaded, to ensure they formatting is consistent
-% (see https://tug.org/pracjourn/2006-4/madsen/madsen.pdf for details).
-
-\usepackage{amsmath}
-\usepackage[all]{onlyamsmath}
-
-% Use Times, Helvetica, and Courier fonts, rather than Computer Modern:
-
-\makeatletter
-\@ifclassloaded{acmart}{
-  % The ACM article style sets the fonts internally
-}{
-  \usepackage{newtxtext}
-  \usepackage{newtxmath}
-}
-\makeatother
-
-% Add support for sub-figures within a figure, as follows:
-%
-%   \begin{figure}
-%     \centering
-%     \subfloat[caption for 1st subfloat]{
-%       \includegraphics{...}
-%       \label{...}
-%     }
-%     \\
-%     \subfloat[caption for 2nd subfloat]{
-%       \includegraphics{...}
-%       \label{...}
-%     }
-%     \caption{caption for entire figure}
-%     \label{...}
-%   \end{figure*}
-%
-% The subfig package obsoletes the older subfigure package, and is itself
-% deprecated in favour of the subcaption package. However, as of April 2015
-% subcaption doesn't work with ACM or IEEE style files (this is also the
-% reason for the [caption=false] option).
-
+\usepackage{microtype}
 \usepackage[caption=false]{subfig}
-
-% Improve formatting of tables. To produce nice looking tables:
-%
-%   - avoid vertical lines;
-%   - avoid double horizontal lines;
-%   - use horizontal lines above and below the table, and to separate the
-%     header from the body of the table, but not elsewhere; and
-%   - if in doubt, align columns to the left (columns of numbers should
-%     align to the decimal point)
-%
-% This translates to a tabular environment that looks something like the
-% following:
-%
-%   \begin{tabular}{lll}
-%     \toprule
-%        Header1 & Header2 & Header3 \\
-%     \midrule
-%        Line1   & ...     & ...     \\
-%        Line2   & ...     & ...     \\
-%        Line3   & ...     & ...     \\
-%        Line4   & ...     & ...     \\
-%     \bottomrule
-%   \end{tabular}
-
-\usepackage{booktabs}
-
-% Improve formatting for quote marks in verbatim mode:
-\usepackage{upquote}
-
-% Improve support for graphics:
 \usepackage{graphicx}
-
-% Add support for URLs using \url{...}. This formats the URL in typewriter
-% font, and makes it a hyperlink if the hyperref package is also loaded.
 \usepackage{url}
-
-% Add support for drawing packet headers. For instructions, see
-% http://ctan.org/tex-archive/macros/latex/contrib/bytefield
-\usepackage{bytefield}
-
-% Add support for typesetting program source code. You can either include
-% code in-line:
-%
-%   \begin{lstlisting}[language=Python]
-%   Source code goes here
-%   \end{lstlisting}
-%
-% or include a source file:
-%
-%  \lstinputlisting[language=Python]{source_filename.py}
-%
-% This package is highly customisable and supports a range of languages.
-% See package documentation at https://ctan.org/pkg/listings for details.
-\usepackage{listings}
-
-% Generated PDF files can include hyperlinks for URLs and cross-references
-% using the hyperref package. This package, however, can interact poorly
-% with others. Known issues include:
-%
-%  - Papers typeset without page numbers gives warnings of the form:
-%      "pdfTeX warning (ext4): destination with the same identifier 
-%      (name{page.}) has been already used, duplicate ignored".
-%    since hyperref tries to refer to the page number.
-%  - The algorithmic package uses the same line-numbering scheme for each
-%    algorithm, and can cause duplicate identifier warnings if you have
-%    several algorithms with line numbers (this may have been fixed with 
-%    recent versions of algorithmic...).
-%  - If using the algorithm package with hyperref, you need to load packages
-%    in the following order (see README in hyperref documentation):
-%      \usepackage{float}
-%      \usepackage{hyperref}
-%      \usepackage{algorithm}
-% For these reasons, hyperref is best to avoid for most papers, however if
-% needed, uncomment the following two lines:
-%  \usepackage{float}
-%  \usepackage{hyperref}
-
-% The algorithm package defines the algorithm environment. This is used in
-% the same way as the figure and table environments, to include algorithms
-% in a paper. The algpseudocode package provides the ability to typeset the
-% algorithms: http://ctan.org/tex-archive/macros/latex/contrib/algorithmicx
-\usepackage{algorithm}
-\usepackage{algpseudocode}
 \usepackage{color}
 
-
-% By default, LaTeX adds extra space after punctuation. The \frenchspacing
-% command disables this. This creates tighter looking, more even, text and
-% avoids inconsistencies if you forget to use '\ ' to suppress the spacing
-% after in-sentence punctuation.
 \frenchspacing
+\uchyph=0
 
-% Prevent hyphenation of all upper case words:
-%\uchyph=0
-
-% The ACM style needs \maketitle after the abstract, but the other styles
-% want it before; these macros hide the difference and are used below:
-\makeatletter
-\@ifclassloaded{acmart}{
-  \newcommand{\maketitleSTD}{}
-  \newcommand{\maketitleACM}{\maketitle}
-}{
-  \newcommand{\maketitleSTD}{\maketitle}
-  \newcommand{\maketitleACM}{}
-}
-\makeatother
-
-% Define a simple \todo{...} macro:
 \newcommand{\todo}[1]{\textbf{\textcolor{red}{To do: #1}}}
-
 \newcommand{\idea}[1]{{\textcolor{blue}{#1}}}
 
 %==================================================================================================
 \begin{document}
-% Specify the title of the document:
-
 \title{Does TCP's New Congestion Window Validation Improve HTTP Adaptive Streaming Performance?}
-
-% Specify the authors of the document. Unfortunately, there's no consistent
-% way to do this that works across the different document classes. 
-%
-% If using \documentclass{article}:
-%
-%   \author{
-%      A. N. Other\\University of Glasgow
-%   \and
-%      Colin Perkins\\University of Glasgow
-%   }
-%
-% If using \documentclass{IEEEtran}:
-%
-%   \author{
-%     \IEEEauthorblockN{A. N. Other}
-%     \IEEEauthorblockA{University of Glasgow}
-%   \and
-%     \IEEEauthorblockN{Colin Perkins}
-%     \IEEEauthorblockA{University of Glasgow}
-%   }
-%
-% If using \documentclass{acmart} add a block like the following per author:
-%
-%   \author{Colin Perkins}
-%   \orcid{0000-0002-3404-8964}
-%   \affiliation{
-%     \institution{University of Glasgow}
-%     \streetaddress{School of Computing Science}
-%     \city{Glasgow}
-%     \postcode{G12 8QQ}
-%     \country{UK}
-%   }
-%   \email{csp@csperkins.org}
-%
-% If you don't have an ORCID identifier, sign up for one at https://orcid.org
 
 \author{Mihail Yanev}
     \orcid{0000-0002-9814-1017}
@@ -320,32 +55,15 @@
   \email{csp@csperkins.org}
 
 
-
-% Specify metadata about the paper. Again, what is required depends on the
-% document class. If using \documentclass{acmart}, specify the following:
-%
-%   \acmYear{2018}
-%   \copyrightyear{2018}
-%   \setcopyright{acmcopyright}
-%   \acmConference{CoNEXT '18}{December 4--7, 2018}{Heraklion/Crete, Greece}
-%   \acmPrice{15.00}
-%   \acmDOI{10.1145/3284850.3284856}
-%   \acmISBN{978-1-4503-6082-1/18/12}
-%
-% The complete metadata is likely only available when preparing the final,
-% camera ready, version of the paper.
-
-\acmYear{2021}
-\copyrightyear{2021}
+\acmYear{2022}
+\copyrightyear{2022}
 \setcopyright{acmcopyright}
-\acmConference{NOSSDAV '22}
-% {December 4--7, 2018}{Heraklion/Crete, Greece}
+\acmConference{NOSSDAV '22}{June 17, 2022}{Athlone, Ireland}
 \acmPrice{15.00}
 % \acmDOI{10.1145/3284850.3284856}
 % \acmISBN{978-1-4503-6082-1/18/12}
 
 %==================================================================================================
-\maketitleSTD
 \begin{abstract}
   % Four sentences:
   %  - State the problem
@@ -356,9 +74,8 @@
 HTTP adaptive streaming video flows exhibit on-off behaviour, with frequent idle periods, which can interact poorly with TCP's congestion control algorithms. New Congestion Window Validation (New CWV) modifies TCP to allow senders to restart more quickly after certain idle periods. While previous work has shown that New CWV can improve \emph{transport} performance for streaming video, it remains to demonstrate that this translates to improved \emph{application} level performance, in terms of playback stability. In this paper, we show that enabling New CWV can reduce video re-buffering events by up to 4\%, and limit representation switches by 12\%, without any changes to existing rate adaptation algorithms.
 
 \end{abstract}
-\maketitleACM
-
-
+\maketitle
+%==================================================================================================
 \section{Introduction}
 \label{sec:introduction}
 
@@ -619,28 +336,18 @@ Future work might look at the performance of these algorithms under more dynamic
 % Acknowledge funding sources.
 
 %==================================================================================================
-% Set the bibliography style. Choose one of the following, depending on the
-% document class being used:
-%
-%   \bibliographystyle{abbrv}                 When using article class
-%   \bibliographystyle{IEEEtran}              When using IEEE style
-%   \bibliographystyle{ACM-Reference-Format}  When using ACM style
-
 \bibliographystyle{ACM-Reference-Format}
-
-% Load the bibliography file(s) for this paper:
 \bibliography{paper}
-
 %==================================================================================================
 % The following information gets written into the PDF file information:
 \ifpdf
   \pdfinfo{
-    /Title        (...)
-    /Author       (...)
-    /Subject      (...)
-    /Keywords     (..., ..., ...)
-    /CreationDate (D:20150827110616Z)
-    /ModDate      (D:20150827110616Z)
+    /Title        (Does TCP's New Congestion Window Validation Improve HTTP Adaptive Streaming Performance?)
+    /Author       (-)
+    /Subject      (Video Streaming)
+    /Keywords     (TCP, MPEG DASH, Congestion Window Validation)
+    /CreationDate (D:20220317130400Z)
+    /ModDate      (D:20220317130400Z)
     /Creator      (LaTeX)
     /Producer     (pdfTeX)
   }
