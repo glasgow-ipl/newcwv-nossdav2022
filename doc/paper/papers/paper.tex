@@ -145,15 +145,14 @@ We structure the remainder of this paper as follows. In Section~\ref{sec:backgro
 
 \begin{figure}
   \centering
-    \subfloat[New CWV]{
-      \includegraphics[width=.23\textwidth,]{figures/new_cwv.pdf}
-      \label{fig:newcwv}
-    }
     \subfloat[CWV]{
       \includegraphics[width=.23\textwidth]{figures/cwv.pdf}
       \label{fig:cwv}
     }
-
+    \subfloat[New CWV]{
+      \includegraphics[width=.23\textwidth,]{figures/new_cwv.pdf}
+      \label{fig:newcwv}
+    }
     \caption{Illustration of CWND Growth After Idle}
     \label{fig:cwnd-growth-after-idle}
 \end{figure}
@@ -180,16 +179,15 @@ While this approach has been employed and works for bulk, network-limited applic
 
 \begin{figure}[t!]
   \centering
+  \subfloat[CWV]{
+    \includegraphics[width=.45\textwidth, keepaspectratio]{figures/lost_packets_vreno.pdf}
+    \label{fig:transmission-after-idle-reno}
+  }
+  \\
     \subfloat[New CWV]{
       \includegraphics[width=.45\textwidth, keepaspectratio]{figures/lost_packets_newcwv.pdf}
       \label{fig:transmission-after-idle-newcwv}
     }
-    \\
-    \subfloat[CWV]{
-      \includegraphics[width=.45\textwidth, keepaspectratio]{figures/lost_packets_vreno.pdf}
-      \label{fig:transmission-after-idle-reno}
-    }
-
     \caption{Resumption after an idle period}
     \label{fig:transmission-after-idle}
 \end{figure}
