@@ -22,6 +22,8 @@ CLIENTS = 1 2 3 5
 
 MULTI_LOGS = $(foreach client, ${CLIENTS}, $(foreach link, ${LINKS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, ${RUNS}, ${ROOT}/logs/clients/${client}/${link}/${run_instance}_${alg}/nginx_access.log))))
 
+MULTI_LOGS_DYNAMIC = $(foreach client, ${CLIENTS}, $(foreach link, ${LINKS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, ${RUNS}, ${ROOT}/logs/clients/dynamic/${client}/${link}/${run_instance}_${alg}/nginx_access.log))))
+
 # Encoding video
 
 #setup
@@ -205,6 +207,25 @@ logs: ${LOGS}
 ${ROOT}/logs:
 	mkdir ${ROOT}/logs
 
+${ROOT}/logs/clients/dynamic/%_vreno/nginx_access.log:
+	$(eval SIM_DIR = $(@D))
+	$(eval LINK_TYPE = $(shell basename `dirname $(@D)`))
+	$(eval CLIENT_NUM = $(shell basename $(shell dirname `dirname $(@D)`)))
+	echo "SIM_DIR=${SIM_DIR}"
+	echo "LINK_TYPE=${LINK_TYPE}"
+	echo "CLIENTS=${CLIENT_NUM}"
+	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg vreno --network_model /vagrant/network_models/links/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg abrDynamic --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
+
+${ROOT}/logs/clients/dynamic/%_newcwv/nginx_access.log:
+	$(eval SIM_DIR = $(@D))
+	$(eval LINK_TYPE = $(shell basename `dirname $(@D)`))
+	$(eval CLIENT_NUM = $(shell basename $(shell dirname `dirname $(@D)`)))
+	echo "SIM_DIR=${SIM_DIR}"
+	echo "LINK_TYPE=${LINK_TYPE}"
+	echo "CLIENTS=${CLIENT_NUM}"
+	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/links/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg abrDynamic --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
+
+
 ${ROOT}/logs/clients/%_vreno/nginx_access.log:
 	$(eval SIM_DIR = $(@D))
 	$(eval LINK_TYPE = $(shell basename `dirname $(@D)`))
@@ -226,7 +247,7 @@ ${ROOT}/logs/clients/%_newcwv/nginx_access.log:
 test: ${TEST_LOGS}
 	echo "Raaan test succcesssfullly"
 
-multi_log: ${MULTI_LOGS}
+multi_log: ${MULTI_LOGS} ${MULTI_LOGS_DYNAMIC}
 	echo "Completed"
 
 
@@ -293,7 +314,7 @@ ${FIGURES_FOLDER}/Average_Oscillations.pdf: ${RAW_DATA} ${ROOT}/scripts/analytic
 
 REBUFFER_RATIO_LINKS = DSL
 ${FIGURES_FOLDER}/Rebuffer_Ratio.pdf: ${RAW_DATA} ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py
-	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${REBUFFER_RATIO_LINKS} --target "rebuffer ratio" --clients_combined ${CLIENTS} --extension pdf
+	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs vreno newcwv --links ${REBUFFER_RATIO_LINKS} --target "rebuffer ratio" --clients_combined ${CLIENTS} --extension pdf
 
 ${FIGURES_FOLDER}/Throughput_%_clients.pdf: ${FIGURES_FOLDER}/tmp/%/parsed_data.json ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${LINKS} --target "throughput" --clients_combined ${CLIENTS} --clients $* --extension pdf
