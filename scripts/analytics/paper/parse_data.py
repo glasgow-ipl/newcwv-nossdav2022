@@ -27,30 +27,18 @@ def parse_data(root, links, algs, numbers):
     thr_safe = []
     delays = []
 
-    drop_data = {}
-    
+    dropped_packets = {link: {alg: {run: {} for run in numbers} for alg in algs} for link in links}
+
     for link in links:
         for alg in algs:
             for number in numbers:
                 path = os.path.join(root, link, f'{number}_{alg}')
+                server_packets = count_lost_packets.count_all_packets(path)
 
-                # client_aggregate = drop_data.get(number, {})
-                link_aggregate = drop_data.get(link, {})
-                alg_aggregate = link_aggregate.get(alg, {i: 0 for i in range(700)})
-
-                dropped_packets_server = count_lost_packets.count_lost_packets(path)
-                for id_seq, (dropped_timestamps, occurence) in dropped_packets_server.items():
-                    # the first _occurence_ packet were lost, record them with their timestamps
-                    for i, relative_time in enumerate(dropped_timestamps):
-                        if i == occurence:
-                            break
-                        drop_count = alg_aggregate.get(relative_time, 0)
-                        alg_aggregate[relative_time] = drop_count + 1
+                all_packets = len(server_packets)
+                num_lost_packets = sum([1 for _, (_, occurence) in server_packets.items() if occurence != 0])
                 
-                link_aggregate[alg] = alg_aggregate
-                # client_aggregate[link] = link_aggregate
-                drop_data[link] = link_aggregate
-                
+                dropped_packets[link][alg][int(number)] = {'all': all_packets, 'lost': num_lost_packets}
 
                 access_log = os.path.join(path, 'nginx_access.log')
                 quality_aggregate = parse_access_log.get_qualities(access_log)
@@ -114,7 +102,7 @@ def parse_data(root, links, algs, numbers):
         metrics[link] = tmp
         tmp = {}
 
-    metrics['dropped_packets'] = drop_data
+    metrics['dropped_packets'] = dropped_packets
     metrics['clients'] = len(metric_files)
 
     tmp_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp', str(metrics['clients']))
