@@ -563,72 +563,35 @@ def plot_data_multiple(*, links, algs, extension = 'png', clients=0, target='all
     if target.lower() == 'rebuffer ratio' or target.lower() == 'all':
         plot_rebuffer_ratio(metric_name='Rebuffer Ratio', data=data_aggregate, links=links, algs=algs, extension=extension, format_percent=True, y_label='Rebuffer Ratio')
     if target.lower() == 'bitrate_derivatives':
-        #TODO: Data parsing and plotting happening at the same time. Need to separate them
-        plot_bitrate_distribution(log_root='/vagrant/logs/clients', links=links, client_runs=clients_combined, extension=extension)
+        plot_bitrate_distribution(links=links, client_runs=clients_combined, algs=algs, extension=extension)
     if target.lower() == 'throughput agg' or target.lower() == 'all':
         plot_cdf_multiple_link_agg(metric_names=['Throughput Precise', 'Throughput Safe'], data=data_aggregate, links=links, algs=algs, clients=clients_combined, extension=extension, link_agg=link_agg)
 
 
-def plot_bitrate_distribution(log_root, client_runs, links, extension):
-    quality_indexes = {k: i for i, k in enumerate(QUALITY_TO_BPS_3S_IETF.keys())}
-    quality_distribution_alg_link_clients = {}
-
-    clients = os.listdir(log_root)
-    for num_clients in clients:
-        client_root = os.path.join(log_root, num_clients)
-        links = sorted(os.listdir(client_root))
-        quality_distribution_alg_link = quality_distribution_alg_link_clients.get(num_clients, {})
-        for link in links:
-            link_root = os.path.join(client_root, link)
-            runs = sorted(os.listdir(link_root))
-            quality_distribution_alg = quality_distribution_alg_link.get(link, {})
-            for run in runs:
-                access_log = os.path.join(link_root, run, 'nginx_access.log')
-                quality_report = parse_access_log.get_qualities(access_log)
-                if 'newcwv' in run:
-                    quality_distribution = quality_distribution_alg.get('newcwv', {})
-                else:
-                    quality_distribution = quality_distribution_alg.get('reno', {})
-
-                for _client, report in quality_report.items():
-                    items = list(report.items())
-                    previous = quality_indexes[items[0][1][1]]
-                    for _chunk, (_time, quality) in items[1:]:
-                        current = quality_indexes[quality] 
-                        offset =  current - previous
-                        previous = current
-                        quality_distribution[offset] = quality_distribution.get(offset, 0) + 1
-            
-                if 'newcwv' in run:
-                    quality_distribution_alg['newcwv'] = quality_distribution
-                else:
-                    quality_distribution_alg['reno'] = quality_distribution
-
-            quality_distribution_alg_link[link] = quality_distribution_alg
-
-        quality_distribution_alg_link_clients[num_clients] = quality_distribution_alg_link
-
-
-    fig, axs = plt.subplots(1, 4)
+def plot_bitrate_distribution(client_runs, links, algs, extension):
+    ## Plotting
+    fig, axs = plt.subplots(len(links), 4)
     axs_list = []
-    client_runs = ['1', '2', '3', '5']
-    links = ['DSL']
-    algs = ["reno", "newcwv"]
     WIDTH = .4
     y_min = 100
     y_max = 0
     for i, client in enumerate(client_runs):
+        data_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp', str(client), 'quality_distribution.json')
+        with open(data_path) as f:
+            quality_distribution_alg_link = json.load(f)
+
         for j, link in enumerate(links):
             y_lim = 0
             for k, alg in enumerate(algs):
                 # plot_dic = {k: v for k, v in quality_distribution_alg_link_clients[client][link][alg].items() if k != 0}
-                plot_dic = quality_distribution_alg_link_clients[client][link][alg]
+                plot_dic = quality_distribution_alg_link[link][alg]
+                plot_dic = {int(offset): occ for offset, occ in plot_dic.items()}
                 if plot_dic:
                     labels, heights = zip(*plot_dic.items())
                 else:
                     labels = []
                     heights = []
-                all_elements = sum(quality_distribution_alg_link_clients[client][link][alg].values())
+                all_elements = sum(quality_distribution_alg_link[link][alg].values())
                 positions = np.array(labels)
                 if k == 0:
                     positions = positions + WIDTH / 2
@@ -715,7 +678,7 @@ def main():
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
-        plot_bitrate_distribution('/vagrant/logs/clients')
+        plot_bitrate_distribution(client_runs=[1, 2, 3, 5], links=['DSL'], algs=['reno', 'newcwv'], extension='png')
         exit()
         main()
         sys.exit(0)

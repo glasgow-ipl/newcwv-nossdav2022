@@ -112,3 +112,45 @@ def parse_data(root, links, algs, numbers):
         json.dump(metrics, f, indent=4)
 
     print(f"Parsed data saved {tmp_path}")
+
+    quality_indexes = {k: i for i, k in enumerate(QUALITY_TO_BPS_3S_IETF.keys())}
+    quality_distribution_alg_link = {}
+
+    for link in links:
+        for alg in algs:
+            quality_distribution_alg = quality_distribution_alg_link.get(link, {})
+            for number in numbers:
+                path = os.path.join(root, link, f'{number}_{alg}')
+                access_log = os.path.join(path, 'nginx_access.log')
+                quality_report = parse_access_log.get_qualities(access_log)
+                if alg == 'newcwv':
+                    quality_distribution = quality_distribution_alg.get('newcwv', {})
+                else:
+                    quality_distribution = quality_distribution_alg.get('reno', {})
+
+
+                for _client, report in quality_report.items():
+                    items = list(report.items())
+                    previous = quality_indexes[items[0][1][1]]
+                    for _chunk, (_time, quality) in items[1:]:
+                        current = quality_indexes[quality] 
+                        offset =  current - previous
+                        previous = current
+                        quality_distribution[offset] = quality_distribution.get(offset, 0) + 1
+            
+                if alg == 'newcwv':
+                    quality_distribution_alg['newcwv'] = quality_distribution
+                else:
+                    quality_distribution_alg['reno'] = quality_distribution
+                
+
+            quality_distribution_alg_link[link] = quality_distribution_alg
+
+
+    tmp_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp', str(metrics['clients']))
+    os.makedirs(tmp_path, exist_ok=True)
+    tmp_path = os.path.join(tmp_path, 'quality_distribution.json')
+    with open(tmp_path, 'w') as f:
+        json.dump(quality_distribution_alg_link, f, indent=4)
+
+    print(f"Parsed data saved {tmp_path}")
