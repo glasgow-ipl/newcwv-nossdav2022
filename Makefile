@@ -291,6 +291,8 @@ RAW_DATA = ${foreach client, ${CLIENTS}, ${FIGURES_FOLDER}/tmp/${client}/parsed_
 
 BITRATE_DERIVATIVE_DATA = ${foreach client, ${CLIENTS}, ${FIGURES_FOLDER}/tmp/${client}/quality_distribution.json}
 
+REBUFFER_RATIO_DATA = ${foreach client, ${CLIENTS}, ${FIGURES_FOLDER}/tmp/${client}/rebuffer_ratio.json}
+
 # Tools to build before the PDF files. This is a list of executable files in
 # the bin/ directory:
 TOOLS = 
@@ -299,14 +301,18 @@ FIGURES_TRANSPORT = $(foreach client, ${CLIENTS},  ${FIGURES_FOLDER}/Throughput_
 
 FIGURES_TRANSPORT = ${FIGURES_FOLDER}/Throughput_clients_DSL.pdf ${FIGURES_FOLDER}/Throughput_clients_FTTC.pdf ${FIGURES_FOLDER}/lost_packets_vreno.pdf ${FIGURES_FOLDER}/lost_packets_newcwv.pdf ${FIGURES_FOLDER}/lost_packets.pdf
 
-FIGURES_APPLICATION = ${FIGURES_FOLDER}/Average_Bitrate.pdf ${FIGURES_FOLDER}/Average_Oscillations.pdf ${FIGURES_FOLDER}/Rebuffer_Ratio.pdf ${FIGURES_FOLDER}/bitrate_derivative_distribution.pdf
+FIGURES_APPLICATION = ${FIGURES_FOLDER}/Rebuffer_Ratio.pdf ${FIGURES_FOLDER}/bitrate_derivative_distribution.pdf
+
+
+${FIGURES_FOLDER}/tmp/%/rebuffer_ratio.json: ${ROOT}/scripts/analytics/paper/parse_rebuffer_ratio.py
+	/usr/bin/python3 /vagrant/scripts/analytics/paper/parse_rebuffer_ratio.py --root /vagrant/logs/clients/$* --algs newcwv vreno --runs ${shell seq 1 10} --links ${LINKS}
 
 #TODO: Logs as a dependency here
 # ${ROOT}/scripts/analytics/paper/plot_driver.py
 ${FIGURES_FOLDER}/tmp/%/parsed_data.json: ${ROOT}/scripts/analytics/paper/parse_data.py ${ROOT}/scripts/analytics/paper/count_lost_packets.py ${ROOT}/scripts/analytics/parse_access_log.py ${ROOT}/scripts/analytics/parse_dash_log.py
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --root /vagrant/logs/clients/$* --algs newcwv vreno --runs ${shell seq 1 10} --links ${LINKS} --parse 1 --target none
 
-${FIGURES_FOLDER}/tmp/${client}/quality_distribution.json: ${ROOT}/scripts/analytics/paper/parse_data.py ${ROOT}/scripts/analytics/parse_access_log.py ${MULTI_LOGS}
+${FIGURES_FOLDER}/tmp/%/quality_distribution.json: ${ROOT}/scripts/analytics/paper/parse_data.py ${ROOT}/scripts/analytics/parse_access_log.py ${MULTI_LOGS}
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --root /vagrant/logs/clients/$* --algs newcwv vreno --runs ${shell seq 1 10} --links ${LINKS} --parse 1 --target none
 
 #TODO need to fix parsed data dependency to allow for more clients
@@ -318,7 +324,7 @@ ${FIGURES_FOLDER}/Average_Oscillations.pdf: ${RAW_DATA} ${ROOT}/scripts/analytic
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${AVERAGE_OSCILLATIONS_LINKS} --target "average oscillations" --clients_combined ${CLIENTS} --extension pdf
 
 REBUFFER_RATIO_LINKS = DSL
-${FIGURES_FOLDER}/Rebuffer_Ratio.pdf: ${RAW_DATA} ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py
+${FIGURES_FOLDER}/Rebuffer_Ratio.pdf: ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py ${REBUFFER_RATIO_DATA}
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs vreno newcwv --links ${REBUFFER_RATIO_LINKS} --target "rebuffer ratio" --clients_combined ${CLIENTS} --extension pdf
 
 ${FIGURES_FOLDER}/Throughput_%_clients.pdf: ${FIGURES_FOLDER}/tmp/%/parsed_data.json ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py

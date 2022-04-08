@@ -540,9 +540,9 @@ def plot_data_multiple(*, links, algs, extension = 'png', clients=0, target='all
     data_aggregate = {}
     for c in clients_combined:
         tmp_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp', c)
-        tmp_path = os.path.join(tmp_path, 'parsed_data.json')
-        print(f"Using file {tmp_path}")
-        with open(tmp_path, 'r') as f:
+        tmp_path_data = os.path.join(tmp_path, 'parsed_data.json')
+        print(f"Using file {tmp_path_data}")
+        with open(tmp_path_data, 'r') as f:
             metrics = json.load(f)
             print("Parsed data loaded")
         data_aggregate[c] = metrics
@@ -560,8 +560,19 @@ def plot_data_multiple(*, links, algs, extension = 'png', clients=0, target='all
     if target.lower() == 'average oscillations' or target.lower() == 'all':
         plot_boxplot_multiple(metric_name='Average Oscillations', data=data_aggregate, links=links, algs=algs, extension=extension, y_label="Mbps")
         plot_line_errorbar(metric_name='Average Oscillations', data=data_aggregate, links=links, algs=algs, extension=extension, y_label="Mbps")
+   
     if target.lower() == 'rebuffer ratio' or target.lower() == 'all':
-        plot_rebuffer_ratio(metric_name='Rebuffer Ratio', data=data_aggregate, links=links, algs=algs, extension=extension, format_percent=True, y_label='Rebuffer Ratio')
+        rebuffer_data_aggregate = {}
+        base_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp')
+        for c in clients_combined:
+            rebuffer_data_path = os.path.join(base_path, c,'rebuffer_ratio.json')
+            with open(rebuffer_data_path) as f:
+                rebuffer_data = json.load(f)
+            
+            rebuffer_data_aggregate[c] = rebuffer_data
+        
+        plot_rebuffer_ratio(metric_name='Rebuffer Ratio', data=rebuffer_data_aggregate, links=links, algs=algs, extension=extension, format_percent=True, y_label='Rebuffer Ratio')
+   
     if target.lower() == 'bitrate_derivatives':
         plot_bitrate_distribution(links=links, client_runs=clients_combined, algs=algs, extension=extension)
     if target.lower() == 'throughput agg' or target.lower() == 'all':
