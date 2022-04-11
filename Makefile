@@ -214,7 +214,6 @@ logs: ${LOGS}
 ${ROOT}/logs:
 	mkdir ${ROOT}/logs
 
-
 ${ROOT}/logs/clients/1/abr/abrThroughput/%/nginx_access.log:
 	$(eval SIM_DIR = $(@D))
 	$(eval CC_ALG = $(shell echo $(shell basename $(@D)) | cut -d'_' -f2))
@@ -222,6 +221,10 @@ ${ROOT}/logs/clients/1/abr/abrThroughput/%/nginx_access.log:
 	$(eval ABR_ALG = $(shell basename $(shell dirname `dirname $(@D)`)))
 	$(eval CLIENT_NUM = $(shell basename $(shell dirname $(shell dirname $(shell dirname `dirname $(@D)`)))))
 	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir ${SIM_DIR} --cong_alg ${CC_ALG} --network_model /vagrant/network_models/custom_models/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg ${ABR_ALG} --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
+
+
+varying_rtt: ${MULTI_LOG_VARYING}
+	echo "Done"
 
 
 ${ROOT}/logs/clients/dynamic/%_vreno/nginx_access.log:
