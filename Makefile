@@ -24,6 +24,13 @@ MULTI_LOGS = $(foreach client, ${CLIENTS}, $(foreach link, ${LINKS}, $(foreach a
 
 MULTI_LOGS_DYNAMIC = $(foreach client, ${CLIENTS}, $(foreach link, ${LINKS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, ${RUNS}, ${ROOT}/logs/clients/dynamic/${client}/${link}/${run_instance}_${alg}/nginx_access.log))))
 
+BWS = 10
+RTTS = $(shell seq 20 10 200)
+
+
+MULTI_LOG_VARYING = $(foreach client, ${CLIENTS}, $(foreach bw, ${BWS}, $(foreach rtt, ${RTTS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 3), ${ROOT}/logs/clients/${client}/abr/abrThroughput/${bw}_${rtt}/${run_instance}_${alg}/nginx_access.log)))))
+
+
 # Encoding video
 
 #setup
@@ -207,6 +214,28 @@ logs: ${LOGS}
 ${ROOT}/logs:
 	mkdir ${ROOT}/logs
 
+# foo:
+# 	cd ${ROOT}/scripts && sudo python3 run_clean.py sudo python mn_script.py --log_dir $(@D) --cong_alg vreno --network_model /vagrant/network_models/links/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg abrDynamic --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
+
+#/vagrant/logs/clients/5/abr/throughput/10_200/_newcwv/nginx_access.log
+
+${ROOT}/logs/clients/1/abr/abrThroughput/%/nginx_access.log:
+	$(eval SIM_DIR = $(@D))
+	$(eval CC_ALG = $(shell echo $(shell basename $(@D)) | cut -d'_' -f2))
+	$(eval LINK_TYPE = $(shell basename `dirname $(@D)`))
+	$(eval ABR_ALG = $(shell basename $(shell dirname `dirname $(@D)`)))
+	$(eval CLIENT_NUM = $(shell basename $(shell dirname $(shell dirname $(shell dirname `dirname $(@D)`)))))
+	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir ${SIM_DIR} --cong_alg ${CC_ALG} --network_model /vagrant/network_models/custom_models/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg ${ABR_ALG} --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
+
+
+varying_rtt: ${MULTI_LOG_VARYING}
+	echo "Done"
+
+foo:
+	echo ${MULTI_LOG_VARYING}
+
+
+
 ${ROOT}/logs/clients/dynamic/%_vreno/nginx_access.log:
 	$(eval SIM_DIR = $(@D))
 	$(eval LINK_TYPE = $(shell basename `dirname $(@D)`))
@@ -215,6 +244,7 @@ ${ROOT}/logs/clients/dynamic/%_vreno/nginx_access.log:
 	echo "LINK_TYPE=${LINK_TYPE}"
 	echo "CLIENTS=${CLIENT_NUM}"
 	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg vreno --network_model /vagrant/network_models/links/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg abrDynamic --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
+
 
 ${ROOT}/logs/clients/dynamic/%_newcwv/nginx_access.log:
 	$(eval SIM_DIR = $(@D))
@@ -235,6 +265,7 @@ ${ROOT}/logs/clients/%_vreno/nginx_access.log:
 	echo "CLIENTS=${CLIENT_NUM}"
 	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg vreno --network_model /vagrant/network_models/links/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
 
+
 ${ROOT}/logs/clients/%_newcwv/nginx_access.log:
 	$(eval SIM_DIR = $(@D))
 	$(eval LINK_TYPE = $(shell basename `dirname $(@D)`))
@@ -244,8 +275,10 @@ ${ROOT}/logs/clients/%_newcwv/nginx_access.log:
 	echo "CLIENTS=${CLIENT_NUM}"
 	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/links/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
 
+
 test: ${TEST_LOGS}
 	echo "Raaan test succcesssfullly"
+
 
 multi_log: ${MULTI_LOGS} ${MULTI_LOGS_DYNAMIC}
 	echo "Completed"
