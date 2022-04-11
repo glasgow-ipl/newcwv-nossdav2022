@@ -214,10 +214,6 @@ logs: ${LOGS}
 ${ROOT}/logs:
 	mkdir ${ROOT}/logs
 
-# foo:
-# 	cd ${ROOT}/scripts && sudo python3 run_clean.py sudo python mn_script.py --log_dir $(@D) --cong_alg vreno --network_model /vagrant/network_models/links/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg abrDynamic --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
-
-#/vagrant/logs/clients/5/abr/throughput/10_200/_newcwv/nginx_access.log
 
 ${ROOT}/logs/clients/1/abr/abrThroughput/%/nginx_access.log:
 	$(eval SIM_DIR = $(@D))
@@ -226,14 +222,6 @@ ${ROOT}/logs/clients/1/abr/abrThroughput/%/nginx_access.log:
 	$(eval ABR_ALG = $(shell basename $(shell dirname `dirname $(@D)`)))
 	$(eval CLIENT_NUM = $(shell basename $(shell dirname $(shell dirname $(shell dirname `dirname $(@D)`)))))
 	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir ${SIM_DIR} --cong_alg ${CC_ALG} --network_model /vagrant/network_models/custom_models/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg ${ABR_ALG} --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
-
-
-varying_rtt: ${MULTI_LOG_VARYING}
-	echo "Done"
-
-foo:
-	echo ${MULTI_LOG_VARYING}
-
 
 
 ${ROOT}/logs/clients/dynamic/%_vreno/nginx_access.log:
