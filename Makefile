@@ -5,6 +5,8 @@ MPD_LOCATION=data/ietf/bbb.mpd
 OUT_DIR=${ROOT}/data
 IGNORE_LINK_LOSS=0
 
+MPD_LOCATION_NEWCWV=data/newcwv/bbb.mpd
+
 REPEAT = 10
 RUNS = $(shell seq 1 ${REPEAT})
 ALGS = vreno newcwv reno
@@ -27,9 +29,12 @@ MULTI_LOGS_DYNAMIC = $(foreach client, ${CLIENTS}, $(foreach link, ${LINKS}, $(f
 BWS = 10
 RTTS = $(shell seq 20 10 200)
 
+# Client loop should be ${CLIENTS}
+MULTI_LOG_VARYING = $(foreach client, $(shell seq 1 1), $(foreach bw, ${BWS}, $(foreach rtt, ${RTTS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 3), ${ROOT}/logs/clients/${client}/abr/abrThroughput/${bw}_${rtt}/${run_instance}_${alg}/nginx_access.log)))))
 
-MULTI_LOG_VARYING = $(foreach client, ${CLIENTS}, $(foreach bw, ${BWS}, $(foreach rtt, ${RTTS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 3), ${ROOT}/logs/clients/${client}/abr/abrThroughput/${bw}_${rtt}/${run_instance}_${alg}/nginx_access.log)))))
-
+RTT_NEWCWV = 400
+BW_NEWCWV = 1
+LOGS_NEWCWV = $(foreach client, $(shell seq 1 1), $(foreach bw, ${BW_NEWCWV}, $(foreach rtt, ${RTT_NEWCWV}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 3), ${ROOT}/logs/newcwv/clients/${client}/abr/abrThroughput/${bw}_${rtt}/${run_instance}_${alg}/nginx_access.log)))))
 
 # Encoding video
 
@@ -43,6 +48,57 @@ ${OUT_DIR}/bbb_sunflower_2160p_60fps_normal.mp4:
 ################
 # Encoder
 ################
+
+####### NewCWV
+
+#encoder 200 3s
+${OUT_DIR}/newcwv/200/bbb_200_60.mp4: ${OUT_DIR}/bbb_sunflower_2160p_60fps_normal.mp4 ${ROOT}/scripts/video_processing/encoder.py ${ROOT}/scripts/video_processing/video_driver.py
+	@echo 'running 200 encoder'
+	python3 ${ROOT}/scripts/video_processing/video_driver.py --prefix ${OUT_DIR}/newcwv --action encode --source ${OUT_DIR}/bbb_sunflower_2160p_60fps_normal.mp4 --extra_arg 0 --segment_duration 3 --newcwv
+	@echo 'Encoder executed'
+
+
+#encoder 200 3s
+${OUT_DIR}/newcwv/250/bbb_250_60.mp4: ${OUT_DIR}/bbb_sunflower_2160p_60fps_normal.mp4 ${ROOT}/scripts/video_processing/encoder.py ${ROOT}/scripts/video_processing/video_driver.py
+	@echo 'running 250 encoder'
+	python3 ${ROOT}/scripts/video_processing/video_driver.py --prefix ${OUT_DIR}/newcwv --action encode --source ${OUT_DIR}/bbb_sunflower_2160p_60fps_normal.mp4 --extra_arg 1 --segment_duration 3 --newcwv
+	@echo 'Encoder executed'
+
+
+#encoder 200 3s
+${OUT_DIR}/newcwv/300/bbb_300_60.mp4: ${OUT_DIR}/bbb_sunflower_2160p_60fps_normal.mp4 ${ROOT}/scripts/video_processing/encoder.py ${ROOT}/scripts/video_processing/video_driver.py
+	@echo 'running 300 encoder'
+	python3 ${ROOT}/scripts/video_processing/video_driver.py --prefix ${OUT_DIR}/newcwv --action encode --source ${OUT_DIR}/bbb_sunflower_2160p_60fps_normal.mp4 --extra_arg 2 --segment_duration 3 --newcwv
+	@echo 'Encoder executed'
+
+
+#encoder 200 3s
+${OUT_DIR}/newcwv/400/bbb_400_60.mp4: ${OUT_DIR}/bbb_sunflower_2160p_60fps_normal.mp4 ${ROOT}/scripts/video_processing/encoder.py ${ROOT}/scripts/video_processing/video_driver.py
+	@echo 'running 400 encoder'
+	python3 ${ROOT}/scripts/video_processing/video_driver.py --prefix ${OUT_DIR}/newcwv --action encode --source ${OUT_DIR}/bbb_sunflower_2160p_60fps_normal.mp4 --extra_arg 3 --segment_duration 3 --newcwv
+	@echo 'Encoder executed'
+
+
+#encoder 200 3s
+${OUT_DIR}/newcwv/500/bbb_500_60.mp4: ${OUT_DIR}/bbb_sunflower_2160p_60fps_normal.mp4 ${ROOT}/scripts/video_processing/encoder.py ${ROOT}/scripts/video_processing/video_driver.py
+	@echo 'running 500 encoder'
+	python3 ${ROOT}/scripts/video_processing/video_driver.py --prefix ${OUT_DIR}/newcwv --action encode --source ${OUT_DIR}/bbb_sunflower_2160p_60fps_normal.mp4 --extra_arg 4 --segment_duration 3 --newcwv
+	@echo 'Encoder executed'
+
+
+#encoder 200 3s
+${OUT_DIR}/newcwv/600/bbb_600_60.mp4: ${OUT_DIR}/bbb_sunflower_2160p_60fps_normal.mp4 ${ROOT}/scripts/video_processing/encoder.py ${ROOT}/scripts/video_processing/video_driver.py
+	@echo 'running 600 encoder'
+	python3 ${ROOT}/scripts/video_processing/video_driver.py --prefix ${OUT_DIR}/newcwv --action encode --source ${OUT_DIR}/bbb_sunflower_2160p_60fps_normal.mp4 --extra_arg 5 --segment_duration 3 --newcwv
+	@echo 'Encoder executed'
+
+
+#encoder 200 3s
+${OUT_DIR}/newcwv/700/bbb_700_60.mp4: ${OUT_DIR}/bbb_sunflower_2160p_60fps_normal.mp4 ${ROOT}/scripts/video_processing/encoder.py ${ROOT}/scripts/video_processing/video_driver.py
+	@echo 'running 700 encoder'
+	python3 ${ROOT}/scripts/video_processing/video_driver.py --prefix ${OUT_DIR}/newcwv --action encode --source ${OUT_DIR}/bbb_sunflower_2160p_60fps_normal.mp4 --extra_arg 6 --segment_duration 3 --newcwv
+	@echo 'Encoder executed'
+
 
 ####### IETF
 
@@ -114,6 +170,57 @@ ${OUT_DIR}/3s/2160/bbb_2160_60.mp4: ${OUT_DIR}/bbb_sunflower_2160p_60fps_normal.
 ###############
 # Segmenter
 ###############
+
+####### Newcwv
+
+#segmenter 480 3s
+${OUT_DIR}/newcwv/200/out/output.mpd: ${OUT_DIR}/newcwv/200/bbb_200_60.mp4 ${ROOT}/scripts/video_processing/segmenter.py ${ROOT}/scripts/video_processing/video_driver.py
+	@echo 'Segmenting 200'
+	python3 ${ROOT}/scripts/video_processing/video_driver.py --prefix ${OUT_DIR}/newcwv --action segment --extra_arg _x200
+	@echo 'Done segmenting'
+
+
+#segmenter 480 3s
+${OUT_DIR}/newcwv/250/out/output.mpd: ${OUT_DIR}/newcwv/250/bbb_250_60.mp4 ${ROOT}/scripts/video_processing/segmenter.py ${ROOT}/scripts/video_processing/video_driver.py
+	@echo 'Segmenting 250'
+	python3 ${ROOT}/scripts/video_processing/video_driver.py --prefix ${OUT_DIR}/newcwv --action segment --extra_arg _x250
+	@echo 'Done segmenting'
+
+
+#segmenter 480 3s
+${OUT_DIR}/newcwv/300/out/output.mpd: ${OUT_DIR}/newcwv/300/bbb_300_60.mp4 ${ROOT}/scripts/video_processing/segmenter.py ${ROOT}/scripts/video_processing/video_driver.py
+	@echo 'Segmenting 300'
+	python3 ${ROOT}/scripts/video_processing/video_driver.py --prefix ${OUT_DIR}/newcwv --action segment --extra_arg _x300
+	@echo 'Done segmenting'
+
+
+#segmenter 480 3s
+${OUT_DIR}/newcwv/400/out/output.mpd: ${OUT_DIR}/newcwv/400/bbb_400_60.mp4 ${ROOT}/scripts/video_processing/segmenter.py ${ROOT}/scripts/video_processing/video_driver.py
+	@echo 'Segmenting 400'
+	python3 ${ROOT}/scripts/video_processing/video_driver.py --prefix ${OUT_DIR}/newcwv --action segment --extra_arg _x400
+	@echo 'Done segmenting'
+
+
+#segmenter 480 3s
+${OUT_DIR}/newcwv/500/out/output.mpd: ${OUT_DIR}/newcwv/500/bbb_500_60.mp4 ${ROOT}/scripts/video_processing/segmenter.py ${ROOT}/scripts/video_processing/video_driver.py
+	@echo 'Segmenting 500'
+	python3 ${ROOT}/scripts/video_processing/video_driver.py --prefix ${OUT_DIR}/newcwv --action segment --extra_arg _x500
+	@echo 'Done segmenting'
+
+
+#segmenter 480 3s
+${OUT_DIR}/newcwv/600/out/output.mpd: ${OUT_DIR}/newcwv/600/bbb_600_60.mp4 ${ROOT}/scripts/video_processing/segmenter.py ${ROOT}/scripts/video_processing/video_driver.py
+	@echo 'Segmenting 600'
+	python3 ${ROOT}/scripts/video_processing/video_driver.py --prefix ${OUT_DIR}/newcwv --action segment --extra_arg _x600
+	@echo 'Done segmenting'
+
+
+#segmenter 480 3s
+${OUT_DIR}/newcwv/700/out/output.mpd: ${OUT_DIR}/newcwv/700/bbb_700_60.mp4 ${ROOT}/scripts/video_processing/segmenter.py ${ROOT}/scripts/video_processing/video_driver.py
+	@echo 'Segmenting 700'
+	python3 ${ROOT}/scripts/video_processing/video_driver.py --prefix ${OUT_DIR}/newcwv --action segment --extra_arg _x700
+	@echo 'Done segmenting'
+
 
 ####### IETF
 
@@ -199,10 +306,20 @@ ${OUT_DIR}/ietf/bbb.mpd: ${OUT_DIR}/ietf/480/out/output.mpd ${OUT_DIR}/ietf/720/
 	@echo 'stitching mpds'
 	python3 ${ROOT}/scripts/video_processing/video_driver.py --prefix ${OUT_DIR}/ietf --action mpd --media_prefix ../ietf --use_dataset 2
 
+####### Newcwv
+
+${OUT_DIR}/newcwv/bbb.mpd: ${OUT_DIR}/newcwv/200/out/output.mpd ${OUT_DIR}/newcwv/250/out/output.mpd ${OUT_DIR}/newcwv/300/out/output.mpd ${OUT_DIR}/newcwv/400/out/output.mpd ${OUT_DIR}/newcwv/500/out/output.mpd ${OUT_DIR}/newcwv/600/out/output.mpd ${OUT_DIR}/newcwv/700/out/output.mpd ${ROOT}/scripts/video_processing/video_driver.py ${ROOT}/scripts/video_processing/mpd_generator.py
+	@echo 'stitching mpds'
+	python3 ${ROOT}/scripts/video_processing/video_driver.py --prefix ${OUT_DIR}/newcwv --action mpd --media_prefix ../newcwv --newcwv
+
+
 stage1-mpd-3s: ${OUT_DIR}/3s/bbb.mpd
 	@echo 'Generating mpd'
 
 stage1-mpd-ietf: ${OUT_DIR}/ietf/bbb.mpd
+	@echo 'Generating mpd'
+
+stage1-mpd-newcwv: ${OUT_DIR}/newcwv/bbb.mpd
 	@echo 'Generating mpd'
 
 #############
@@ -223,7 +340,20 @@ ${ROOT}/logs/clients/1/abr/abrThroughput/%/nginx_access.log:
 	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir ${SIM_DIR} --cong_alg ${CC_ALG} --network_model /vagrant/network_models/custom_models/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg ${ABR_ALG} --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
 
 
+${ROOT}/logs/newcwv/clients/1/abr/abrThroughput/%/nginx_access.log:
+	$(eval SIM_DIR = $(@D))
+	$(eval CC_ALG = $(shell echo $(shell basename $(@D)) | cut -d'_' -f2))
+	$(eval LINK_TYPE = $(shell basename `dirname $(@D)`))
+	$(eval ABR_ALG = $(shell basename $(shell dirname `dirname $(@D)`)))
+	$(eval CLIENT_NUM = $(shell basename $(shell dirname $(shell dirname $(shell dirname `dirname $(@D)`)))))
+	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir ${SIM_DIR} --cong_alg ${CC_ALG} --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location $(MPD_LOCATION_NEWCWV) --dash_alg ${ABR_ALG} --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
+
+
 varying_rtt: ${MULTI_LOG_VARYING}
+	echo "Done"
+
+
+newcwv_logs: ${LOGS_NEWCWV}
 	echo "Done"
 
 
@@ -247,24 +377,24 @@ ${ROOT}/logs/clients/dynamic/%_newcwv/nginx_access.log:
 	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/links/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg abrDynamic --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
 
 
-${ROOT}/logs/clients/%_vreno/nginx_access.log:
-	$(eval SIM_DIR = $(@D))
-	$(eval LINK_TYPE = $(shell basename `dirname $(@D)`))
-	$(eval CLIENT_NUM = $(shell basename $(shell dirname `dirname $(@D)`)))
-	echo "SIM_DIR=${SIM_DIR}"
-	echo "LINK_TYPE=${LINK_TYPE}"
-	echo "CLIENTS=${CLIENT_NUM}"
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg vreno --network_model /vagrant/network_models/links/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
+# ${ROOT}/logs/clients/%_vreno/nginx_access.log:
+# 	$(eval SIM_DIR = $(@D))
+# 	$(eval LINK_TYPE = $(shell basename `dirname $(@D)`))
+# 	$(eval CLIENT_NUM = $(shell basename $(shell dirname `dirname $(@D)`)))
+# 	echo "SIM_DIR=${SIM_DIR}"
+# 	echo "LINK_TYPE=${LINK_TYPE}"
+# 	echo "CLIENTS=${CLIENT_NUM}"
+# 	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg vreno --network_model /vagrant/network_models/links/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
 
 
-${ROOT}/logs/clients/%_newcwv/nginx_access.log:
-	$(eval SIM_DIR = $(@D))
-	$(eval LINK_TYPE = $(shell basename `dirname $(@D)`))
-	$(eval CLIENT_NUM = $(shell basename $(shell dirname `dirname $(@D)`)))
-	echo "SIM_DIR=${SIM_DIR}"
-	echo "LINK_TYPE=${LINK_TYPE}"
-	echo "CLIENTS=${CLIENT_NUM}"
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/links/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
+# ${ROOT}/logs/clients/%_newcwv/nginx_access.log:
+# 	$(eval SIM_DIR = $(@D))
+# 	$(eval LINK_TYPE = $(shell basename `dirname $(@D)`))
+# 	$(eval CLIENT_NUM = $(shell basename $(shell dirname `dirname $(@D)`)))
+# 	echo "SIM_DIR=${SIM_DIR}"
+# 	echo "LINK_TYPE=${LINK_TYPE}"
+# 	echo "CLIENTS=${CLIENT_NUM}"
+# 	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/links/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
 
 
 test: ${TEST_LOGS}
@@ -313,6 +443,8 @@ FIGURES_FOLDER = ${PAPER_BUILD}/figures
 
 RAW_DATA = ${foreach client, ${CLIENTS}, ${FIGURES_FOLDER}/tmp/${client}/parsed_data.json}
 
+RAW_DATA_NEWCWV = ${FIGURES_FOLDER}/parsed/newcwv/parsed_data.json
+
 BITRATE_DERIVATIVE_DATA = ${foreach client, ${CLIENTS}, ${FIGURES_FOLDER}/tmp/${client}/quality_distribution.json}
 
 REBUFFER_RATIO_DATA = ${foreach client, ${CLIENTS}, ${FIGURES_FOLDER}/tmp/${client}/rebuffer_ratio.json}
@@ -331,41 +463,56 @@ FIGURES_APPLICATION = ${FIGURES_FOLDER}/Rebuffer_Ratio.pdf ${FIGURES_FOLDER}/bit
 ${FIGURES_FOLDER}/tmp/%/rebuffer_ratio.json: ${ROOT}/scripts/analytics/paper/parse_rebuffer_ratio.py
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/parse_rebuffer_ratio.py --root /vagrant/logs/clients/$* --algs newcwv vreno --runs ${shell seq 1 10} --links ${LINKS}
 
+
 #TODO: Logs as a dependency here
 # ${ROOT}/scripts/analytics/paper/plot_driver.py
 ${FIGURES_FOLDER}/tmp/%/parsed_data.json: ${ROOT}/scripts/analytics/paper/parse_data.py ${ROOT}/scripts/analytics/paper/count_lost_packets.py ${ROOT}/scripts/analytics/parse_access_log.py ${ROOT}/scripts/analytics/parse_dash_log.py
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --root /vagrant/logs/clients/$* --algs newcwv vreno --runs ${shell seq 1 10} --links ${LINKS} --parse 1 --target none
 
+
+${FIGURES_FOLDER}/parsed/newcwv/parsed_data.json: ${ROOT}/scripts/analytics/paper/parse_data.py ${ROOT}/scripts/analytics/paper/count_lost_packets.py ${ROOT}/scripts/analytics/parse_access_log.py ${ROOT}/scripts/analytics/parse_dash_log.py
+	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --root /vagrant/logs/clients/$* --algs newcwv vreno --runs ${shell seq 1 10} --links ${LINKS} --parse 1 --target none
+
+
 ${FIGURES_FOLDER}/tmp/%/quality_distribution.json: ${ROOT}/scripts/analytics/paper/parse_data.py ${ROOT}/scripts/analytics/parse_access_log.py ${MULTI_LOGS}
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --root /vagrant/logs/clients/$* --algs newcwv vreno --runs ${shell seq 1 10} --links ${LINKS} --parse 1 --target none
+
 
 #TODO need to fix parsed data dependency to allow for more clients
 ${FIGURES_FOLDER}/Average_Bitrate.pdf: ${RAW_DATA} ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${LINKS} --target "average bitrate" --clients_combined ${CLIENTS} --extension pdf
 
+
 AVERAGE_OSCILLATIONS_LINKS = DSL FTTC
 ${FIGURES_FOLDER}/Average_Oscillations.pdf: ${RAW_DATA} ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${AVERAGE_OSCILLATIONS_LINKS} --target "average oscillations" --clients_combined ${CLIENTS} --extension pdf
+
 
 REBUFFER_RATIO_LINKS = DSL
 ${FIGURES_FOLDER}/Rebuffer_Ratio.pdf: ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py ${REBUFFER_RATIO_DATA}
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs vreno newcwv --links ${REBUFFER_RATIO_LINKS} --target "rebuffer ratio" --clients_combined ${CLIENTS} --extension pdf
 
+
 ${FIGURES_FOLDER}/Throughput_%_clients.pdf: ${FIGURES_FOLDER}/tmp/%/parsed_data.json ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${LINKS} --target "throughput" --clients_combined ${CLIENTS} --clients $* --extension pdf
+
 
 BITRATE_DERIVATIVE_LINKS = DSL
 ${FIGURES_FOLDER}/bitrate_derivative_distribution.pdf: ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${BITRATE_DERIVATIVE_LINKS} --target "bitrate_derivatives" --clients_combined ${CLIENTS} --extension pdf
 
+
 ${FIGURES_FOLDER}/Throughput_clients_%.pdf:
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${LINKS} --target "throughput agg" --clients_combined ${CLIENTS} --link_agg $* --extension pdf	
+
 
 ${FIGURES_FOLDER}/lost_packets_vreno.pdf:
 	/usr/bin/python3 ${ROOT}/scripts/analytics/paper/plot_lost_packets.py --root ${ROOT}/logs/clients/1/DSL/1_vreno
 
+
 ${FIGURES_FOLDER}/lost_packets_newcwv.pdf:
 	/usr/bin/python3 ${ROOT}/scripts/analytics/paper/plot_lost_packets.py --root ${ROOT}/logs/clients/1/DSL/1_newcwv
+
 
 ${FIGURES_FOLDER}/lost_packets.pdf:
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_lost_packets_aggregate.py --algs newcwv vreno --clients_combined 1 2 3 5
