@@ -14,7 +14,7 @@ import parse_dash_log
 from constants import QUALITY_TO_BPS_3S_IETF, VIDEO_CACHED_RESPONSE_MS
 
 
-def parse_data(root, links, algs, numbers):
+def parse_data(root, links, algs, numbers, out_dir=None):
     metrics = {}
 
     tmp = {alg: {} for alg in algs}
@@ -105,13 +105,17 @@ def parse_data(root, links, algs, numbers):
     metrics['dropped_packets'] = dropped_packets
     metrics['clients'] = len(metric_files)
 
-    tmp_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp', str(metrics['clients']))
-    os.makedirs(tmp_path, exist_ok=True)
-    tmp_path = os.path.join(tmp_path, 'parsed_data.json')
-    with open(tmp_path, 'w') as f:
+    if not out_dir:
+        # Get the directory tree after logs/
+        appendix = root.split('logs' + os.path.sep, maxsplit=2)[1]
+        out_dir = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'parsed_data', appendix)
+
+    os.makedirs(out_dir, exist_ok=True)
+    save_path = os.path.join(out_dir, 'parsed_data.json')
+    with open(save_path, 'w') as f:
         json.dump(metrics, f, indent=4)
 
-    print(f"Parsed data saved {tmp_path}")
+    print(f"Parsed data saved {save_path}")
 
     quality_indexes = {k: i for i, k in enumerate(QUALITY_TO_BPS_3S_IETF.keys())}
     quality_distribution_alg_link = {}
@@ -142,15 +146,14 @@ def parse_data(root, links, algs, numbers):
                     quality_distribution_alg['newcwv'] = quality_distribution
                 else:
                     quality_distribution_alg['reno'] = quality_distribution
-                
 
+                
             quality_distribution_alg_link[link] = quality_distribution_alg
 
 
-    tmp_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp', str(metrics['clients']))
-    os.makedirs(tmp_path, exist_ok=True)
-    tmp_path = os.path.join(tmp_path, 'quality_distribution.json')
-    with open(tmp_path, 'w') as f:
+    os.makedirs(out_dir, exist_ok=True)
+    save_path = os.path.join(out_dir, 'quality_distribution.json')
+    with open(save_path, 'w') as f:
         json.dump(quality_distribution_alg_link, f, indent=4)
 
-    print(f"Parsed data saved {tmp_path}")
+    print(f"Parsed data saved {save_path}")

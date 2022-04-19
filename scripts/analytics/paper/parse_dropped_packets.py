@@ -13,7 +13,7 @@ import count_lost_packets
 import json
 
 
-def parse_dropped_packets(root, links, algs, numbers, out_dir):
+def parse_dropped_packets(root, links, algs, numbers, out_dir=None):
     metrics = {}
 
     tmp = {alg: {} for alg in algs}
@@ -37,6 +37,11 @@ def parse_dropped_packets(root, links, algs, numbers, out_dir):
 
     metrics['dropped_packets'] = dropped_packets
     metrics['clients'] = len(metric_files)
+
+    if not out_dir:
+        # Get the directory tree after logs/
+        appendix = root.split('logs' + os.path.sep, maxsplit=2)[1]
+        out_dir = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'parsed_data', appendix)
 
     save_path = os.path.join(out_dir, str(metrics['clients']))
     os.makedirs(save_path, exist_ok=True)
