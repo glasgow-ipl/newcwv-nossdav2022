@@ -12,6 +12,8 @@ RUNS = $(shell seq 1 ${REPEAT})
 ALGS = vreno newcwv reno
 LINKS = DSL FTTC FTTP
 
+ABR_ALGS= abrThroughput abrDynamic
+
 LOGS = $(foreach link, ${LINKS}, $(foreach alg, ${ALGS}, $(foreach run_instance, ${RUNS}, ${ROOT}/logs/newcwv/${link}/${run_instance}_${alg}/nginx_access.log)))
 
 TEST_ALGS = newcwv vreno
@@ -31,6 +33,9 @@ RTTS = $(shell seq 20 10 200)
 
 # Client loop should be ${CLIENTS}
 MULTI_LOG_VARYING = $(foreach client, $(shell seq 1 1), $(foreach bw, ${BWS}, $(foreach rtt, ${RTTS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 3), ${ROOT}/logs/clients/${client}/abr/abrThroughput/${bw}_${rtt}/${run_instance}_${alg}/nginx_access.log)))))
+
+
+MULTI_LOG_NEW = $(foreach client, ${CLIENTS}, $(foreach abr_alg, ${ABR_ALGS}, $(foreach link, ${LINKS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 1), ${ROOT}/logs/clients/${client}/abr/${abr_alg}/${link}/${run_instance}_${alg}/nginx_access.log)))))
 
 RTT_NEWCWV = 400
 BW_NEWCWV = 1
@@ -331,13 +336,13 @@ logs: ${LOGS}
 ${ROOT}/logs:
 	mkdir ${ROOT}/logs
 
-${ROOT}/logs/clients/1/abr/abrThroughput/%/nginx_access.log:
+${ROOT}/logs/clients/%/nginx_access.log:
 	$(eval SIM_DIR = $(@D))
 	$(eval CC_ALG = $(shell echo $(shell basename $(@D)) | cut -d'_' -f2))
 	$(eval LINK_TYPE = $(shell basename `dirname $(@D)`))
 	$(eval ABR_ALG = $(shell basename $(shell dirname `dirname $(@D)`)))
 	$(eval CLIENT_NUM = $(shell basename $(shell dirname $(shell dirname $(shell dirname `dirname $(@D)`)))))
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir ${SIM_DIR} --cong_alg ${CC_ALG} --network_model /vagrant/network_models/custom_models/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg ${ABR_ALG} --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
+	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir ${SIM_DIR} --cong_alg ${CC_ALG} --network_model /vagrant/network_models/links/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg ${ABR_ALG} --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
 
 
 ${ROOT}/logs/newcwv/clients/1/abr/abrThroughput/%/nginx_access.log:
@@ -404,6 +409,8 @@ test: ${TEST_LOGS}
 multi_log: ${MULTI_LOGS} ${MULTI_LOGS_DYNAMIC}
 	echo "Completed"
 
+multi_log_new: ${MULTI_LOG_NEW}
+	echo "Completed"
 
 single_run: ${ROOT}/logs/single/newcwv/nginx_access.log
 	@echo "Single run executed successfully"
