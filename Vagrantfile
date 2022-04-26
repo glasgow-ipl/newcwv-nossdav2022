@@ -75,6 +75,8 @@ Vagrant.configure("2") do |config|
    v.customize ["modifyvm", :id, "--graphicscontroller", "VBoxSVGA"]
   end
 
-  config.vm.provision "shell", privileged: true, inline: $RUN_PROBE 
+  config.vm.provision "shell", privileged: true, inline: $RUN_PROBE
+  
+  config.vm.network :forwarded_port, guest: 22, host: 2242, id: 'ssh'
 
 end
