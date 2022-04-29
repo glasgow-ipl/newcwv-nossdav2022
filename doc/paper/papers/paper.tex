@@ -277,13 +277,11 @@ To evaluate whether the improved transport layer performance of New CWV translat
 
 \todo{Make the DSL link case in the last sentence more global and not as UK specific.}
 
-In this paper, we have not shown average bit-rate data, since in all evaluated scenarios connections with and without New CWV have shown similar performance. Additionally, in the rare cases where performance differed, connections without New CWV, had achieved slightly higher average bit-rate, however, this rate was not supported by the network link, as we not that the bit-rate switches and the rebuffering for these connections was also higher.
-
-
 Figure \ref{fig:bitrate-switches} shows the observed bitrate switch distribution. The proportion of the requested chunks (\emph{y axis}) is shown using a logarithmic scale. The representation change (\emph{x axis}) is the magnitude of the chunk-by-chunk bit rate switches. For example, if a chunk is requested at the same bit rate as the preceding chunk, the difference is zero. If the chunk is of the next higher encoding, compared to its predecessor, the difference is 1, and if it is of the next lower encoding the difference is -1, and so on. We see that for the case with 5 clients, connections without New CWV experience non-zero quality switches for 17.4\% of the video duration, compared to 5.7\% for connections with New CWV. For a video consisting of just over 200 chunks, an 11.7 percentage point difference means that, on average, New CWV connections see 24 fewer switches over the course of the video playback.
 
 Figure \ref{fig:rebuffer-ratio} shows the percentage that the of the whole video playback that the connection spent in rebuffering state, where the video player stalled, and playback did not progress. Again, looking at the 5 client case, we see that New CWV experiences less rebuffering overall. The mean rebuffering values for the 5 client case are 5\% and 1.5\% for CWV and New CWV respectively. For a 10 minute video, this 3.5 percentage point difference accounts for over 21 seconds of rebuffering time.
 
+In this paper, we have not shown average bit-rate data, since in all evaluated scenarios connections with and without New CWV have shown similar performance. Additionally, in the rare cases where performance differed, connections without New CWV, had achieved slightly higher average bit-rate, however, this rate was not supported by the network link, as we not that the bit-rate switches and the rebuffering for these connections was also higher.
 
 We conclude that New CWV achieves higher video stability when multiple clients are competing on a constrained link, with improved encoding stability and decreased rebuffering time. We have observed this behaviour mainly on the simulated DSL link, since our highest video encoding is just under 5Mbps, however, we note that in practice higher encodings are also used~\cite{online-youtube-encodings}.
 
