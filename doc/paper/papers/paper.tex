@@ -301,7 +301,11 @@ Furthermore, our results demonstrate that New CWV's more consistent bandwidth me
 We also conclude that the more consistent measurements better match the available network conditions, allowing clients using New CWV to better adapt to the constraints of the bottleneck link, and thus to request chunks that can be delivered on time without need of rebuffering (Figure \ref{fig:rebuffer-ratio}).
 \todo{Maybe a more neutral phrasing for this paragraph would be: ``We have presented results as follows: (i) we validated...; (ii) the use of New CWV effectively...; (iii) the more consistent application bandwidth measurements resulting from the use of New CWV...; and (iv) more consistent measurements...''}
 
-All scenarios investigated by this work have used links that emulated a wired connection. However, since WiFi and mobile links have very different properties and as such TCP behaves differently on those types of links, we cannot argue about the benefits achieved there and further research is required on the topic. However, we expect that even for these types of links connections with New CWV would behave as well as or better than connections without New CWV, as observed in the experiments here. This is since New CWV, does not alter any of the congestion avoidance or recovery states, which is where TCP connections spend most of their time.
+The scenarios investigated by this work have used links that emulated a wired
+residential Internet connection.  WiFi and cellular links, however, are known
+to have very different properties that can affect TCP performance. Understanding
+how use of TCP New CWV affects video performance on such links is outside the
+scope of this current work.
 
 Furthermore, while our experiments investigated the effects of New CWV on TCP New Reno, we note that the same technique could apply for other window-controlled loss based algorithms, such as TCP CUBIC for example. We chose TCP New Reno, as the originally New CWV was implemented in Reno and a study in 2019 found New Reno was still widely used for video delivery \cite{Mishra-2019-the-great-internet-tcp-congestion-control-census}.
 
