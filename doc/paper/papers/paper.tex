@@ -307,10 +307,19 @@ to have very different properties that can affect TCP performance. Understanding
 how use of TCP New CWV affects video performance on such links is outside the
 scope of this current work.
 
-Furthermore, while our experiments investigated the effects of New CWV on TCP New Reno, we note that the same technique could apply for other window-controlled loss based algorithms, such as TCP CUBIC for example. We chose TCP New Reno, as the originally New CWV was implemented in Reno and a study in 2019 found New Reno was still widely used for video delivery \cite{Mishra-2019-the-great-internet-tcp-congestion-control-census}.
+Our experiments investigated the effects of New CWV on TCP New Reno. This was done to align with
+\cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv},
+and because a recent study \cite{Mishra-2019-the-great-internet-tcp-congestion-control-census}
+found New Reno was still widely used for video delivery.
+We note that NewCWV could apply for other window-controlled loss based
+algorithms, such as TCP CUBIC for example. 
 
  However, the modifications to TCP that New CWV introduces are a new mechanism to count the unacknowledged packets and an additional exit condition for the slow-start phase. Therefore, these changes should be applicable to CUBIC as well. The main concern that both New CWV and CUBIC alter the slow-start behaviour could be overcome by only increasing the CWND value up to the more conservative option from New CWV and CUBIC.
- 
+\todo{TCP Cubic tunes the window growth in slow start after idle such that
+the window growth slows as it approaches the previously achieved window,
+no? This seems like it would achieve a similar effect to NewCWV. May need
+more discussion.}.
+
  Furthermore, with our findings of New CWV for New Reno and potentially CUBIC hosts 30\% of all Internet video servers could be impacted by this research, as we note that congestion window validation is currently enabled by default in the standard TCP 5.4 Linux Stack. 
 
 
