@@ -178,30 +178,6 @@ note = {(Accessed on 03/12/2021)}
     howpublished = {\url{https://download.blender.org/demo/movies/BBB/}},
 }
 
-@misc{rfc2861-2000-padhye-congestion-window-validation,
-	series =	{Request for Comments},
-	number =	2861,
-	howpublished =	{RFC 2861},
-	publisher =	{RFC Editor},
-        author =	{Padhye, H. and Floyd, S. and Handley, M.},
-	title =		{{TCP Congestion Window Validation}},
-	pagetotal =	11,
-	year =		2000,
-	month =		jun,
-}
-
-@misc{rfc7661-2015-fairhurst-new-cwnd-validation,
-	series =	{Request for Comments},
-	number =	7661,
-	howpublished =	{RFC 7661},
-	publisher =	{RFC Editor},
-        author =	{Fairhurst, G. and Sathiaseelan, S. and Secchi, R.},
-	title =		{{Updating TCP to Support Rate-Limited Traffic}},
-	pagetotal =	21,
-	year =		2015,
-	month =		oct,
-}
-
 @inproceedings{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv,
     author = {Nazir, S. and Hossain, Z. and Secchi, R. and Broadbent, M. and Petlund, A. and Fairhurst, G.},
     booktitle = {NOSSDAV '14},
@@ -362,19 +338,6 @@ howpublished = {\url{https://www.ofcom.org.uk/__data/assets/pdf_file/0038/194897
 }
 
 
-@misc{rfc5681-congeston-control,
-	series =	{Request for Comments},
-	number =	5681,
-	howpublished =	{RFC 5681},
-	publisher =	{RFC Editor},
-    author =	{Blanton, E. and Paxson, V. and Allman, M.},
-	title =		{{TCP Congestion Control}},
-	pagetotal =	18,
-	year =		2009,
-	month =		sep,
-}
-
-
 @article{Esteban-2012-Interactions-HTTP-TCP,
     author = {Esteban, J. and Benno, S. A. and Beck, A. and Guo, Y. and Hilt, V. and Rimac, I.},
     doi = {10.1145/2229087.2229094},
@@ -459,18 +422,6 @@ howpublished = {\url{https://www.ofcom.org.uk/__data/assets/pdf_file/0038/194897
     publisher = {ACM Press},
     title = {{Modeling TCP Throughput: A Simple Model and its Empirical Validation *}},
     year = 1998
-}
-
-@misc{rfc-5348-tfrc,
-	series =	{Request for Comments},
-	number =	5348,
-	howpublished =	{RFC 5348},
-	publisher =	{RFC Editor},
-        author =	{Handley, M. and Padhye, J. and Floyd, S. and Widmer, J.},
-	title =		{{TCP Friendly Rate Control (TFRC): Protocol Specification}},
-	pagetotal =	58,
-	year =		2008,
-	month =		sep,
 }
 
 @inproceedings{Carlucci-2016-Analysis-WebRTC,
@@ -615,19 +566,6 @@ year = 2016
     howpublished = {\url{https://github.com/Dash-Industry-Forum/dash.js}},
 }
 
-@misc{rfc3339-precise-timestamps,
-	series =	{Request for Comments},
-	number =	3339,
-	howpublished =	{RFC 3339},
-	publisher =	{RFC Editor},
-	doi =		{10.17487/RFC3339},
-    author =	"Newman, C. and Klyne, G",
-	title =		{{Date and Time on the Internet: Timestamps}},
-	pagetotal =	18,
-	year =		2002,
-	month =		jul,
-}
-
 @misc{online-youtube-encodings,
     author = {},
     title = {Recommended upload encoding settings - YouTube Help},
@@ -669,12 +607,58 @@ year = 2016
 
 
 
+
+@misc{rfc2861-2000-padhye-congestion-window-validation,
+  author       = "Padhye, H. and Floyd, S. and Handley, M.",
+	title        = "{TCP} Congestion Window Validation",
+	year         = 2000,
+	month        = jun,
+  howpublished = "Internet Engineering Task Force",
+	note         = "{RFC} 2861",
+}
+
+@misc{rfc3339-precise-timestamps,
+  author       = "Newman, C. and Klyne, G",
+	title        = "Date and Time on the Internet: Timestamps",
+	year         = 2002,
+	month        = jul,
+  howpublished = "Internet Engineering Task Force",
+	note         = "{RFC} 3339",
+}
+
+@misc{rfc-5348-tfrc,
+  author       = "Handley, M. and Padhye, J. and Floyd, S. and Widmer, J.",
+	title        = "{TCP} Friendly Rate Control ({TFRC}): Protocol Specification",
+	year         =  2008,
+	month        =  sep,
+  howpublished = "Internet Engineering Task Force",
+	note         = "{RFC} 5348",
+}
+
+@misc{rfc5681-congeston-control,
+  author       = "Blanton, E. and Paxson, V. and Allman, M.",
+	title        = "{TCP} Congestion Control",
+	year         = 2009,
+	month        = sep,
+  howpublished = "Internet Engineering Task Force",
+	note         = "{RFC} 5681",
+}
+
+@misc{rfc7661-2015-fairhurst-new-cwnd-validation,
+  author       = "Fairhurst, G. and Sathiaseelan, S. and Secchi, R.",
+	title        = "Updating {TCP} to Support Rate-Limited Traffic",
+	year         = 2015,
+	month        = oct,
+  howpublished = "Internet Engineering Task Force",
+	note         = "{RFC} 7661",
+}
+
 @misc{RFC9000,
   author       = "Iyengar, J. and Thomson, M.", 
   title        = "{QUIC}: A {UDP}-Based Multiplexed and Secure Transport", 
   year         = 2021, 
   month        = may,
-  howpublished = "{IETF}", 
+  howpublished = "Internet Engineering Task Force",
   note         = "{RFC} 9000"
 }
 
@@ -683,7 +667,7 @@ year = 2016
   title        = "{QUIC} Loss Detection and Congestion Control", 
   year         = 2021, 
   month        = may,
-  howpublished = "{IETF}", 
+  howpublished = "Internet Engineering Task Force",
   note         = "{RFC} 9002"
 }
 
