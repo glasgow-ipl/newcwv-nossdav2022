@@ -167,7 +167,7 @@ Our evaluation testbed consists of a network emulated in Mininet, running on Ubu
 The server uses \texttt{nginx} (v1.18) with HTTP/2, serving three representations of Big Buck Bunny~\cite{online-bbb}: 480p (0.44Mbps), 720p (2.64Mbps), and 1080p (4.82Mbps). Each is encoded in chunks of 3 seconds duration.
 %  Client
 Clients use Firefox (v91) with \texttt{dash.js} (v4.0.0). We
-report results with both the ABR Throughput and DYNAMIC \cite{Spiteri-2019-from-theory-to-practice-sabre} algorithms implemented in \texttt{dash.js}.
+report results with both the \textsc{throughput} and \textsc{dynamic} \cite{Spiteri-2019-from-theory-to-practice-sabre} algorithms implemented in \texttt{dash.js}.
 
 The network is configured with a bottleneck RTT of 40ms, a reasonable RTT value to the closest video CDN replica. The routers' queues are sized to the bandwidth delay product. Three different bandwidth profiles are evaluated, representing DSLv2 (10Mbps), FTTC (50Mbps), and FTTP (145Mbps) links; e.g., as are typical in the UK~\cite{online-ofcom-report}. Below we show the results for the DSLv2 and FTTC links. However, as higher resolution video and other network-heavy operations such as virtual reality environments become more available we expect the issues observed could translate to the links with higher capacity (i.e., FTTC and FTTP).
 
@@ -220,27 +220,27 @@ We illustrate the impact of New CWV on packet loss rates in Figure \ref{fig:lost
 \begin{figure*}
   \centering
   \includegraphics[width=\textwidth, keepaspectratio]{figures/bitrate_derivative_distribution.pdf}
-  \caption{Absolute Bitrate Switches (ABR Throughput)}
+  \caption{Absolute Bitrate Switches (\textsc{throughput})}
   \label{fig:bitrate-switches}
 \end{figure*}
 
 \begin{figure*}
   \centering
   \includegraphics[width=\textwidth, keepaspectratio]{figures/bitrate_derivative_distribution_dynamic.pdf}
-  \caption{Absolute Bitrate Switches (ABR DYNAMIC)}
+  \caption{Absolute Bitrate Switches (\textsc{dynamic})}
   \label{fig:bitrate-switches-dynamic}
 \end{figure*}
 
 
 \begin{figure}
       \includegraphics[width=.45\textwidth, keepaspectratio]{figures/Rebuffer_Ratio.pdf}
-    \caption{Rebuffer Ratio (ABR Throughput)}
+    \caption{Rebuffer Ratio (\textsc{throughput})}
     \label{fig:rebuffer-ratio}
 \end{figure}
 
 \begin{figure}
   \includegraphics[width=.45\textwidth, keepaspectratio]{figures/Rebuffer_Ratio_dynamic.pdf}
-\caption{Rebuffer Ratio (ABR DYNAMIC)}
+\caption{Rebuffer Ratio (\textsc{dynamic})}
 \label{fig:rebuffer-ratio-dynamic}
 \end{figure}
 
@@ -248,14 +248,15 @@ To evaluate whether the improved transport layer performance of New CWV translat
 
 \todo{Make the DSL link case in the last sentence more global and not as UK specific.}
 
-Figure \ref{fig:bitrate-switches} shows the observed bitrate switch distribution using the ABR Throughput algorithm. The proportion of the requested chunks (\emph{y axis}) is shown using a logarithmic scale. The representation change (\emph{x axis}) is the magnitude of the chunk-by-chunk bit rate switches. For example, if a chunk is requested at the same bit rate as the preceding chunk, the difference is zero. If the chunk is of the next higher encoding, compared to its predecessor, the difference is 1, and if it is of the next lower encoding the difference is -1, and so on. We see that for the case with 5 clients, connections without New CWV experience non-zero quality switches for 17.4\% of the video duration, compared to 5.7\% for connections with New CWV. For a video consisting of just over 200 chunks, an 11.7 percentage point difference means that, on average, New CWV connections see 24 fewer switches over the course of the video playback.
+Figure \ref{fig:bitrate-switches} shows the observed bitrate switch distribution using the  \textsc{throughput} algorithm. The proportion of the requested chunks (\emph{y axis}) is shown using a logarithmic scale. The representation change (\emph{x axis}) is the magnitude of the chunk-by-chunk bit rate switches. For example, if a chunk is requested at the same bit rate as the preceding chunk, the difference is zero. If the chunk is of the next higher encoding, compared to its predecessor, the difference is 1, and if it is of the next lower encoding the difference is -1, and so on. We see that for the case with 5 clients, connections without New CWV experience non-zero quality switches for 17.4\% of the video duration, compared to 5.7\% for connections with New CWV. For a video consisting of just over 200 chunks, an 11.7 percentage point difference means that, on average, New CWV connections see 24 fewer switches over the course of the video playback.
 
 
 Comparing Figures~\ref{fig:bitrate-switches} and~\ref{fig:bitrate-switches-dynamic}, we see that when CWV is used, the dynamic algorithm shows a significant improvement in reducing the non-zero representation quality changes. Looking at connections with New CWV, we do not see a significant difference when \emph{dynamic} was used. This is since New CWV connections had a lower number of non-zero changes even when \emph{throughput} was used.  
 
-Figure \ref{fig:rebuffer-ratio} shows the fraction of the video playback where the connection's media did not progress or otherwise was waiting for more content before it can resume playing, when using the ABR Throughput algorithm. The value is shown in percentage relative to the whole media playtime. Again, looking at the 5 client case, we see that New CWV experiences less rebuffering overall. The mean rebuffering values for the 5 client case are 5\% and 1.5\% for CWV and New CWV respectively. For a 10 minute video, this 3.5 percentage point difference accounts for over 21 seconds of rebuffering time.
 
-Figure \ref{fig:rebuffer-ratio-dynamic} shows the fraction of the video playback where the connection's media did not progress or otherwise was waiting for more content before it can resume playing for the DYNAMIC ABR. The value is shown in percentage relative to the whole media playtime. Similar to our discussion on Figure \ref{fig:bitrate-switches-dynamic}, we see that the performance of the connections without New CWV has improved when DYNAMIC is now closer to the performance of the connections where New CWV is enabled. Again, we see that the performance of the New CWV connections does not differ significantly from what was already observed with ABR throughput and is still better than the performance of connections without New CWV regardless of the ABR algorithm choice.
+Figure \ref{fig:rebuffer-ratio} shows the fraction of the video playback where the connection's media did not progress or otherwise was waiting for more content before it can resume playing, when using the \textsc{throughput} algorithm. The value is shown in percentage relative to the whole media playtime. Again, looking at the 5 client case, we see that New CWV experiences less rebuffering overall. The mean rebuffering values for the 5 client case are 5\% and 1.5\% for CWV and New CWV respectively. For a 10 minute video, this 3.5 percentage point difference accounts for over 21 seconds of rebuffering time.
+
+Figure \ref{fig:rebuffer-ratio-dynamic} shows the fraction of the video playback where the connection's media did not progress or otherwise was waiting for more content before it can resume playing for the \textsc{dynamic}. The value is shown in percentage relative to the whole media playtime. Similar to our discussion on Figure \ref{fig:bitrate-switches-dynamic}, we see that the performance of the connections without New CWV has improved when \textsc{dynamic} is now closer to the performance of the connections where New CWV is enabled. Again, we see that the performance of the New CWV connections does not differ significantly from what was already observed with \textsc{throughput} and is still better than the performance of connections without New CWV regardless of the ABR algorithm choice.
 
 
 In this paper, we have not shown average bit-rate data, since in all evaluated scenarios connections with and without New CWV have shown similar performance. Additionally, in the rare cases where performance differed, connections without New CWV, had achieved slightly higher average bit-rate, however, this rate was not supported by the network link, as we not that the bit-rate switches and the rebuffering for these connections was also higher.
@@ -291,15 +292,15 @@ Our experiments investigated the effects of New CWV on TCP New Reno. This was do
 and because a recent study \cite{Mishra-2019-the-great-internet-tcp-congestion-control-census}
 found New Reno was still widely used for video delivery.
 We note that NewCWV could apply for other window-controlled loss based
-algorithms, such as TCP CUBIC for example. 
+algorithms, such as \textsc{cubic} for example. 
 
- However, the modifications to TCP that New CWV introduces are a new mechanism to count the unacknowledged packets and an additional exit condition for the slow-start phase. Therefore, these changes should be applicable to CUBIC as well. The main concern that both New CWV and CUBIC alter the slow-start behaviour could be overcome by only increasing the CWND value up to the more conservative option from New CWV and CUBIC.
+ However, the modifications to TCP that New CWV introduces are a new mechanism to count the unacknowledged packets and an additional exit condition for the slow-start phase. Therefore, these changes should be applicable to \textsc{cubic} as well. The main concern that both New CWV and \textsc{cubic} alter the slow-start behaviour could be overcome by only increasing the CWND value up to the more conservative option from New CWV and \textsc{cubic}.
 \todo{TCP Cubic tunes the window growth in slow start after idle such that
 the window growth slows as it approaches the previously achieved window,
 no? This seems like it would achieve a similar effect to NewCWV. May need
 more discussion.}.
 
- Furthermore, with our findings of New CWV for New Reno and potentially CUBIC hosts 30\% of all Internet video servers could be impacted by this research, as we note that congestion window validation is currently enabled by default in the standard TCP 5.4 Linux Stack. 
+ Furthermore, with our findings of New CWV for New Reno and potentially \textsc{cubic} hosts 30\% of all Internet video servers could be impacted by this research, as we note that congestion window validation is currently enabled by default in the standard TCP 5.4 Linux Stack. 
 
 
 %==================================================================================================
