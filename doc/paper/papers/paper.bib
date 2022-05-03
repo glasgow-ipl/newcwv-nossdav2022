@@ -306,7 +306,6 @@ howpublished = {\url{https://www.ofcom.org.uk/__data/assets/pdf_file/0038/194897
 
 
 @article{Bhat-2017-not-so-quic,
-    abstract = {Despite known QoE shortcomings, Dynamic Adaptive Streaming over HTTP (DASH) has been tied with TCP for many years now. The advent of HTTP/2 powered by transport protocols such as QUIC provides an excellent opportunity to revisit adaptive bitrate streaming with respect to QoE. QUIC promises improved congestion control, zero-RTT connection establishment and multiplexing logical streams. In this work, we adapt state-of-the-art DASH players with buffer-based and hybrid (rate/buffer-based) quality adaptation logic to use QUIC. Our main focus lies in contrasting the QoE performance of DASH algorithms running on top of QUIC versus TCP in various environments. Interestingly, we find through testbed and Internet measurements that QUIC does not provide a boost to current DASH algorithms but instead a degradation in the chosen quality bitrates.},
     address = {Taipei, Taiwan},
     author = {Bhat, D. and Rizk, A. and Zink, M.},
     doi = {10.1145/3083165},
@@ -404,7 +403,6 @@ howpublished = {\url{https://www.ofcom.org.uk/__data/assets/pdf_file/0038/194897
 }
 
 @article{Bae-2015-why-is-http-streaming-hard,
-    abstract = {HTTP adaptive streaming is increasingly popular in video delivery. This is mainly because HTTP allows easy deployment while it simplifies content delivery, and chunk-based delivery enables dynamic adaptation of video quality to varying network bandwidth. However, we find that the very nature of chunk delivery on HTTP causes some fundamental problems in efficient bandwidth utilization. In this work, we investigate why it is so hard to adapt to varying bandwidth with HTTP adaptive streaming. First, we find that the choice of chunk duration greatly affects the bandwidth adaptation logic. Second, we observe that the disparity between the advertised quality of a chunk and real encoding rate confuses the client-side adaptation logic. Third, the dependence on TCP/HTTP leads to suboptimal bandwidth utilization while it makes it challenging to adapt to rapidly-changing bandwidth. We show the evidence of the problems in our controlled experiments with popular HTTP adaptive streaming schemes, and lay out the future requirements for robust bandwidth adaptation in video streaming. General Terms Algorithm, Design, Performance.},
     author = {Bae, S. and Jang, D. and Park, K. S.},
     doi = {10.1145/2797022.2797031},
     isbn = {9781450335546},
@@ -418,7 +416,6 @@ howpublished = {\url{https://www.ofcom.org.uk/__data/assets/pdf_file/0038/194897
 }
 
 @misc{Kua-2017-a-survey-rate-adaptation-dash,
-    abstract = {With companies such as Netflix and YouTube accounting for more than 50% of the peak download traffic on North American fixed networks in 2015, video streaming represents a significant source of Internet traffic. Multimedia delivery over the Internet has evolved rapidly over the past few years. The last decade has seen video streaming transitioning from User Datagram Protocol to Transmission Control Protocol-based technologies. Dynamic adaptive streaming over HTTP (DASH) has recently emerged as a standard for Internet video streaming. A range of rate adaptation mechanisms are proposed for DASH systems in order to deliver video quality that matches the throughput of dynamic network conditions for a richer user experience. This survey paper looks at emerging research into the application of client-side, server-side, and in-network rate adaptation techniques to support DASH-based content delivery. We provide context and motivation for the application of these techniques and review significant works in the literature from the past decade. These works are categorized according to the feedback signals used and the end-node that performs or assists with the adaptation. We also provide a review of several notable video traffic measurement and characterization studies and outline open research questions in the field.},
     author = {Kua, J. and Armitage, G. and Branch, P.},
     booktitle = {IEEE Communications Surveys and Tutorials},
     doi = {10.1109/COMST.2017.2685630},
@@ -474,7 +471,6 @@ howpublished = {\url{https://www.ofcom.org.uk/__data/assets/pdf_file/0038/194897
 	pagetotal =	58,
 	year =		2008,
 	month =		sep,
-	abstract =	{This document specifies TCP Friendly Rate Control (TFRC). TFRC is a congestion control mechanism for unicast flows operating in a best-effort Internet environment. It is reasonably fair when competing for bandwidth with TCP flows, but has a much lower variation of throughput over time compared with TCP, making it more suitable for applications such as streaming media where a relatively smooth sending rate is of importance. This document obsoletes RFC 3448 and updates RFC 4342. {[}STANDARDS-TRACK{]}},
 }
 
 @inproceedings{Carlucci-2016-Analysis-WebRTC,
@@ -492,7 +488,6 @@ howpublished = {\url{https://www.ofcom.org.uk/__data/assets/pdf_file/0038/194897
 }
 
 @inproceedings{Arun-2018-copa,
-    abstract = {This paper introduces Copa, an end-to-end congestion control algorithm that uses three ideas. First, it shows that a target rate equal to 1/($\delta$d q), where d q is the (measured) queueing delay, optimizes a natural function of throughput and delay under a Markovian packet arrival model. Second, it adjusts its congestion window in the direction of this target rate, converging quickly to the correct fair rates even in the face of significant flow churn. These two ideas enable a group of Copa flows to maintain high utilization with low queuing delay. However, when the bottleneck is shared with loss-based congestion-controlled flows that fill up buffers, Copa, like other delay-sensitive schemes, achieves low throughput. To combat this problem, Copa uses a third idea: detect the presence of buffer-fillers by observing the delay evolution , and respond with additive-increase/multiplicative decrease on the $\delta$ parameter. Experimental results show that Copa outperforms Cubic (similar throughput, much lower delay, fairer with diverse RTTs), BBR and PCC (significantly fairer, lower delay), and co-exists well with Cubic unlike BBR and PCC. Copa is also robust to non-congestive loss and large bottleneck buffers, and outperforms other schemes on long-RTT paths.},
     author = {Arun, V. and Balakrishnan, H.},
     booktitle = {NSDI '18},
     isbn = {978-1-939133-01-4},
@@ -528,7 +523,6 @@ howpublished = {\url{https://www.ofcom.org.uk/__data/assets/pdf_file/0038/194897
 
 
 @inproceedings{Spiteri2016,
-abstract = {Modern video players employ complex algorithms to adapt the bitrate of the video that is shown to the user. Bitrate adaptation requires a tradeoff between reducing the probability that the video freezes and enhancing the quality of the video shown to the user. A bitrate that is too high leads to frequent video freezes (i.e., rebuffering), while a bitrate that is too low leads to poor video quality. Video providers segment the video into short chunks and encode each chunk at multiple bitrates. The video player adaptively chooses the bitrate of each chunk that is downloaded, possibly choosing different bitrates for successive chunks. While bitrate adaptation holds the key to a good quality of experience for the user, current video players use ad-hoc algorithms that are poorly understood. We formulate bitrate adaptation as a utility maximization problem and devise an online control algorithm called BOLA that uses Lyapunov optimization techniques to minimize rebuffering and maximize video quality. We prove that BOLA achieves a time-average utility that is within an additive term O(1/V) of the optimal value, for a control parameter V related to the video buffer size. Further, unlike prior work, our algorithm does not require any prediction of available network bandwidth. We empirically validate our algorithm in a simulated network environment using an extensive collection of network traces. We show that our algorithm achieves near-optimal utility and in many cases significantly higher utility than current state-of-the-art algorithms. Our work has immediate impact on real-world video players and BOLA is part of the reference player implementation for the evolving DASH standard for video transmission.},
 author = {Spiteri, K. and Urgaonkar, R. and Sitaraman, R. K.},
 booktitle = {Proceedings - IEEE INFOCOM},
 doi = {10.1109/INFOCOM.2016.7524428},
@@ -644,7 +638,6 @@ year = 2016
 }
 
 @article{Karagkioules-2020-achieving-low-latency,
-    abstract = {Achieving low-latency is paramount for live streaming scenarios, that are now-days becoming increasingly popular. In this paper, we propose a novel algorithm for bitrate adaptation in HTTP Adaptive Streaming (HAS), based on Online Convex Optimization (OCO). The proposed algorithm, named Learn2Adapt-LowLatency (L2A-LL), is shown to provide a robust adaptation strategy which, unlike most of the state-of-the-art techniques, does not require parameter tuning, channel model assumptions, throughput estimation or application-specific adjustments. These properties make it very suitable for users who typically experience fast variations in channel characteristics. The proposed algorithm has been implemented in DASH-IF's reference video player (dash.js) and has been made publicly available for research purposes at [22]. Real experiments show that L2A-LL reduces latency significantly, while providing a high average streaming bit-rate, without impairing the overall Quality of Experience (QoE); a result that is independent of the channel and application scenarios. The presented optimization framework, is robust due to its design principle; its ability to learn and allows for modular QoE prioritization, while it facilitates easy adjustments to consider applications beyond live streaming and/or multiple user classes. CCS CONCEPTS • Information systems → Multimedia streaming.},
     author = {Karagkioules, T. and Mekuria, R. and Griffioen, D. and Wagenaar, A.},
     doi = {10.1145/3339825},
     isbn = {9781450368452},
@@ -663,7 +656,6 @@ year = 2016
 }
 
 @inproceedings{Gerla-2001-tcp-westwood,
-    abstract = {We study the performance of TCP Westwood (TCPW), a new TCP protocol with a sender-side modification of the window congestion control scheme. TCP Westwood controls the window using end-to-end rate estimation in a way that is totally transparent to routers and to the destination. Thus, it is compatible with any network and TCP implementation. The key innovative idea is to continuously estimate, at the TCP sender, the packet rate of the connection by monitoring the ACK reception rate. The estimated connection rate is then used to compute congestion window and slow start threshold settings after a congestion episode. Resetting the window to match available bandwidth makes TCPW more robust to sporadic losses due to wireless channel problems. These often cause conventional TCP to overreact, leading to unnecessary window reduction. Experimental studies of TCPW show significant improvements in throughput performance over Reno and SACK, particularly in mixed wired/wireless networks over high-speed links. The contributions of this paper include a model for fair and friendly sharing of the bottleneck link and a Markov Chain performance model in presence of link errors/loss. TCPW performance is compared to that of TCP Reno, and analytic results are validated against simulation results. Internet and laboratory measurements using a Linux TCPW implementation are also reported, providing further evidence of the gains achievable via TCPW.},
     author = {Gerla, M. and Sanadidi, M. Y. and Wang, R. and Zanella, A. and Casetti, C. and Mascolo, S.},
     booktitle = {Conference Record / IEEE Global Telecommunications Conference},
     doi = {10.1109/glocom.2001.965869},
