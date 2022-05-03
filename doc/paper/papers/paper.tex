@@ -161,7 +161,7 @@ We first describe our experimental setup (\S\ref{sec:experimental-setup}), which
 \label{sec:experimental-setup}
 
 % Overview
-Our evaluation testbed consists of a network emulated in Mininet, running on Ubuntu 20.04, as shown in Figure~\ref{fig:experimental-setup}. Both the server and its clients use TCP New Reno, widely used for video delivery~\cite{Mishra-2019-the-great-internet-tcp-congestion-control-census} and run Linux Kernel 5.4.0 modified to include New CWV and RFC 3339~\cite{rfc3339-precise-timestamps} compliant timestamps to enable higher precision event tracking. 
+Our evaluation testbed consists of a network emulated in Mininet, running on Ubuntu 20.04, as shown in Figure~\ref{fig:experimental-setup}. Both the server and its clients use TCP New Reno and run Linux Kernel 5.4.0 modified to include New CWV and RFC 3339~\cite{rfc3339-precise-timestamps} compliant timestamps to enable higher precision event tracking. 
 
 % Server
 The server uses \texttt{nginx} (v1.18) with HTTP/2, serving three representations of Big Buck Bunny~\cite{online-bbb}: 480p (0.44Mbps), 720p (2.64Mbps), and 1080p (4.82Mbps). Each is encoded in chunks of 3 seconds duration.
