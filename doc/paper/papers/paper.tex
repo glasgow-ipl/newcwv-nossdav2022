@@ -212,7 +212,9 @@ The case where, we do not see this pattern for FTTC is the one client on FTTC li
   \label{fig:lost-packets}
 \end{figure}
 
-We illustrate the impact of New CWV on packet loss rates in Figure \ref{fig:lost-packets}. New CWV consistently achieves lower loss rates when compared to CWV, with New CWV connections having packet loss rates that are up to half that of CWV connections. As explained in Section \ref{sec:background}, New CWV exits slow-start earlier, does not overshoot its window, and therefore is able to avoid the loss seen near the end of slow-start that CWV experiences (Figure~\ref{fig:transmission-after-idle}). Nazir et al.~\cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv} observed similar loss values both when New CWV is enabled and when it is not; we believe this due to the much larger RTT value they used.
+We illustrate the impact of New CWV on packet loss in Figure \ref{fig:lost-packets}. New CWV consistently achieves lower loss when compared to CWV, with the former having packet loss rates that are up to half of the latter. This confirms our hypothesis for loss and conforms to the description in Section \ref{sec:background}: New CWV exits slow-start earlier, does not overshoot its window, and therefore is able to avoid the loss seen near the end of slow-start that CWV experiences (Figure~\ref{fig:transmission-after-idle}). Previous work~\cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv} observed different loss values when comparing New CWV and CWV connections. We address this in Section \ref{sec:summary}.
+
+The loss values shown here are reported as seen when the \textsc{dynamic} algorithm was used to request video. We have not shown a graph for \textsc{throughput} as well, as we observed that these two algorithms do not make a significant difference with respect to the amount of lost packets.
 
 
 %--------------------------------------------------------------------------------------------------
