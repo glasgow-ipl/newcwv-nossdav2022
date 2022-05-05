@@ -237,7 +237,7 @@ To evaluate this, we collect instantaneous and smoothed bandwidth estimates from
     \includegraphics[width=\textwidth]{figures/Throughput_FTTC.pdf}
     \label{fig:throughput-clients-FTTC}
   }
-  \caption{dash.js client throughput measurements}
+  \caption{Measured dash.js client bandwidth estimates}
   \label{fig:throughput-clients}
 \end{figure*}
 
@@ -265,10 +265,10 @@ Nazir et al.~\cite{Nazir-2014-performance-evaluation-congestion-window-validatio
   \label{fig:lost-packets}
 \end{figure}
 
-We illustrate the impact of New CWV on packet loss in Figure~\ref{fig:lost-packets}. New CWV consistently achieves lower loss when compared to CWV, with the former having packet loss rates that are up to half of the latter. This confirms our hypothesis for loss and conforms to the description in Section \ref{sec:background}: New CWV exits slow-start earlier, does not overshoot its window, and therefore is able to avoid the loss seen near the end of slow-start that CWV experiences (Figure~\ref{fig:transmission-after-idle}).
+We illustrate the impact of New CWV on packet loss in Figure~\ref{fig:lost-packets}. New CWV consistently achieves lower loss compared to CWV, with the former having packet loss rates that are less thsn half the latter. This confirms our hypothesis for loss, and matches Section \ref{sec:background}: New CWV exits slow-start earlier, does not overshoot its window, and therefore is able to avoid loss at the end of slow-start.
 
-The loss values shown here are reported as seen when the \textsc{dynamic} algorithm was used to request video. We have not shown a graph for \textsc{throughput} as well, as we observed that these two algorithms do not make a significant difference with respect to the amount of lost packets.
-
+The loss values shown in Fig.\ \ref{fig:lost-packets} are reported for the \textsc{dynamic} rate adaptation algorithm. Results for the \textsc{throughput} algorithm show no significant differences.
+\todo{Is this just true for loss, or for all the results in this section?}
 
 %--------------------------------------------------------------------------------------------------
 \subsection{Impact on Video QoE}
