@@ -106,7 +106,7 @@
   %  - Say what your solution achieves
   %  - Say what follows from your solution
 
-When using HTTP adaptive streaming, video traffic exhibits on-off behaviour with frequent idle periods that can interact poorly with TCP congestion control algorithms. New congestion window validation (New CWV) modifies TCP to allow senders to restart more quickly after certain idle periods. While previous work has shown that New CWV can improve \emph{transport} performance for streaming video, it remains to demonstrate that this translates to improved \emph{application} level performance, in terms of playback stability. In this paper, we show that enabling New CWV can reduce video re-buffering events by up to 4\%, and limit representation switches by 12\%, without any changes to existing rate adaptation algorithms.
+When using HTTP adaptive streaming, video traffic exhibits on-off behaviour with frequent idle periods that can interact poorly with TCP congestion control algorithms. New congestion window validation (New CWV) modifies TCP to allow senders to recover their sending rate more quickly after certain idle periods. While previous work has shown that New CWV can improve \emph{transport} performance for streaming video, it has not been shown if this translates to improved \emph{application} performance in terms of playback stability. In this paper, we show that New CWV can reduce video re-buffering events by up to 4\%, and limit representation switches by 12\%, without any changes to existing rate adaptation algorithms.
 
 \end{abstract}
 \maketitle
