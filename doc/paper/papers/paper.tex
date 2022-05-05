@@ -250,8 +250,8 @@ The FTTC results, Fig.\ \ref{fig:throughput-clients-FTTC}, show a consistently t
 %
 FTTP results are not shown, since in no case was the link capacity reached, and there were no significant difference in performance between CWV and New CWV. \todo{Is this correct?}
 
-
-We note that in reality, presence of cross-traffic is likely to occur and also note that even in this case New CWV's video stability was higher as shown in Section \ref{sec:QoE-impact}. For all other cases, since clients were able to leave slow-start earlier, having less oscillating \emph{cwnd} compared to that of clients using CWV and have expectedly shown a steeper CDF throughput function. 
+\todo{Not clear what the following is trying to say}
+We note that cross-traffic is likely in real deployments. We also note that even in this case New CWV's video stability was higher as shown in Section \ref{sec:QoE-impact}. For all other cases, since clients were able to leave slow-start earlier, having less oscillating \emph{cwnd} compared to that of clients using CWV and have expectedly shown a steeper CDF throughput function. 
 
 In addition to being more consistent, 
 Clients with New CWV enabled reported estimates that were lower overall. This can be explained by the behaviour of CWV illustrated in Figure~\ref{fig:cwv}: CWV will always reach the maximum link capacity because of its longer slow-start phase. Nazir et al.~\cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}also saw this behaviour. This also supports our initial hypothesis that streaming clients measuring throughput will be able to obtain estimates that are more stable. Finally, as for all client combinations the FTTP link's capacity was much higher than what the highest rate the video clients demanded, both clients with New CWV and CWV showcased similar performance having high stability.
