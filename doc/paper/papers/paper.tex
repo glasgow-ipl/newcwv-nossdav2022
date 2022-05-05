@@ -166,18 +166,19 @@ To address this, new congestion window validation~\cite{rfc7661-2015-fairhurst-n
     \includegraphics[width=.45\textwidth, keepaspectratio]{figures/lost_packets_newcwv.pdf}
     \label{fig:transmission-after-idle-newcwv}
   }
-  \label{fig:transmission-after-idle}
+  \\
   \subfloat[CWV]{
     \includegraphics[width=.45\textwidth, keepaspectratio]{figures/lost_packets_vreno.pdf}
     \label{fig:transmission-after-idle-reno}
   }
   \caption{Resumption after an idle period}
+  \label{fig:transmission-after-idle}
 \end{figure}
 
 We have implemented New CWV in the Linux kernel\footnote{A snapshot of our implementation, as used in this paper, is available at \url{http://dx.doi.org/10.5525/gla.researchdata.1278}, while the main repository for the work is at \url{https://github.com/glasgow-ipl/newcwv-nossdav2022}.}. We used \cite{secchi-2016-newcwv} as a base, which provides an implementation for Linux 3.18, and ported the changes to Linux 5.4. Our implementation altered two files, adding 143 and removing 49 lines of code.
 
 We use this implementation to better illustrate the impact of New CWV on flows restarting after an idle period, as shown in Figure \ref{fig:transmission-after-idle}.
-The connection using New CWV (Figure \ref{fig:transmission-after-idle-newcwv}) uses the previously set \emph{ssthresh} value and leaves slow-start early, avoiding packet loss, after reaching the \emph{ssthresh} in the third flight of packets after restarting. 
+The New CWV connection (Figure \ref{fig:transmission-after-idle-newcwv}) uses the previously set \emph{ssthresh} value and leaves slow-start early, avoiding packet loss, after reaching the \emph{ssthresh} in the third flight of packets after restarting. 
 In contrast, if the same connection used CWV, the senders would not have preserved the \emph{ssthresh} value and would rely on loss to exit slow-start, as seen at the end of the third and fourth flights of packets in Figure \ref{fig:transmission-after-idle-reno}. In this example, the connection using CWV enters congestion avoidance \textasciitilde160ms after transmission restarts, while that using New CWV is able to enter congestion avoidance \textasciitilde50ms earlier and avoid packet loss.
 Overall, New CWV results in fewer lost packets, and returns to its previous sending rate without overshoot after loss, giving more predictable transmission.
 
