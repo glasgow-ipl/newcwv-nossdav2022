@@ -141,10 +141,12 @@ We structure the remainder of this paper as follows. In Section~\ref{sec:backgro
   \centering
     \subfloat[CWV]{
       \includegraphics[width=.23\textwidth]{figures/cwv.pdf}
+      \Description{Illustration of cwnd growth over time, with Congestion Window Validation enabled.}
       \label{fig:cwv}
     }
     \subfloat[New CWV]{
       \includegraphics[width=.23\textwidth,]{figures/new_cwv.pdf}
+      \Description{Illustration of cwnd growth over time, with New Congestion Window Validation enabled.}
       \label{fig:newcwv}
     }
     \caption{\emph{cwnd} growth following an idle period}
@@ -164,11 +166,13 @@ To address this, new congestion window validation~\cite{rfc7661-2015-fairhurst-n
   \centering
   \subfloat[New CWV]{
     \includegraphics[width=.45\textwidth, keepaspectratio]{figures/lost_packets_newcwv.pdf}
+    \Description{Scatter plot showing the impact of New Congestion Window Validation on tail packet losses across several flights of packets. New Congestion Window Validation allows packet loss to be avoided.}
     \label{fig:transmission-after-idle-newcwv}
   }
   \\
   \subfloat[CWV]{
     \includegraphics[width=.45\textwidth, keepaspectratio]{figures/lost_packets_vreno.pdf}
+    \Description{Scatter plot showing the impact of Congestion Window Validation on tail packet losses across several flights of packets. Congestion Window Validation, in relying on packet loss to exit slow start, causes tail loss for several flights of packets.}
     \label{fig:transmission-after-idle-reno}
   }
   \caption{Resumption after an idle period}
@@ -191,6 +195,7 @@ New CWV has been shown to improve \emph{transport} layer performance of rate-lim
 \begin{figure}
   \centering
   \includegraphics[width=.45\textwidth]{figures/setup.pdf}
+  \Description{Illustration of the experimental setup. The server, running Congestion Window Validation or New Congestion Window Validation, serves encoded video over an emulated link to up to 5 clients.}
   \caption{Experimental Setup}
   \label{fig:experimental-setup}
 \end{figure}
@@ -230,11 +235,13 @@ To evaluate this, we collect the client's instantaneous and smoothed bandwidth e
   \centering
   \subfloat[DSL]{
     \includegraphics[width=\textwidth]{figures/Throughput_DSL.pdf}
+    \Description{Cumulative Distribution Function plots showing the distribution of bandwidth estimates under the emulated DSL link, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
     \label{fig:throughput-clients-DSL}
   }
   \\
   \subfloat[FTTC]{
     \includegraphics[width=\textwidth]{figures/Throughput_FTTC.pdf}
+    \Description{Cumulative Distribution Function plots showing the distribution of bandwidth estimates under the emulated FTTC link, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
     \label{fig:throughput-clients-FTTC}
   }
   \caption{dash.js client throughput measurements}
@@ -250,7 +257,8 @@ Clients with New CWV enabled reported estimates that were lower overall. This ca
 \begin{figure}[t!]
   \centering
   \includegraphics[width=.45\textwidth]{figures/lost_packets.pdf}
-  \caption{Lost Packets DSL}
+  \Description{Boxplots showing the percentage of packets loss under the emulated DSL link, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
+  \caption{Lost Packets DSL \todo{adaptation algo?}}
   \label{fig:lost-packets}
 \end{figure}
 
@@ -266,6 +274,7 @@ The loss values shown here are reported as seen when the \textsc{dynamic} algori
 \begin{figure*}
   \centering
   \includegraphics[width=\textwidth, keepaspectratio]{figures/bitrate_derivative_distribution.pdf}
+  \Description{Bar plots showing the distribution of representation changes under the emulated DSL link, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
   \caption{Absolute Bitrate Switches (\textsc{throughput})}
   \label{fig:bitrate-switches}
 \end{figure*}
@@ -273,21 +282,24 @@ The loss values shown here are reported as seen when the \textsc{dynamic} algori
 \begin{figure*}
   \centering
   \includegraphics[width=\textwidth, keepaspectratio]{figures/bitrate_derivative_distribution_dynamic.pdf}
+  \Description{Bar plots showing the distribution of representation changes under the emulated FTTC link, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
   \caption{Absolute Bitrate Switches (\textsc{dynamic})}
   \label{fig:bitrate-switches-dynamic}
 \end{figure*}
 
 
 \begin{figure}
-      \includegraphics[width=.45\textwidth, keepaspectratio]{figures/Rebuffer_Ratio.pdf}
-    \caption{Rebuffer Ratio (\textsc{throughput})}
+    \includegraphics[width=.45\textwidth, keepaspectratio]{figures/Rebuffer_Ratio.pdf}
+    \Description{Boxplots showing the rebuffer ratio under the emulated DSL link, with the throughput algorithm, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
+    \caption{Rebuffer Ratio (\textsc{throughput}) \todo{link type?}}
     \label{fig:rebuffer-ratio}
 \end{figure}
 
 \begin{figure}
-  \includegraphics[width=.45\textwidth, keepaspectratio]{figures/Rebuffer_Ratio_dynamic.pdf}
-\caption{Rebuffer Ratio (\textsc{dynamic})}
-\label{fig:rebuffer-ratio-dynamic}
+    \includegraphics[width=.45\textwidth, keepaspectratio]{figures/Rebuffer_Ratio_dynamic.pdf}
+    \Description{Boxplots showing the rebuffer ratio under the emulated DSL link, with the dynamic algorithm, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
+    \caption{Rebuffer Ratio (\textsc{dynamic}) \todo{link type?}}
+    \label{fig:rebuffer-ratio-dynamic}
 \end{figure}
 
 To evaluate whether the improved transport layer performance of New CWV translates into improved QoE at the application layer, we report results for the rebuffer ratio and the bitrate switch frequency. We report results for the DSL evaluations, as this link type, in combination with the video encodings used, best highlights the scenario in which New CWV is most beneficial. With FTTP the combination of clients and video encodings enabled all clients to stream at the highest quality without hitting the link limits. This was also the case for all FTTC simulations, with the exception of the 5 client one. In it, we observed a similar pattern as that shown for DSL. We believe that the problem we describe here would be applicable to faster links as applications' network demands increase, f.e., higher video resolutions are seeing more deployment, or as other network-heavy applications start competing for the links' resources (e.g., virtual and augmented reality). Furthermore, we note that the issues we found with the DSL link still have high impact as over 30\% of the households in the UK used a ADSL2 connection or similar in 2019 \cite{ofcom-2020-report}. 
