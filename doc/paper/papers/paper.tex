@@ -267,7 +267,8 @@ Figure \ref{fig:rebuffer-ratio} shows the fraction of the video playback where t
 
 Figure \ref{fig:rebuffer-ratio-dynamic} shows the fraction of the video playback where the connection's media did not progress or otherwise was waiting for more content before it can resume playing for the \textsc{dynamic}. The value is shown in percentage relative to the whole media playtime. Similar to our discussion on Figure \ref{fig:bitrate-switches-dynamic}, we see that the performance of the connections using CWV has improved, rebuffer-ratio is lower, when \textsc{dynamic} is used. Again, we see that the performance of the New CWV connections does not differ significantly from what was already observed with \textsc{throughput} and is still better than the performance of connections with CWV even in the cases where \textsc{dynamic} was used.
 
-
+% Looking at the average-bitrate 
+% in the cases where they are different New CWV is more stable (\todo{X\% more stable})
 In this paper, we have not shown average bit-rate data, since in all evaluated scenarios connections with New CWV and with CWV have shown similar performance. Additionally, in the rare cases where performance differed, connections using CWV, had achieved slightly higher average bit-rate, however, this rate was not supported by the network link, as we not that the bit-rate switches and the rebuffering for these connections was also higher.
 
 We conclude that New CWV achieves higher video stability when multiple clients are competing on a constrained link, with improved encoding stability and decreased rebuffering time. We have observed this behaviour mainly on the simulated DSL link, since our highest video encoding is just under 5Mbps, however, we note that in practice higher encodings are also used.\footnote{\url{https://support.google.com/youtube/answer/1722171}}
