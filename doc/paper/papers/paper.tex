@@ -249,7 +249,7 @@ The case where, we do not see this pattern for FTTC is the one client on FTTC li
   \label{fig:lost-packets}
 \end{figure}
 
-We illustrate the impact of New CWV on packet loss in Figure \ref{fig:lost-packets}. New CWV consistently achieves lower loss when compared to CWV, with the former having packet loss rates that are up to half of the latter. This confirms our hypothesis for loss and conforms to the description in Section \ref{sec:background}: New CWV exits slow-start earlier, does not overshoot its window, and therefore is able to avoid the loss seen near the end of slow-start that CWV experiences (Figure~\ref{fig:transmission-after-idle}). Previous work~\cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv} observed different loss values when comparing New CWV and CWV connections. We address this in Section \ref{sec:summary}.
+We illustrate the impact of New CWV on packet loss in Figure \ref{fig:lost-packets}. New CWV consistently achieves lower loss when compared to CWV, with the former having packet loss rates that are up to half of the latter. This confirms our hypothesis for loss and conforms to the description in Section \ref{sec:background}: New CWV exits slow-start earlier, does not overshoot its window, and therefore is able to avoid the loss seen near the end of slow-start that CWV experiences (Figure~\ref{fig:transmission-after-idle}).
 
 The loss values shown here are reported as seen when the \textsc{dynamic} algorithm was used to request video. We have not shown a graph for \textsc{throughput} as well, as we observed that these two algorithms do not make a significant difference with respect to the amount of lost packets.
 
@@ -312,11 +312,10 @@ We found that \textsc{dynamic} improved the QoE for connections using CWV, but d
 \subsection{Summary}
 \label{sec:summary}
 
-Compared to \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv} Figure~\ref{fig:throughput-clients} observed similar throughput distribution pattern. We observed lower loss for New CWV connections than they documented. We note that our environment tries to represent a more realistic case for video streaming as of the time of writing this paper. We have reconstructed their environment and used incremental RTT values starting from 40 (the value we used) going to 200 ms (the value they used) in incremental steps of 10 ms. We confirm that as the RTT increases New CWV connections experience higher loss and start to show closer results to when CWV is used. However, even with our incremental RTTs we have not managed to get higher but not as high loss rate as the one reported by the original authors. We attribute this difference to the fact that they used an older version of New Reno and their adaptive algorithm was very different to the current, dash.js, ones. 
+% Compared to \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv} Figure~\ref{fig:throughput-clients} observed similar throughput distribution pattern. We observed lower loss for New CWV connections than they documented. We note that our environment tries to represent a more realistic case for video streaming as of the time of writing this paper. We have reconstructed their environment and used incremental RTT values starting from 40 (the value we used) going to 200 ms (the value they used) in incremental steps of 10 ms. We confirm that as the RTT increases New CWV connections experience higher loss and start to show closer results to when CWV is used. However, even with our incremental RTTs we have not managed to get higher but not as high loss rate as the one reported by the original authors. We attribute this difference to the fact that they used an older version of New Reno and their adaptive algorithm was very different to the current, dash.js, ones. 
 
-Additionally, we observed that New CWV's more consistent bandwidth measurements (Figure~\ref{fig:throughput-clients}) translate to fewer representation switches (Figure \ref{fig:bitrate-switches}). 
-This is since the more consistent measurements better match the available network conditions, allowing clients using New CWV to better adapt to the constraints of the bottleneck link. This also results in requesting chunks that can be delivered on time without need of rebuffering (Figure \ref{fig:rebuffer-ratio}).
-\todo{Maybe a more neutral phrasing for this paragraph would be: ``We have presented results as follows: (i) we validated...; (ii) the use of New CWV effectively...; (iii) the more consistent application bandwidth measurements resulting from the use of New CWV...; and (iv) more consistent measurements...''}
+We observed that New CWV's more consistent bandwidth measurements (Figure~\ref{fig:throughput-clients}) translate to fewer lost packets (Figure~\ref{fig:lost-packets}), fewer representation switches (Figures \ref{fig:bitrate-switches} \& \ref{fig:bitrate-switches-dynamic}), and lower rebuffering ratio (Figures \ref{fig:rebuffer-ratio} \& \ref{fig:rebuffer-ratio-dynamic}).
+This is since the more consistent measurements better match the available network conditions, allowing clients using New CWV to better adapt to the constraints of the bottleneck link. 
 
 The scenarios investigated by this work have used links that emulated a wired
 residential Internet connection.  WiFi and cellular links, however, are known
@@ -336,6 +335,8 @@ bandwidth estimates during slow start, in both cases to avoid the overshoot
 problems we discuss in Section \ref{sec:background} and improve stability.
 These can potentially benefit from retaining state after idle periods in
 the manner of New CWV; exploring this is for future work.
+
+We have constructed a similar environment to \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv} and have conceptually performed the same experiments. However, our environment was built to match the scenarios that could be seen in 2022. Our findings broadly overlapped with theirs, however, comparing both results would not be fair or possible because of the already mentioned differences in the environments. 
 
 %==================================================================================================
 \section{Related Work}
