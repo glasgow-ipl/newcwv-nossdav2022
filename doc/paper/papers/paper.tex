@@ -222,13 +222,13 @@ During each run we collect client bandwidth estimates. Additionally, to evaluate
 \subsection{Impact on Transport Performance} 
 \label{sec:transport-impact}
 
-New CWV alters the TCP \emph{cwnd} sizing behaviour, allowing it to recover more quickly after an idle period. As shown in Figures~\ref{fig:newcwv} and \ref{fig:transmission-after-idle-newcwv}, New CWV avoids the packet loss associated with CWV, and we therefore expect clients to report more stable available link bandwidth estimates. 
+New CWV alters TCP \emph{cwnd} sizing behaviour, allowing it to recover more quickly after idle periods, and, as shown in Section \ref{sec:background}, prevents packet loss when exiting slow start which should give more stable bandwidth estimates. 
 
-To evaluate this, we collect the client's instantaneous and smoothed bandwidth estimates. The instantaneous estimate is obtained by dividing the size of the chunk by the time taken to download it. The smoothed estimate is a function of the instantaneous estimate and other variables, f.e., historical measurement data and safety or ``dampening'' factors. In short, the former is the throughput measurement as seen by the end-point, while the latter is the input value to the client's rate adaptation algorithm.
+To evaluate this, we collect instantaneous and smoothed bandwidth estimates from the clients. The instantaneous estimate is obtained by dividing the size of the chunk by the time taken to download it. The smoothed estimate is a function of the instantaneous estimate and other variables, f.e., historical measurement data and safety or ``dampening'' factors. The former is the throughput measurement as seen by the end-point, while the latter is the input value to the client's rate adaptation algorithm.
 
 \begin{figure*}[t!]
   \centering
-  \subfloat[DSL]{
+  \subfloat[ADSL2]{
     \includegraphics[width=\textwidth]{figures/Throughput_DSL.pdf}
     \label{fig:throughput-clients-DSL}
   }
@@ -241,8 +241,17 @@ To evaluate this, we collect the client's instantaneous and smoothed bandwidth e
   \label{fig:throughput-clients}
 \end{figure*}
 
-Figure~\ref{fig:throughput-clients} shows the cumulative distribution function of all instantaneous and smoothed throughput measurements as seen by the clients. In it, a steep function would indicate that most throughput values have seen little variation, and are therefore highly consistent. 
-This is the case for all FTTC cases except the one with one client, where the link capacity was much higher than the highest video representation bandwidth requirement. Because of this high discrepancy the New CWV client could not operate close to the link capacity and therefore could not get an accurate estimation of the available capacity. We note that in reality, presence of cross-traffic is likely to occur and also note that even in this case New CWV's video stability was higher as shown in Section \ref{sec:QoE-impact}. For all other cases, since clients were able to leave slow-start earlier, having less oscillating \emph{cwnd} compared to that of clients using CWV and have expectedly shown a steeper CDF throughput function. 
+The cumulative distribution of instantaneous and smoothed throughput is shown in 
+Figure~\ref{fig:throughput-clients}. 
+%
+The ADSL2 results, Fig.\ \ref{fig:throughput-clients-DSL}, show \todo{what?}
+%
+The FTTC results, Fig.\ \ref{fig:throughput-clients-FTTC}, show a consistently tighter distribution with New CWV than CWV, representing a more stable throughput estimate. The exception is when only one client is used, where the link capacity was much higher than the total video bandwidth that could be requested; preventing the client from obtaining an accurate estimation of the available capacity.
+%
+FTTP results are not shown, since in no case was the link capacity reached, and there were no significant difference in performance between CWV and New CWV. \todo{Is this correct?}
+
+
+We note that in reality, presence of cross-traffic is likely to occur and also note that even in this case New CWV's video stability was higher as shown in Section \ref{sec:QoE-impact}. For all other cases, since clients were able to leave slow-start earlier, having less oscillating \emph{cwnd} compared to that of clients using CWV and have expectedly shown a steeper CDF throughput function. 
 
 In addition to being more consistent, 
 Clients with New CWV enabled reported estimates that were lower overall. This can be explained by the behaviour of CWV illustrated in Figure~\ref{fig:cwv}: CWV will always reach the maximum link capacity because of its longer slow-start phase. Nazir et al.~\cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}also saw this behaviour. This also supports our initial hypothesis that streaming clients measuring throughput will be able to obtain estimates that are more stable. Finally, as for all client combinations the FTTP link's capacity was much higher than what the highest rate the video clients demanded, both clients with New CWV and CWV showcased similar performance having high stability.
