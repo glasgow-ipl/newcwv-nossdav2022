@@ -68,33 +68,21 @@
 
 \begin{CCSXML}
 <ccs2012>
-   <concept>
+  <concept>
        <concept_id>10003033.10003039.10003048</concept_id>
        <concept_desc>Networks~Transport protocols</concept_desc>
        <concept_significance>300</concept_significance>
-       </concept>
-   <concept>
-       <concept_id>10003033.10003039.10003051</concept_id>
-       <concept_desc>Networks~Application layer protocols</concept_desc>
-       <concept_significance>300</concept_significance>
-       </concept>
-   <concept>
+  </concept>
+  <concept>
        <concept_id>10003033.10003079.10003081</concept_id>
        <concept_desc>Networks~Network simulations</concept_desc>
        <concept_significance>100</concept_significance>
-       </concept>
-   <concept>
-       <concept_id>10003033.10003068.10003073.10003075</concept_id>
-       <concept_desc>Networks~Network control algorithms</concept_desc>
-       <concept_significance>500</concept_significance>
-       </concept>
+  </concept>
  </ccs2012>
 \end{CCSXML}
 
 \ccsdesc[300]{Networks~Transport protocols}
-\ccsdesc[300]{Networks~Application layer protocols}
 \ccsdesc[100]{Networks~Network simulations}
-\ccsdesc[500]{Networks~Network control algorithms}
 
 \keywords{TCP, MPEG DASH, Congestion Window Validation}
 
@@ -141,10 +129,12 @@ We structure the remainder of this paper as follows. In Section~\ref{sec:backgro
   \centering
     \subfloat[CWV]{
       \includegraphics[width=.23\textwidth]{figures/cwv.pdf}
+      \Description{Illustration of cwnd growth over time, with Congestion Window Validation enabled.}
       \label{fig:cwv}
     }
     \subfloat[New CWV]{
       \includegraphics[width=.23\textwidth,]{figures/new_cwv.pdf}
+      \Description{Illustration of cwnd growth over time, with New Congestion Window Validation enabled.}
       \label{fig:newcwv}
     }
     \caption{\emph{cwnd} growth following an idle period}
@@ -164,11 +154,13 @@ To address this, new congestion window validation~\cite{rfc7661-2015-fairhurst-n
   \centering
   \subfloat[New CWV]{
     \includegraphics[width=.45\textwidth, keepaspectratio]{figures/lost_packets_newcwv.pdf}
+    \Description{Scatter plot showing the impact of New Congestion Window Validation on tail packet losses across several flights of packets. New Congestion Window Validation allows packet loss to be avoided.}
     \label{fig:transmission-after-idle-newcwv}
   }
   \\
   \subfloat[CWV]{
     \includegraphics[width=.45\textwidth, keepaspectratio]{figures/lost_packets_vreno.pdf}
+    \Description{Scatter plot showing the impact of Congestion Window Validation on tail packet losses across several flights of packets. Congestion Window Validation, in relying on packet loss to exit slow start, causes tail loss for several flights of packets.}
     \label{fig:transmission-after-idle-reno}
   }
   \caption{Resumption after an idle period}
@@ -191,6 +183,7 @@ New CWV has been shown to improve \emph{transport} layer performance of rate-lim
 \begin{figure}
   \centering
   \includegraphics[width=.45\textwidth]{figures/setup.pdf}
+  \Description{Illustration of the experimental setup. The server, running Congestion Window Validation or New Congestion Window Validation, serves encoded video over an emulated link to up to 5 clients.}
   \caption{Experimental Setup}
   \label{fig:experimental-setup}
 \end{figure}
@@ -230,11 +223,13 @@ To evaluate this, we collect instantaneous and smoothed bandwidth estimates from
   \centering
   \subfloat[ADSL2]{
     \includegraphics[width=\textwidth]{figures/Throughput_DSL.pdf}
+    \Description{Cumulative Distribution Function plots showing the distribution of bandwidth estimates under the emulated DSL link, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
     \label{fig:throughput-clients-DSL}
   }
   \\
   \subfloat[FTTC]{
     \includegraphics[width=\textwidth]{figures/Throughput_FTTC.pdf}
+    \Description{Cumulative Distribution Function plots showing the distribution of bandwidth estimates under the emulated FTTC link, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
     \label{fig:throughput-clients-FTTC}
   }
   \caption{Measured dash.js client bandwidth estimates}
@@ -261,7 +256,8 @@ Nazir et al.~\cite{Nazir-2014-performance-evaluation-congestion-window-validatio
 \begin{figure}[t!]
   \centering
   \includegraphics[width=.45\textwidth]{figures/lost_packets.pdf}
-  \caption{Lost Packets DSL}
+  \Description{Boxplots showing the percentage of packets loss under the emulated DSL link, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
+  \caption{Lost Packets DSL \todo{adaptation algo?}}
   \label{fig:lost-packets}
 \end{figure}
 
@@ -277,6 +273,7 @@ The loss values shown in Fig.\ \ref{fig:lost-packets} are reported for the \text
 \begin{figure*}
   \centering
   \includegraphics[width=\textwidth, keepaspectratio]{figures/bitrate_derivative_distribution.pdf}
+  \Description{Bar plots showing the distribution of representation changes under the emulated DSL link, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
   \caption{Absolute Bitrate Switches (\textsc{throughput})}
   \label{fig:bitrate-switches}
 \end{figure*}
@@ -284,21 +281,24 @@ The loss values shown in Fig.\ \ref{fig:lost-packets} are reported for the \text
 \begin{figure*}
   \centering
   \includegraphics[width=\textwidth, keepaspectratio]{figures/bitrate_derivative_distribution_dynamic.pdf}
+  \Description{Bar plots showing the distribution of representation changes under the emulated FTTC link, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
   \caption{Absolute Bitrate Switches (\textsc{dynamic})}
   \label{fig:bitrate-switches-dynamic}
 \end{figure*}
 
 
 \begin{figure}
-      \includegraphics[width=.45\textwidth, keepaspectratio]{figures/Rebuffer_Ratio.pdf}
-    \caption{Rebuffer Ratio (\textsc{throughput})}
+    \includegraphics[width=.45\textwidth, keepaspectratio]{figures/Rebuffer_Ratio.pdf}
+    \Description{Boxplots showing the rebuffer ratio under the emulated DSL link, with the throughput algorithm, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
+    \caption{Rebuffer Ratio (\textsc{throughput}) \todo{link type?}}
     \label{fig:rebuffer-ratio}
 \end{figure}
 
 \begin{figure}
-  \includegraphics[width=.45\textwidth, keepaspectratio]{figures/Rebuffer_Ratio_dynamic.pdf}
-\caption{Rebuffer Ratio (\textsc{dynamic})}
-\label{fig:rebuffer-ratio-dynamic}
+    \includegraphics[width=.45\textwidth, keepaspectratio]{figures/Rebuffer_Ratio_dynamic.pdf}
+    \Description{Boxplots showing the rebuffer ratio under the emulated DSL link, with the dynamic algorithm, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
+    \caption{Rebuffer Ratio (\textsc{dynamic}) \todo{link type?}}
+    \label{fig:rebuffer-ratio-dynamic}
 \end{figure}
 
 To evaluate whether improved New CWV transport layer performance translates into improved application QoE, we explore impact on application-level metrics such as rebuffer ratio and bit rate switch frequency. 
@@ -307,7 +307,6 @@ In all cases, we report results for ADSL2 only. This link type, in combination w
 
 Figure \ref{fig:bitrate-switches} shows the bit rate switch distribution for the \textsc{throughput} algorithm; Figure \ref{fig:bitrate-switches-dynamic} shows \textsc{dynamic}.\footnote{The representation change (\emph{x-axis}) is the magnitude of the chunk-by-chunk bit rate switches. For example, if a chunk is requested at the same bit rate as the preceding chunk, the difference is zero. If the chunk is of the next higher encoding, compared to its predecessor, the difference is 1, and if it is of the next lower encoding the difference is -1, and so on.} 
 In the extreme, with 5 clients, connections with CWV experience representation changes between 17.4\% of video chunks, compared to 5.7\% for connections with New CWV. Fewer clients congest the link less, and see correspondingly fewer shifts.
-
 
 Comparing Figures~\ref{fig:bitrate-switches} and~\ref{fig:bitrate-switches-dynamic}, we see that when CWV is used, \textsc{dynamic} shows a significant reduction in representation changes compared to \textsc{throughput}. Connections using New CWV exhibit fewer representations shifts, irrespective of the rate adaptation algorithm, and are less affected by the choice of rate adaptation.
 
