@@ -175,7 +175,7 @@ As our experiments investigate the effect of New CWV when only video traffic is 
 
 We leave as future work the creation of a more complex environment, e.g., video clients starting at random times, evaluating New CWV performance when it interacts with clients in all TCP states, introducing non-homogenous traffic and cross traffic, inspecting how video controlled New CWV flows interact with other types of traffic, etc.   
 
-To evaluate the impact of congestion and competing flows, experiment were run with several (1, 2, 3, and 5) simultaneous clients. Finally, to reduce noise, we ran each combination of CWV or New CWV, number of clients, and link type, 10 times before reporting the average results. The results presented includes data accumulated from 240 simulations (2 algorithms $\times$ 3 link types $\times$ 4 client variations $\times$ 10 repetitions). 
+To evaluate the impact of congestion and competing flows, experiments were run with both the \textsc{dynamic} and \textsc{throughput} algorithms and several (1, 2, 3, and 5) simultaneous clients. Finally, to reduce noise, we ran each combination of CWV or New CWV, adaptive algorithm, number of clients, and link type, 10 times before reporting the average results. The results presented includes data accumulated from 480 simulations (2 congestion control algorithms $\times$ 2 adaptive algorithms $\times$ 3 link types $\times$ 4 client variations $\times$ 10 repetitions). 
 During each run we collect client bandwidth estimates. Additionally, to evaluate the video QoE impact we report the rebuffer ratio and bitrate switch frequency distribution.
 
 %--------------------------------------------------------------------------------------------------
