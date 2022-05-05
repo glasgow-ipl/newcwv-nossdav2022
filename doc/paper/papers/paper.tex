@@ -145,40 +145,41 @@ We structure the remainder of this paper as follows. In Section~\ref{sec:backgro
       \includegraphics[width=.23\textwidth,]{figures/new_cwv.pdf}
       \label{fig:newcwv}
     }
-    \caption{Illustration of \emph{cwnd} growth following an idle period}
+    \caption{\emph{cwnd} growth following an idle period}
     \label{fig:cwnd-growth-after-idle}
 \end{figure}
 
-In HTTP adaptive streaming, a server provides pre-encoded video chunks in different representations, each encoded at multiple bit rates, while the client, using a rate adaptation algorithm, determines the best representation to request at any given time. The goal of the client is to maximise QoE within the network's capacity. This can be a challenge since different, often contradictory, QoE heuristics need be considered simultaneously~\cite{Seufert-2015-A-Survey-on-QoE-Dash}. 
+In HTTP adaptive streaming, a server provides pre-encoded video chunks in different representations, each encoded at multiple bit rates. The client use a rate adaptation algorithm to determine the best representation to request at any given time. The goal of the client is to maximise QoE within the network's capacity. This can be a challenge since different, often contradictory, QoE heuristics need be considered \cite{Seufert-2015-A-Survey-on-QoE-Dash}. 
 
-Throughput-based rate adaptation algorithms for HTTP adaptive streaming use an estimate of the current network conditions to determine the representation that should be requested. These algorithms require a stable and accurate throughput estimate in order to perform well. However, the interaction between the on-off traffic pattern of streaming video and TCP's congestion control algorithm can lead to significant fluctuations in throughput, impacting the performance of throughput-based rate adaptation algorithms.
+Throughput-based rate adaptation algorithms require a stable and accurate estimate of TCP throughput. However, interactions between the on-off traffic pattern of streaming video and TCP congestion control can cause significant fluctuations in TCP behaviour, impacting performance.
 
 
-In particular, during idle periods in between transmission of video chunks, the TCP congestion controller's knowledge of the network capacity becomes stale. To avoid sending with a possibly unrepresentative congestion window, once the link has been idle for a period longer than the connection's retransmission timeout, $T_{rto}$, the congestion window validation~\cite{rfc2861-2000-padhye-congestion-window-validation} (CWV) algorithm resets the TCP congestion window (\emph{cwnd}) to its initial value and forces the connection to re-enter slow-start after an idle period. Figure~\ref{fig:cwv} illustrates the behaviour of CWV following an idle period. CWV has become standard practice~\cite{rfc5681-congeston-control}, and is enabled by default in the latest stable Linux kernel (5.4). However, re-entering slow-start like this, results in packet loss once the CWND grows beyond the link capacity (Figure~\ref{fig:transmission-after-idle-reno}). This was found to interact poorly with HTTP adaptive streaming and other application-limited transmissions~\cite{Esteban-2012-Interactions-HTTP-TCP}.
+In particular, during idle periods in between transmission of video chunks, the TCP congestion controller's knowledge of the network capacity becomes stale. To avoid sending with a possibly unrepresentative congestion window, once the link has been idle for a period longer than the retransmission timeout, $T_{rto}$, the congestion window validation~\cite{rfc2861-2000-padhye-congestion-window-validation} (CWV) algorithm resets the TCP congestion window (\emph{cwnd}) to its initial value and forces the connection to re-enter slow-start. Figure~\ref{fig:cwv} illustrates this behaviour. CWV has become standard practice~\cite{rfc5681-congeston-control}, and is enabled by default in the latest stable Linux kernel (5.4). This slow start after idle, however, causes bursts of packet loss when the \emph{cwnd} overshoots the link capacity at the end of the slow start (Figure~\ref{fig:transmission-after-idle-reno}). This can to interact poorly with HTTP adaptive streaming and other application-limited transmissions~\cite{Esteban-2012-Interactions-HTTP-TCP}.
 
-To address re-entering slow start, new congestion window validation~\cite{rfc7661-2015-fairhurst-new-cwnd-validation} was proposed. During a slow-start after idle rather than relying on packet loss to re-discover its appropriate \emph{cwnd} value, New CWV preserves the \emph{cwnd} before the idle period and later uses it as a slow-start threshold (\emph{ssthresh}), i.e., it to exit the slow-start phase earlier, before loss occurs. Figure~\ref{fig:newcwv} shows the growth of \emph{cwnd} following an idle period under New CWV.
+To address this, new congestion window validation~\cite{rfc7661-2015-fairhurst-new-cwnd-validation} was proposed. During slow start after idle, rather than relying on packet loss to re-discover its appropriate \emph{cwnd} value, New CWV preserves the \emph{cwnd} before the idle period and later uses it as the slow start threshold (\emph{ssthresh}). That is, it exits the slow-start phase before loss occurs, assuming no change in available bandwidth. Figure~\ref{fig:newcwv} shows the growth of \emph{cwnd} following an idle period under New CWV.
 
 \begin{figure}[t!]
   \centering
+  \subfloat[New CWV]{
+    \includegraphics[width=.45\textwidth, keepaspectratio]{figures/lost_packets_newcwv.pdf}
+    \label{fig:transmission-after-idle-newcwv}
+  }
+  \label{fig:transmission-after-idle}
   \subfloat[CWV]{
     \includegraphics[width=.45\textwidth, keepaspectratio]{figures/lost_packets_vreno.pdf}
     \label{fig:transmission-after-idle-reno}
   }
-  \\
-    \subfloat[New CWV]{
-      \includegraphics[width=.45\textwidth, keepaspectratio]{figures/lost_packets_newcwv.pdf}
-      \label{fig:transmission-after-idle-newcwv}
-    }
-    \caption{Resumption after an idle period}
-    \label{fig:transmission-after-idle}
+  \caption{Resumption after an idle period}
 \end{figure}
 
-To evaluate the transport performance of New CWV, we have implemented the algorithm within the Linux kernel~\footnote{A snapshot of our implementation, as used in this paper, is available at \url{http://dx.doi.org/10.5525/gla.researchdata.1278}, while the main repository for the work is at \url{https://github.com/glasgow-ipl/newcwv-nossdav2022}.}. We used \cite{secchi-2016-newcwv} as a base, which provides a Kernel 3.18 implementation. Our implementation altered two files adding 143 and removing 49 lines of code. We use this implementation to better illustrated the impact of New CWV on flows restarting after an idle period, as shown in Figure~\ref{fig:transmission-after-idle}.
-As shown, the connection using New CWV uses the previously set \emph{ssthresh} value and leaves slow-start early. This results in New CWV connections not experiencing any packet loss (Figure~\ref{fig:transmission-after-idle-newcwv}), after reaching their set \emph{ssthresh} value in the third flight of packets after restarting. In contrast, if the same connection used CWV, the senders would not have preserved the \emph{ssthresh} value that way and would rely on loss to exit slow-start, as seen at the end of the third and fourth flights of packets in Figure~\ref{fig:transmission-after-idle-reno}. In the presented case, CWV enters congestion avoidance around 160 milliseconds after the transmission restart (Figure \ref{fig:transmission-after-idle-reno}), while New CWV is able to enter congestion avoidance around the 110th millisecond mark (Figure \ref{fig:transmission-after-idle-newcwv}).
+We have implemented New CWV in the Linux kernel\footnote{A snapshot of our implementation, as used in this paper, is available at \url{http://dx.doi.org/10.5525/gla.researchdata.1278}, while the main repository for the work is at \url{https://github.com/glasgow-ipl/newcwv-nossdav2022}.}. We used \cite{secchi-2016-newcwv} as a base, which provides an implementation for Linux 3.18, and ported the changes to Linux 5.4. Our implementation altered two files, adding 143 and removing 49 lines of code.
 
+We use this implementation to better illustrate the impact of New CWV on flows restarting after an idle period, as shown in Figure \ref{fig:transmission-after-idle}.
+The connection using New CWV (Figure \ref{fig:transmission-after-idle-newcwv}) uses the previously set \emph{ssthresh} value and leaves slow-start early, avoiding packet loss, after reaching the \emph{ssthresh} in the third flight of packets after restarting. 
+In contrast, if the same connection used CWV, the senders would not have preserved the \emph{ssthresh} value and would rely on loss to exit slow-start, as seen at the end of the third and fourth flights of packets in Figure \ref{fig:transmission-after-idle-reno}. In this example, the connection using CWV enters congestion avoidance \textasciitilde160ms after transmission restarts, while that using New CWV is able to enter congestion avoidance \textasciitilde50ms earlier and avoid packet loss.
 Overall, New CWV results in fewer lost packets, and returns to its previous sending rate without overshoot after loss, giving more predictable transmission.
 
-New CWV has been shown to improve \emph{transport} layer performance of rate-limited applications when compared with CWV~\cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}, and our implementation and the results we have presented here validate that. It remains to show how this translates into \emph{application} layer performance, particularly since this is not guaranteed~\cite{Spiteri-2016-BOLA}. In Section~\ref{sec:evaluation}, we first validate the results of Nazir et al.~\cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}, before testing our hypothesis that New CWV will enable applications to obtain more consistent throughput estimates, and, in turn, improve the stability of throughput-based rate adaptation algorithms.
+New CWV has been shown to improve \emph{transport} layer performance of rate-limited applications when compared with CWV~\cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}, and the results we have presented here validate that, although it remains to show how this translates into \emph{application} layer performance \cite{Spiteri-2016-BOLA}. 
 
 %==================================================================================================
 \section{Evaluating New CWV for Video}
@@ -191,7 +192,8 @@ New CWV has been shown to improve \emph{transport} layer performance of rate-lim
   \label{fig:experimental-setup}
 \end{figure}
 
-We first describe our experimental setup (\S\ref{sec:experimental-setup}), which we use to investigate the transport layer impact, verify whether New CWV connections obtain more consistent throughput estimates (\S\ref{sec:transport-impact}), and later to also investigate the application impact, and more specifically, the difference on video QoE that New CWV connections observe (\S\ref{sec:QoE-impact}). Finally, we summarise our findings (\S\ref{sec:summary}).
+In this section, we first validate the results of Nazir et al.~\cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}, before testing whether New CWV will enable \emph{applications} to obtain more consistent throughput estimates, and, in turn, improve the stability of rate adaptation algorithms.
+We first describe our experimental setup (\S\ref{sec:experimental-setup}). Second, we investigate the transport layer impact to check if New CWV connections obtain more consistent throughput estimates (\S\ref{sec:transport-impact}). Then, we investigate the application impact, specifically the difference on video QoE due to New CWV (\S\ref{sec:QoE-impact}). Finally, we summarise our findings (\S\ref{sec:summary}).
 
 %--------------------------------------------------------------------------------------------------
 \subsection{Experimental Setup}
