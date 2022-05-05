@@ -292,21 +292,19 @@ to have very different properties that can affect TCP performance. Understanding
 how use of TCP New CWV affects video performance on such links is outside the
 scope of this current work.
 
-Our experiments investigated the effects of New CWV on TCP New Reno. This was done to align with
+Our experiments investigated the effects of New CWV on video delivered
+using TCP New Reno. This was done to align with
 \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv},
 and because a recent study \cite{Mishra-2019-the-great-internet-tcp-congestion-control-census}
 found New Reno was still widely used for video delivery.
-We note that NewCWV could apply for other window-controlled loss based
-algorithms, such as \textsc{cubic} for example. 
+%
+TCP Cubic grows its congestion window in slow start using the HyStart++
+algorithm \cite{draft-ietf-tcpm-hystartplusplus}, and TCP BBRv2 tracks
+bandwidth estimates during slow start, in both cases to avoid the overshoot
+problems we discuss in Section \ref{sec:background} and improve stability.
+These can potentially benefit from retaining state after idle periods in
+the manner of New CWV; exploring this is for future work.
 
- However, the modifications to TCP that New CWV introduces are a new mechanism to count the unacknowledged packets and an additional exit condition for the slow-start phase. Therefore, these changes should be applicable to \textsc{cubic} as well. The main concern that both New CWV and \textsc{cubic} alter the slow-start behaviour could be solved by only increasing the CWND value up to the more conservative option from New CWV and \textsc{cubic}.
-\todo{TCP Cubic tunes the window growth in slow start after idle such that
-the window growth slows as it approaches the previously achieved window,
-no? This seems like it would achieve a similar effect to NewCWV. May need
-more discussion.}.
-
- Furthermore, in 2019 \cite{Mishra-2019-the-great-internet-tcp-congestion-control-census} reported that Netflix used New Reno for their video delivery. This means that this research could be used for motivation for Netflix and other providers using New Reno to enable New CWV, if they have not already done so.
- 
 %==================================================================================================
 \section{Related Work}
 \label{sec:related}
