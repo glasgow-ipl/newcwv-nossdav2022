@@ -317,11 +317,8 @@ Figure \ref{fig:rebuffer-ratio-dynamic} shows results for \textsc{dynamic}, and 
 We do not present average bit rate results, due to space limitations, but these show little variation between CWV and New CWV. Differences that exist show slightly improved stability for New CWV, consistent with our other results.
 
 
-We conclude that New CWV achieves higher video stability when multiple clients are competing on a constrained link, with improved encoding stability and decreased rebuffering time. We have observed this behaviour mainly on the simulated DSL link, since our highest video encoding is just under 5Mbps, however, we note that in practice higher encodings are also used.\footnote{\url{https://support.google.com/youtube/answer/1722171}}
-
-Additionally, we have observed that when New CWV is enabled, the application metrics achieved for connections using either \textsc{dynamic} and \textsc{throughput} are very similar. We observe that a more complex algorithm, such as \textsc{dynamic} has a significant impact on connections with CWV. However, even with an increasingly more complex algorithm at the application layer, the QoE of the CWV connections still lower than the connections with New CWV.
-
-We found that \textsc{dynamic} improved the QoE for connections using CWV, but did not make much difference in the cases where New CWV was enabled. This was due to New CWV connections achieving high QoE, even when \textsc{throughput} was used.
+Overall, New CWV achieves higher video stability when multiple clients are competing on a constrained link, with improved encoding stability and decreased rebuffering time. 
+We observe that when New CWV is enabled, application metrics achieved for connections using either \textsc{dynamic} and \textsc{throughput} are very similar. A more complex rate adaptation algorithm, such as \textsc{dynamic}, has a significant impact on connections using CWV, but still gives lower QoE than the simpler adaptation algorithm used with New CWV.
 
 %--------------------------------------------------------------------------------------------------
 \subsection{Summary}
