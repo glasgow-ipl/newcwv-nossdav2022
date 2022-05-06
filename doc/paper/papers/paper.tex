@@ -251,8 +251,7 @@ To evaluate this, we collect instantaneous and smoothed bandwidth estimates from
 The cumulative distribution of instantaneous and smoothed throughput is shown in 
 Figure~\ref{fig:throughput-clients}. 
 %
-The ADSL2 results, Fig.\ \ref{fig:throughput-clients-DSL}, show \todo{what?}
-%
+The ADSL2 results, Fig.\ \ref{fig:throughput-clients-DSL}, shows that New CWV and CWV performed largely the same bandwidth estimate distribution. This is since CWV connections cannot overshoot too high over the capacity after an idle period and therefore do not lose as many packets and so matches closer the improved New CWV behaviour. 
 The FTTC results, Fig.\ \ref{fig:throughput-clients-FTTC}, show a consistently tighter distribution with New CWV than CWV, representing a more stable throughput estimate. The exception is when only one client is used, where the link capacity was much higher than the total video bandwidth that could be requested; preventing the client from obtaining an accurate estimation of the available capacity.
 %
 FTTP results are not shown, since in no case was the link capacity reached, and there were no significant difference in performance between CWV and New CWV.
@@ -275,8 +274,7 @@ Nazir et al.~\cite{Nazir-2014-performance-evaluation-congestion-window-validatio
 
 We illustrate the impact of New CWV on packet loss in Figure~\ref{fig:lost-packets}. New CWV consistently achieves lower loss compared to CWV, with the former having packet loss rates that are less thsn half the latter. This confirms our hypothesis for loss, and matches Section \ref{sec:background}: New CWV exits slow-start earlier, does not overshoot its window, and therefore is able to avoid loss at the end of slow-start.
 
-The loss values shown in Fig.\ \ref{fig:lost-packets} are reported for the \textsc{dynamic} rate adaptation algorithm. Results for the \textsc{throughput} algorithm show no significant differences.
-\todo{Is this just true for loss, or for all the results in this section?}
+The results in this section are reported for the \textsc{dynamic} rate adaptation algorithm. Results for the \textsc{throughput} algorithm show no significant differences.
 
 %--------------------------------------------------------------------------------------------------
 \subsection{Impact on Video QoE}
