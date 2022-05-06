@@ -367,26 +367,12 @@ We consider similar scenarios to \cite{Nazir-2014-performance-evaluation-congest
 \label{sec:related}
 
 New CWV enhances the CWV algorithm~\cite{rfc2861-2000-padhye-congestion-window-validation}.
-Both CWV and New CWV attempt to solve the issue of connection resumption after
-an idle period in which TCP's view of the network has become stale. While CWV
+Both try to address problems with resumption after
+an idle period when TCP has a stable view of the network. While CWV
 addresses the issue for bulk, network-limited applications, New CWV improves
 the algorithm for rate-limited applications.
-\todo{The remainder of this paragraph was unrelated to the paper; reference
-instead prior work to improve TCP performance for rate limited applications --
-keep it short.}
-%   As a result of their changes, both algorithms alter TCP's send rate.
-%   Altering the send-rate of TCP should be taken with caution, such that it
-%   does not send too fast to cause congestion collapse
-%   \cite{Jacobson-1988-congestion-avoidance} but also, to not let other TCP
-%   flows have significant effect on their operation (TCP friendliness). The
-%   core idea, of altering TCP's sending dynamics, is not new. Building on work
-%   by Mathis et al.~\cite{Mathis-1997-the-macroscopic-behavior-tcp} and Padhye
-%   et al.~\cite{Padhye-1998-modelling-tcp-throughput}, there has been a
-%   significant number of proposals on TCP friendliness and rate
-%   control~\cite{rfc-5348-tfrc,Rossi-2010-ledbat,Arun-2018-copa}, including
-%   for multimedia~\cite{Carlucci-2016-Analysis-WebRTC,Choi-2007-fairer-tfrc}.
-%   These proposals show that it is possible to alter the transport's sending
-%   dynamics while remaining friendly to other Internet traffic.
+As noted above, extensions such as HyStart++ \cite{draft-ietf-tcpm-hystartplusplus}, 
+also achieve similar results..
 
 A wide variety of ABR algorithms have been proposed, providing longer-term rate
 adaptation to complement TCP dynamics (e.g., \cite{Sun-2016-cs2p,Jiang-2012-improving-fairness-http-video-festive,Spiteri-2016-BOLA,Huang-2015-A-buffer-based-approach-to-rate-adaptation-bba,Spiteri-2019-from-theory-to-practice-sabre,Wang-2016-squad}).
