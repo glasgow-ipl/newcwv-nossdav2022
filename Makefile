@@ -381,7 +381,7 @@ ${FIGURES_FOLDER}/lost_packets.pdf:
 # ${FIGURES}: figures
 
 # Master build rule:
-paper: ${FIGURES_APPLICATION} ${FIGURES_TRANSPORT} check-make git-revision $(TOOLS) $(PDF_FILES)
+paper: ${FIGURES_APPLICATION} check-make git-revision $(TOOLS) $(PDF_FILES)
 
 # Build a paper without pre-building the figures
 paper-quick: check-make git-revision $(TOOLS)
