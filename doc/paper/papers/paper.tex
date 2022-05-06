@@ -269,7 +269,7 @@ Nazir et al.~\cite{Nazir-2014-performance-evaluation-congestion-window-validatio
   \label{fig:lost-packets}
 \end{figure}
 
-We illustrate the impact of New CWV on packet loss in Figure~\ref{fig:lost-packets}. New CWV consistently achieves lower loss compared to CWV, with the former having packet loss rates that are less thsn half the latter. This confirms our hypothesis for loss, and matches Section \ref{sec:background}: New CWV exits slow-start earlier, does not overshoot its window, and therefore is able to avoid loss at the end of slow-start.
+We illustrate the impact of New CWV on packet loss in Figure~\ref{fig:lost-packets}. New CWV consistently achieves lower loss compared to CWV, with the former having packet loss rates that are less than half the latter. This confirms our hypothesis for loss, and matches Section \ref{sec:background}: New CWV exits slow-start earlier, does not overshoot its window, and therefore is able to avoid loss at the end of slow-start.
 
 The results in this section are reported for the \textsc{dynamic} rate adaptation algorithm. Results for the \textsc{throughput} algorithm show no significant differences.
 
@@ -331,7 +331,6 @@ We observe that when New CWV is enabled, application metrics achieved for connec
 \subsection{Summary}
 \label{sec:summary}
 
-% Compared to \cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv} Figure~\ref{fig:throughput-clients} observed similar throughput distribution pattern. We observed lower loss for New CWV connections than they documented. We note that our environment tries to represent a more realistic case for video streaming as of the time of writing this paper. We have reconstructed their environment and used incremental RTT values starting from 40 (the value we used) going to 200 ms (the value they used) in incremental steps of 10 ms. We confirm that as the RTT increases New CWV connections experience higher loss and start to show closer results to when CWV is used. However, even with our incremental RTTs we have not managed to get higher but not as high loss rate as the one reported by the original authors. We attribute this difference to the fact that they used an older version of New Reno and their adaptive algorithm was very different to the current, dash.js, ones. 
 
 The use of New CWV contributes to more consistent bandwidth estimates (Figure~\ref{fig:throughput-clients}) and leads to fewer lost packets (Figure~\ref{fig:lost-packets}), fewer representation switches (Figures \ref{fig:bitrate-switches} \& \ref{fig:bitrate-switches-dynamic}), and lower rebuffering ratio (Figures \ref{fig:rebuffer-ratio} \& \ref{fig:rebuffer-ratio-dynamic}).
 This is since the more consistent measurements better match the available network conditions, allowing clients using New CWV to better adapt to the constraints of the bottleneck link. 
@@ -383,10 +382,6 @@ be implemented when using QUIC with ABR video.
 
 New CWV improves HTTP adaptive streaming playback stability. We compared video delivery with CWV and New CWV, and validated the results shown by previous work~\cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}. Enabling New CWV, a transport layer change, can improve application layer performance, reducing the number of encoding switches by up to 12\% points and rebuffering time by up to 4\% points, improving QoE and making transmission more predictable. These improvements help simple rate adaptation algorithms compete with the state of the art.  
 
-% Future work might look at the performance of these algorithms under more dynamic environments, for example, if all clients join the session at random times or in the presence of other cross-traffic.
-
-
-% We believe that with changes to the transport layer, simple, network-reactive, throughput algorithms will be able to perform comparable to other more complex solutions, such as buffer-based or the dynamic algorithms. In turn, this might enable new work in the field to focus on other aspects improving the adaptation process and not to try and mask the transport's behaviour.
 
 %==================================================================================================
 \section*{Acknowledgements}
