@@ -179,7 +179,7 @@ To address this, new congestion window validation~\cite{rfc7661-2015-fairhurst-n
   \label{fig:transmission-after-idle}
 \end{figure}
 
-We have implemented New CWV in the Linux kernel\footnote{A snapshot of our implementation, as used in this paper, is available at \url{http://dx.doi.org/10.5525/gla.researchdata.1278}, while the main repository for the work is at \url{https://github.com/glasgow-ipl/newcwv-nossdav2022}.}. We used \cite{secchi-2016-newcwv} as a base, which provides an implementation for Linux 3.18, and ported the changes to Linux 5.4. Our implementation altered two files, adding 143 and removing 49 lines of code.
+We implemented New CWV in Linux\footnote{A snapshot of our implementation, as used in this paper, is available at \url{http://dx.doi.org/10.5525/gla.researchdata.1278}, while the main repository for the work is at \url{https://github.com/glasgow-ipl/newcwv-nossdav2022}.}. We used \cite{secchi-2016-newcwv} as a base, which provides an implementation for Linux 3.18, and ported the changes to Linux 5.4. Our implementation altered two files, adding 143 and removing 49 lines of code.
 
 We use this implementation to better illustrate the impact of New CWV on flows restarting after an idle period, as shown in Figure \ref{fig:transmission-after-idle}.
 The New CWV connection (Figure \ref{fig:transmission-after-idle-newcwv}) uses the previously set \emph{ssthresh} value and leaves slow-start early, avoiding packet loss, after reaching the \emph{ssthresh} in the third flight of packets after restarting. 
