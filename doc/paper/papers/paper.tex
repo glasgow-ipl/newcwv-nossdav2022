@@ -251,7 +251,7 @@ To evaluate this, we collect instantaneous and smoothed bandwidth estimates from
 The cumulative distribution of instantaneous and smoothed throughput is shown in 
 Figure~\ref{fig:throughput-clients}. 
 %
-The DSLv2 results, Fig.\ \ref{fig:throughput-clients-DSL}, are similar for CWV and New CWV. This is due to the relatively low link capacity and the exponential increase of the slow-start not being able to overshoot too far over the capacity after an idle period and that way avoiding loss of many packets matching New CWV behaviour closer. 
+The ADSL2 results, Fig.\ \ref{fig:throughput-clients-DSL}, are similar for CWV and New CWV. This is due to the relatively low link capacity and the exponential increase of the slow-start not being able to overshoot too far over the capacity after an idle period, so avoiding loss of many packets and matching New CWV behaviour.
 The FTTC results, Fig.\ \ref{fig:throughput-clients-FTTC}, show a consistently tighter distribution with New CWV than CWV, representing a more stable throughput estimate. The exception is when only one client is used, where the link capacity was much higher than the total video bandwidth that could be requested; preventing the client from obtaining an accurate estimation of the available capacity.
 %
 FTTP results are not shown, since in no case was the link capacity reached, and there were no significant difference in performance between CWV and New CWV.
@@ -294,20 +294,6 @@ The results in this section are reported for the \textsc{dynamic} rate adaptatio
 \end{figure*}
 
 
-\begin{figure}
-    \includegraphics[width=.45\textwidth, keepaspectratio]{figures/Rebuffer_Ratio.pdf}
-    \Description{Boxplots showing the rebuffer ratio under the emulated DSL link, with the throughput algorithm, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
-    \caption{DSL Rebuffer Ratio (\textsc{throughput})}
-    \label{fig:rebuffer-ratio}
-\end{figure}
-
-\begin{figure}
-    \includegraphics[width=.45\textwidth, keepaspectratio]{figures/Rebuffer_Ratio_dynamic.pdf}
-    \Description{Boxplots showing the rebuffer ratio under the emulated DSL link, with the dynamic algorithm, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
-    \caption{DSL Rebuffer Ratio (\textsc{dynamic})}
-    \label{fig:rebuffer-ratio-dynamic}
-\end{figure}
-
 To evaluate whether improved New CWV transport layer performance translates into improved application QoE, we explore impact on application-level metrics such as rebuffer ratio and bit rate switch frequency. 
 
 In all cases, we report results for ADSL2 only. This link type, in combination with the video encodings used, best highlights scenarios where New CWV is beneficial. With FTTP links, all clients were able to stream at the highest quality without hitting the link limits. This was also the case for the FTTC links, with the exception of the 5 client scenario where we observed a similar pattern as that shown for ADSL2. Congestion control changes, such those we discuss, are ineffective when video flows are application limited and cannot cause congestion. Future higher-bandwidth applications, such as higher quality video, AR, or VR, will shift the congestion threshold upwards.
@@ -326,6 +312,20 @@ We do not present average bit rate results, due to space limitations, but these 
 
 Overall, New CWV achieves higher video stability when multiple clients are competing on a constrained link, with improved encoding stability and decreased rebuffering time. 
 We observe that when New CWV is enabled, application metrics achieved for connections using either \textsc{dynamic} and \textsc{throughput} are very similar. A more complex rate adaptation algorithm, such as \textsc{dynamic}, has a significant impact on connections using CWV, but still gives lower QoE than the simpler adaptation algorithm used with New CWV.
+
+\begin{figure}
+    \includegraphics[width=.45\textwidth, keepaspectratio]{figures/Rebuffer_Ratio.pdf}
+    \Description{Boxplots showing the rebuffer ratio under the emulated DSL link, with the throughput algorithm, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
+    \caption{DSL Rebuffer Ratio (\textsc{throughput})}
+    \label{fig:rebuffer-ratio}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[width=.45\textwidth, keepaspectratio]{figures/Rebuffer_Ratio_dynamic.pdf}
+    \Description{Boxplots showing the rebuffer ratio under the emulated DSL link, with the dynamic algorithm, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
+    \caption{DSL Rebuffer Ratio (\textsc{dynamic})}
+    \label{fig:rebuffer-ratio-dynamic}
+\end{figure}
 
 %--------------------------------------------------------------------------------------------------
 \subsection{Summary}
@@ -394,6 +394,7 @@ New CWV improves HTTP adaptive streaming playback stability. We compared video d
 This work is supported by the UK Engineering and Physical Sciences Research
 Council.
 
+\balance
 %==================================================================================================
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{paper}
