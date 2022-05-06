@@ -156,6 +156,8 @@ doc/paper/figures/
 !doc/paper/figures/lost_packets_newcwv.pdf
 !doc/paper/figures/los_packets_reno.pdf
 !doc/paper/figures/Rebuffer_Ratio.pdf
+!doc/paper/figures/Throughput_DSL.pdf
+!doc/paper/figures/Throughput_FTTC.pdf
 doc/paper/git-revision
 doc/paper/index.html
 # Tex build files
