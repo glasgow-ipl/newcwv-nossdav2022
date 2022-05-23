@@ -12,7 +12,7 @@ RUNS = $(shell seq 1 ${REPEAT})
 ALGS = vreno newcwv reno
 LINKS = DSL FTTC FTTP
 
-ABR_ALGS = abrDynamic
+ABR_ALGS = abrDynamic abrThroughput
 
 LOGS = $(foreach link, ${LINKS}, $(foreach alg, ${ALGS}, $(foreach run_instance, ${RUNS}, ${ROOT}/logs/newcwv/${link}/${run_instance}_${alg}/nginx_access.log)))
 
