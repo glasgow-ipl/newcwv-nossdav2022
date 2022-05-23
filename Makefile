@@ -391,25 +391,6 @@ ${ROOT}/logs/clients/dynamic/%_newcwv/nginx_access.log:
 	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/links/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg abrDynamic --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
 
 
-# ${ROOT}/logs/clients/%_vreno/nginx_access.log:
-# 	$(eval SIM_DIR = $(@D))
-# 	$(eval LINK_TYPE = $(shell basename `dirname $(@D)`))
-# 	$(eval CLIENT_NUM = $(shell basename $(shell dirname `dirname $(@D)`)))
-# 	echo "SIM_DIR=${SIM_DIR}"
-# 	echo "LINK_TYPE=${LINK_TYPE}"
-# 	echo "CLIENTS=${CLIENT_NUM}"
-# 	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg vreno --network_model /vagrant/network_models/links/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
-
-
-# ${ROOT}/logs/clients/%_newcwv/nginx_access.log:
-# 	$(eval SIM_DIR = $(@D))
-# 	$(eval LINK_TYPE = $(shell basename `dirname $(@D)`))
-# 	$(eval CLIENT_NUM = $(shell basename $(shell dirname `dirname $(@D)`)))
-# 	echo "SIM_DIR=${SIM_DIR}"
-# 	echo "LINK_TYPE=${LINK_TYPE}"
-# 	echo "CLIENTS=${CLIENT_NUM}"
-# 	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/links/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg $(DASH_ALG) --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
-
 
 test: ${TEST_LOGS}
 	echo "Raaan test succcesssfullly"
@@ -455,11 +436,6 @@ PAPER_BUILD = doc/paper
 
 FIGURES_FOLDER = ${PAPER_BUILD}/figures
 
-.PRECIOUS: ${FIGURES_FOLDER}/tmp/%/parsed_data.json
-
-RAW_DATA = ${foreach client, ${CLIENTS}, ${FIGURES_FOLDER}/tmp/${client}/parsed_data.json}
-
-RAW_DATA_NEWCWV = ${FIGURES_FOLDER}/parsed/newcwv/parsed_data.json
 
 BITRATE_DERIVATIVE_DATA = ${foreach client, ${CLIENTS}, ${FIGURES_FOLDER}/tmp/${client}/quality_distribution.json}
 
@@ -480,16 +456,6 @@ ${FIGURES_FOLDER}/tmp/%/rebuffer_ratio.json: ${ROOT}/scripts/analytics/paper/par
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/parse_rebuffer_ratio.py --root /vagrant/logs/clients/$* --algs newcwv vreno --runs ${shell seq 1 10} --links ${LINKS}
 
 
-#TODO: Logs as a dependency here
-# ${ROOT}/scripts/analytics/paper/plot_driver.py
-${FIGURES_FOLDER}/tmp/%/parsed_data.json: ${ROOT}/scripts/analytics/paper/parse_data.py ${ROOT}/scripts/analytics/paper/count_lost_packets.py ${ROOT}/scripts/analytics/parse_access_log.py ${ROOT}/scripts/analytics/parse_dash_log.py
-	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --root /vagrant/logs/clients/$* --algs newcwv vreno --runs ${shell seq 1 10} --links ${LINKS} --parse 1 --target none
-
-
-${FIGURES_FOLDER}/parsed/newcwv/parsed_data.json: ${ROOT}/scripts/analytics/paper/parse_data.py ${ROOT}/scripts/analytics/paper/count_lost_packets.py ${ROOT}/scripts/analytics/parse_access_log.py ${ROOT}/scripts/analytics/parse_dash_log.py
-	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --root /vagrant/logs/clients/$* --algs newcwv vreno --runs ${shell seq 1 10} --links ${LINKS} --parse 1 --target none
-
-
 ${ROOT}/${FIGURES_FOLDER}/parsed_data/%/parsed_data.json:
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --root /vagrant/logs/clients/$* --algs newcwv vreno --runs ${shell seq 1 1} --links ${LINKS} --parse 1 --target none
 
@@ -507,10 +473,6 @@ ${FIGURES_FOLDER}/Average_Oscillations.pdf: ${ROOT}/scripts/analytics/paper/plot
 REBUFFER_RATIO_LINKS = DSL
 ${FIGURES_FOLDER}/Rebuffer_Ratio.pdf: ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py ${REBUFFER_RATIO_DATA}
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs vreno newcwv --links ${REBUFFER_RATIO_LINKS} --target "rebuffer ratio" --clients_combined ${CLIENTS} --extension pdf
-
-
-${FIGURES_FOLDER}/Throughput_%_clients.pdf: ${FIGURES_FOLDER}/tmp/%/parsed_data.json ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py
-	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${LINKS} --target "throughput" --clients_combined ${CLIENTS} --clients $* --extension pdf
 
 
 BITRATE_DERIVATIVE_LINKS = DSL
@@ -533,13 +495,6 @@ ${FIGURES_FOLDER}/lost_packets_newcwv.pdf:
 ${FIGURES_FOLDER}/lost_packets.pdf:
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_lost_packets_aggregate.py --algs newcwv vreno --clients_combined 1 2 3 5
 
-# ${FIGURES_FOLDER}/Average_Stalls_5_clients.pdf: ${FIGURES_FOLDER}/tmp/parsed_data.json
-# 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_data.py --algs newcwv vreno --links ${LINKS} --target "average stalls" --extension png
-
-# figures: ${ROOT}/scripts/analytics/paper/plot_data.py ${TEST_LOGS}
-# 	@echo 'Generating Figures'
-# 	/usr/bin/python3 $<
-# 	@echo 'Done'
 
 # ${FIGURES}: figures
 
