@@ -279,7 +279,7 @@ The results in this section are reported for the \textsc{dynamic} rate adaptatio
 
 \begin{figure*}
   \centering
-  \includegraphics[width=\textwidth, keepaspectratio]{figures/bitrate_derivative_distribution.pdf}
+  \includegraphics[width=\textwidth, keepaspectratio]{figures/bitrate_derivative_distribution_throughput.pdf}
   \Description{Bar plots showing the distribution of representation changes under the emulated DSL link, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
   \caption{Absolute Bitrate Switches (\textsc{throughput})}
   \label{fig:bitrate-switches}
@@ -314,7 +314,7 @@ Overall, New CWV achieves higher video stability when multiple clients are compe
 We observe that when New CWV is enabled, application metrics achieved for connections using either \textsc{dynamic} and \textsc{throughput} are very similar. A more complex rate adaptation algorithm, such as \textsc{dynamic}, has a significant impact on connections using CWV, but still gives lower QoE than the simpler adaptation algorithm used with New CWV.
 
 \begin{figure}
-    \includegraphics[width=.45\textwidth, keepaspectratio]{figures/Rebuffer_Ratio.pdf}
+    \includegraphics[width=.45\textwidth, keepaspectratio]{figures/Rebuffer_Ratio_throughput.pdf}
     \Description{Boxplots showing the rebuffer ratio under the emulated DSL link, with the throughput algorithm, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
     \caption{DSL Rebuffer Ratio (\textsc{throughput})}
     \label{fig:rebuffer-ratio}
