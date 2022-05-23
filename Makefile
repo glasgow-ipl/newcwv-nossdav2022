@@ -12,7 +12,7 @@ RUNS = $(shell seq 1 ${REPEAT})
 ALGS = vreno newcwv reno
 LINKS = DSL FTTC FTTP
 
-ABR_ALGS= abrThroughput abrDynamic
+ABR_ALGS = abrDynamic
 
 LOGS = $(foreach link, ${LINKS}, $(foreach alg, ${ALGS}, $(foreach run_instance, ${RUNS}, ${ROOT}/logs/newcwv/${link}/${run_instance}_${alg}/nginx_access.log)))
 
@@ -35,7 +35,7 @@ RTTS = $(shell seq 20 10 200)
 MULTI_LOG_VARYING = $(foreach client, $(shell seq 1 1), $(foreach bw, ${BWS}, $(foreach rtt, ${RTTS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 3), ${ROOT}/logs/clients/${client}/abr/abrThroughput/${bw}_${rtt}/${run_instance}_${alg}/nginx_access.log)))))
 
 
-MULTI_LOG_NEW = $(foreach client, ${CLIENTS}, $(foreach abr_alg, ${ABR_ALGS}, $(foreach link, ${LINKS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 1), ${ROOT}/logs/clients/${client}/abr/${abr_alg}/${link}/${run_instance}_${alg}/nginx_access.log)))))
+MULTI_LOG_NEW = $(foreach client, ${CLIENTS}, $(foreach abr_alg, ${ABR_ALGS}, $(foreach link, ${LINKS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 8), ${ROOT}/logs/clients/${client}/abr/${abr_alg}/${link}/${run_instance}_${alg}/nginx_access.log)))))
 
 RTT_NEWCWV = 400
 BW_NEWCWV = 1
@@ -491,7 +491,7 @@ ${FIGURES_FOLDER}/Average_Bitrate.pdf: ${RAW_DATA} ${ROOT}/scripts/analytics/pap
 
 
 AVERAGE_OSCILLATIONS_LINKS = DSL FTTC
-${FIGURES_FOLDER}/Average_Oscillations.pdf: ${RAW_DATA} ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py
+${FIGURES_FOLDER}/Average_Oscillations.pdf: ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${AVERAGE_OSCILLATIONS_LINKS} --target "average oscillations" --clients_combined ${CLIENTS} --extension pdf
 
 
@@ -535,7 +535,7 @@ ${FIGURES_FOLDER}/lost_packets.pdf:
 # ${FIGURES}: figures
 
 # Master build rule:
-paper: ${FIGURES_APPLICATION} ${FIGURES_TRANSPORT} check-make git-revision $(TOOLS) $(PDF_FILES)
+paper: ${RAW_DATA} ${FIGURES_APPLICATION} ${FIGURES_TRANSPORT} check-make git-revision $(TOOLS) $(PDF_FILES)
 
 # Build a paper without pre-building the figures
 paper-quick: check-make git-revision $(TOOLS)
