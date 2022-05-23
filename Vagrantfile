@@ -24,7 +24,10 @@ $RUN_PROBE = <<SCRIPT
   curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
   sudo python2 get-pip.py
 
-	git clone git://github.com/mininet/mininet
+  apt-get install -y make
+  apt-get install -y gcc
+
+	git clone https://github.com/mininet/mininet
 	echo `pwd`
 	export LC_ALL=C
 	# Cannot use -a flag on install.sh as pox requires python-scapy package which is no longer supported in 20.04
@@ -77,6 +80,6 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "shell", privileged: true, inline: $RUN_PROBE
   
-  config.vm.network :forwarded_port, guest: 22, host: 2242, id: 'ssh'
+  config.vm.network :forwarded_port, guest: 22, host: 2299, id: 'ssh'
 
 end
