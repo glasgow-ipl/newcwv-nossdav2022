@@ -369,8 +369,10 @@ test: ${TEST_LOGS}
 multi_log: ${MULTI_LOGS} ${MULTI_LOGS_DYNAMIC}
 	echo "Completed"
 
+
 multi_log_new: ${MULTI_LOG_NEW}
 	echo "Completed"
+
 
 single_run: ${ROOT}/logs/single/newcwv/nginx_access.log
 	@echo "Single run executed successfully"
