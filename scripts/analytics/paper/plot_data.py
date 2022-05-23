@@ -124,7 +124,6 @@ def plot_rebuffer_ratio(*, metric_name, data, algs, links, extension, format_per
 
     save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures')
     abr_short_name = 'dynamic' if abr == 'abrDynamic' else 'throughput' if abr == 'abrThroughput' else 'other'
-    print(abr, abr_short_name)
     fig_name = os.path.join(save_path, f'{metric_name.replace(" ", "_")}_{abr_short_name}.{extension}')
     fig.set_size_inches(8.5, 3)
     print(f"Saving {fig_name}")
@@ -577,12 +576,12 @@ def plot_data_multiple(*, links, algs, extension = 'png', clients=0, target='all
         plot_rebuffer_ratio(metric_name='Rebuffer Ratio', data=rebuffer_data_aggregate, links=links, algs=algs, extension=extension, format_percent=True, y_label='Rebuffer Ratio', abr=abr)
    
     if target.lower() == 'bitrate_derivatives':
-        plot_bitrate_distribution(links=links, client_runs=clients_combined, algs=algs, extension=extension)
+        plot_bitrate_distribution(links=links, client_runs=clients_combined, algs=algs, extension=extension, root=root, abr=abr)
     if target.lower() == 'throughput agg' or target.lower() == 'all':
         plot_cdf_multiple_link_agg(metric_names=['Throughput Precise', 'Throughput Safe'], data=data_aggregate, links=links, algs=algs, clients=clients_combined, extension=extension, link_agg=link_agg)
 
 
-def plot_bitrate_distribution(client_runs, links, algs, extension):
+def plot_bitrate_distribution(client_runs, links, algs, extension, root, abr):
     ## Plotting
     fig, axs = plt.subplots(len(links), 4)
     axs_list = []
@@ -590,7 +589,8 @@ def plot_bitrate_distribution(client_runs, links, algs, extension):
     y_min = 100
     y_max = 0
     for i, client in enumerate(client_runs):
-        data_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'parsed_data', 'clients', 'dynamic', str(client), 'quality_distribution.json')
+        tmp_path = os.path.join(root, client, 'abr', abr)
+        data_path = os.path.join(tmp_path, 'quality_distribution.json')
         with open(data_path) as f:
             quality_distribution_alg_link = json.load(f)
 
@@ -643,7 +643,8 @@ def plot_bitrate_distribution(client_runs, links, algs, extension):
     
     fig.legend(bbox_to_anchor=(0.65, -0.1), ncol=2)
     fig.set_size_inches(15, 3)
-    fig_name = f'/vagrant/doc/paper/figures/bitrate_derivative_distribution_dynamic.{extension}'
+    abr_short_name = 'dynamic' if abr == 'abrDynamic' else 'throughput' if abr == 'abrThroughput' else 'other'
+    fig_name = f'/vagrant/doc/paper/figures/bitrate_derivative_distribution_{abr_short_name}.{extension}'
     print(f"Saving {fig_name}")
     fig.savefig(fig_name, bbox_inches='tight')
 
