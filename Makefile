@@ -419,7 +419,7 @@ TOOLS =
 
 FIGURES_TRANSPORT = $(foreach client, ${CLIENTS},  ${FIGURES_FOLDER}/Throughput_${client}_clients.pdf)
 
-FIGURES_TRANSPORT = ${FIGURES_FOLDER}/Throughput_clients_DSL.pdf ${FIGURES_FOLDER}/Throughput_clients_FTTC.pdf ${FIGURES_FOLDER}/lost_packets_vreno.pdf ${FIGURES_FOLDER}/lost_packets_newcwv.pdf ${FIGURES_FOLDER}/lost_packets.pdf
+FIGURES_TRANSPORT = ${FIGURES_FOLDER}/Throughput_DSL.pdf ${FIGURES_FOLDER}/Throughput_FTTC.pdf ${FIGURES_FOLDER}/lost_packets_vreno.pdf ${FIGURES_FOLDER}/lost_packets_newcwv.pdf ${FIGURES_FOLDER}/lost_packets.pdf
 
 FIGURES_APPLICATION = ${FIGURES_FOLDER}/Rebuffer_Ratio_throughput.pdf ${FIGURES_FOLDER}/Rebuffer_Ratio_dynamic.pdf ${FIGURES_FOLDER}/bitrate_derivative_distribution_throughput.pdf ${FIGURES_FOLDER}/bitrate_derivative_distribution_dynamic.pdf
 
@@ -462,8 +462,12 @@ ${FIGURES_FOLDER}/bitrate_derivative_distribution_dynamic.pdf: ${ROOT}/scripts/a
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${BITRATE_DERIVATIVE_LINKS} --target "bitrate_derivatives" --clients_combined ${CLIENTS} --extension pdf --root ${ROOT}/doc/paper/figures/parsed_data/clients --abr abrDynamic
 
 
-${FIGURES_FOLDER}/Throughput_clients_%.pdf:
-	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${LINKS} --target "throughput agg" --clients_combined ${CLIENTS} --link_agg $* --extension pdf	
+${FIGURES_FOLDER}/Throughput_DSL.pdf:
+	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${LINKS} --target "throughput agg" --clients_combined ${CLIENTS} --link_agg DSL --extension pdf --abr abrDynamic --root ${ROOT}/doc/paper/figures/parsed_data/clients
+
+
+${FIGURES_FOLDER}/Throughput_FTTC.pdf:
+	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${LINKS} --target "throughput agg" --clients_combined ${CLIENTS} --link_agg FTTC --extension pdf --abr abrDynamic --root ${ROOT}/doc/paper/figures/parsed_data/clients
 
 
 ${FIGURES_FOLDER}/lost_packets_vreno.pdf:
