@@ -37,7 +37,7 @@ def split_runs(packet_list):
 def plot_dropped_packets(algs, clients):
     drop_info = {a : {} for a in algs}
     for c in clients: 
-        with open(f'/vagrant/doc/paper/figures/tmp/{c}/parsed_data.json') as f:
+        with open(f'/vagrant/doc/paper/figures/parsed_data/clients/{c}/parsed_data.json') as f:
             tmp = json.load(f)['dropped_packets']['DSL']
             for a in algs:
                 drop_info[a][c] = tmp[a]
@@ -71,7 +71,7 @@ def plot_dropped_packets(algs, clients):
     # axs[0].set_yticks([0, 0.01, 0.02, 0.03, 0.04])
     axs[1].set_yticks([])
 
-    save_path = 'doc/paper/figures/lost_packets.pdf'
+    save_path = 'doc/paper/figures/lost_packets_dynamic.pdf'
     print(f"Saving {save_path}")
     fig.set_size_inches(8, 3)
     fig.savefig(save_path, bbox_inches='tight')
