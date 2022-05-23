@@ -18,6 +18,8 @@ if __name__ == '__main__':
     parser.add_argument('--link_agg', type=str)
     parser.add_argument('--target', type=str.lower, choices=['all', 'none', 'average bitrate', 'average oscillations', 'rebuffer ratio', 'throughput', 'bitrate_derivatives', 'throughput agg'], default='all')
     parser.add_argument('--clients', type=int, default=0)
+    parser.add_argument('--abr', type=str,  help='Adaptive bitrate algorithm used')
+
 
     parser.add_argument('--clients_combined', nargs='+')
 
@@ -30,8 +32,9 @@ if __name__ == '__main__':
     extension = args.extension
     target = args.target
     link_agg = args.link_agg
+    abr = args.abr
 
     if args.parse:
         parse_data(root, links, algs, numbers)
     if args.target.lower() != 'none':
-        plot_data_multiple(links=links, algs=algs, extension=extension, clients=args.clients, clients_combined=args.clients_combined, target=target, link_agg=link_agg, root=root)
+        plot_data_multiple(links=links, algs=algs, extension=extension, clients=args.clients, clients_combined=args.clients_combined, target=target, link_agg=link_agg, root=root, abr=abr)

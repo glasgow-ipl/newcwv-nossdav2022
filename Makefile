@@ -443,8 +443,13 @@ ${FIGURES_FOLDER}/Average_Oscillations.pdf: ${ROOT}/scripts/analytics/paper/plot
 
 
 REBUFFER_RATIO_LINKS = DSL
-${FIGURES_FOLDER}/Rebuffer_Ratio.pdf: ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py ${REBUFFER_RATIO_DATA}
-	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs vreno newcwv --links ${REBUFFER_RATIO_LINKS} --target "rebuffer ratio" --clients_combined ${CLIENTS} --extension pdf
+${FIGURES_FOLDER}/Rebuffer_Ratio_dynamic.pdf: ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py ${REBUFFER_RATIO_DATA}
+	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs vreno newcwv --links ${REBUFFER_RATIO_LINKS} --target "rebuffer ratio" --clients_combined ${CLIENTS} --extension pdf --root ${ROOT}/doc/paper/figures/parsed_data/clients --abr abrDynamic
+
+
+REBUFFER_RATIO_LINKS = DSL
+${FIGURES_FOLDER}/Rebuffer_Ratio_throughput.pdf: ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py ${REBUFFER_RATIO_DATA}
+	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs vreno newcwv --links ${REBUFFER_RATIO_LINKS} --target "rebuffer ratio" --clients_combined ${CLIENTS} --extension pdf --root ${ROOT}/doc/paper/figures/parsed_data/clients --abr abrThroughput
 
 
 BITRATE_DERIVATIVE_LINKS = DSL

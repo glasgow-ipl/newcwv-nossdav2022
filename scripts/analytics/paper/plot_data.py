@@ -82,7 +82,7 @@ def plot_boxplot_multiple(*, metric_name, data, algs, links, extension, format_p
     # plt.clf()
 
 
-def plot_rebuffer_ratio(*, metric_name, data, algs, links, extension, format_percent=False, y_label=''):
+def plot_rebuffer_ratio(*, metric_name, data, algs, links, extension, format_percent=False, y_label='', abr='abrDynamic'):
     title_map = {'newcwv': 'New CWV', 'vreno': 'CWV'}
     plt.rc('font',**{'size': 20})
 
@@ -123,7 +123,9 @@ def plot_rebuffer_ratio(*, metric_name, data, algs, links, extension, format_per
                 ax.set_title(title_map[alg])
 
     save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures')
-    fig_name = os.path.join(save_path, f'{metric_name.replace(" ", "_")}_dynamic.{extension}')
+    abr_short_name = 'dynamic' if abr == 'abrDynamic' else 'throughput' if abr == 'abrThroughput' else 'other'
+    print(abr, abr_short_name)
+    fig_name = os.path.join(save_path, f'{metric_name.replace(" ", "_")}_{abr_short_name}.{extension}')
     fig.set_size_inches(8.5, 3)
     print(f"Saving {fig_name}")
     fig.savefig(fig_name, bbox_inches='tight')
@@ -533,7 +535,7 @@ def plot_data(*, links, algs, extension = 'png', clients=0, target='all'):
         plot_boxplot('Rebuffer Ratio', combined, algs, clients, extension, ylabel='Rebuffer Ratio', format_percent=True, xticks=['New CWV', 'Reno'])
 
 
-def plot_data_multiple(*, links, algs, extension = 'png', clients=0, target='all', clients_combined=None, link_agg=None, root=None):
+def plot_data_multiple(*, links, algs, extension = 'png', clients=0, target='all', clients_combined=None, link_agg=None, root=None, abr='abrDynamic'):
     if not clients and target == 'throughput':
         print('Client argument must be supplied and different from 0', file=sys.stderr)
         sys.exit(1)
@@ -541,7 +543,7 @@ def plot_data_multiple(*, links, algs, extension = 'png', clients=0, target='all
     data_aggregate = {}
     for c in clients_combined:
         #TODO: Make use of root
-        tmp_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'parsed_data', 'clients', 'dynamic', c)
+        tmp_path = os.path.join(root, c, 'abr', abr)
         tmp_path_data = os.path.join(tmp_path, 'parsed_data.json')
         print(f"Using file {tmp_path_data}")
         with open(tmp_path_data, 'r') as f:
@@ -565,14 +567,14 @@ def plot_data_multiple(*, links, algs, extension = 'png', clients=0, target='all
    
     if target.lower() == 'rebuffer ratio' or target.lower() == 'all':
         rebuffer_data_aggregate = {}
-        base_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'parsed_data', 'clients', 'dynamic')
         for c in clients_combined:
-            rebuffer_data_path = os.path.join(base_path, c,'parsed_data.json')
+            tmp_path = os.path.join(root, c, 'abr', abr)
+            rebuffer_data_path = os.path.join(tmp_path, 'parsed_data.json')
             with open(rebuffer_data_path) as f:
                 rebuffer_data = json.load(f)
             
             rebuffer_data_aggregate[c] = rebuffer_data
-        plot_rebuffer_ratio(metric_name='Rebuffer Ratio', data=rebuffer_data_aggregate, links=links, algs=algs, extension=extension, format_percent=True, y_label='Rebuffer Ratio')
+        plot_rebuffer_ratio(metric_name='Rebuffer Ratio', data=rebuffer_data_aggregate, links=links, algs=algs, extension=extension, format_percent=True, y_label='Rebuffer Ratio', abr=abr)
    
     if target.lower() == 'bitrate_derivatives':
         plot_bitrate_distribution(links=links, client_runs=clients_combined, algs=algs, extension=extension)
@@ -686,9 +688,10 @@ def main():
     extension = 'png'
     clients = 5
     clients_combined = ['1', '2', '3', '5']
+    abr = 'abrDynamic'
     # parse_data(root=root, links=links, algs=algs, numbers=numbers)
     # plot_data(links=links, algs=algs, extension=extension, clients=clients, target='rebuffer ratio')
-    plot_data_multiple(links=links, algs=algs, extension=extension, clients=clients, target='throughput', clients_combined=clients_combined)
+    plot_data_multiple(links=links, algs=algs, extension=extension, clients=clients, target='throughput', clients_combined=clients_combined, abr=abr)
 
 
 if __name__ == '__main__':
