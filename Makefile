@@ -354,42 +354,12 @@ ${ROOT}/logs/clients/%/nginx_access.log:
 	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir ${SIM_DIR} --cong_alg ${CC_ALG} --network_model /vagrant/network_models/links/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg ${ABR_ALG} --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
 
 
-${ROOT}/logs/newcwv/clients/1/abr/abrThroughput/%/nginx_access.log:
-	$(eval SIM_DIR = $(@D))
-	$(eval CC_ALG = $(shell echo $(shell basename $(@D)) | cut -d'_' -f2))
-	$(eval LINK_TYPE = $(shell basename `dirname $(@D)`))
-	$(eval ABR_ALG = $(shell basename $(shell dirname `dirname $(@D)`)))
-	$(eval CLIENT_NUM = $(shell basename $(shell dirname $(shell dirname $(shell dirname `dirname $(@D)`)))))
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir ${SIM_DIR} --cong_alg ${CC_ALG} --network_model /vagrant/network_models/newcwv/newcwv.json --mpd_location $(MPD_LOCATION_NEWCWV) --dash_alg ${ABR_ALG} --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
-
-
 varying_rtt: ${MULTI_LOG_VARYING}
 	echo "Done"
 
 
 newcwv_logs: ${LOGS_NEWCWV}
 	echo "Done"
-
-
-${ROOT}/logs/clients/dynamic/%_vreno/nginx_access.log:
-	$(eval SIM_DIR = $(@D))
-	$(eval LINK_TYPE = $(shell basename `dirname $(@D)`))
-	$(eval CLIENT_NUM = $(shell basename $(shell dirname `dirname $(@D)`)))
-	echo "SIM_DIR=${SIM_DIR}"
-	echo "LINK_TYPE=${LINK_TYPE}"
-	echo "CLIENTS=${CLIENT_NUM}"
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg vreno --network_model /vagrant/network_models/links/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg abrDynamic --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
-
-
-${ROOT}/logs/clients/dynamic/%_newcwv/nginx_access.log:
-	$(eval SIM_DIR = $(@D))
-	$(eval LINK_TYPE = $(shell basename `dirname $(@D)`))
-	$(eval CLIENT_NUM = $(shell basename $(shell dirname `dirname $(@D)`)))
-	echo "SIM_DIR=${SIM_DIR}"
-	echo "LINK_TYPE=${LINK_TYPE}"
-	echo "CLIENTS=${CLIENT_NUM}"
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/links/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg abrDynamic --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
-
 
 
 test: ${TEST_LOGS}
