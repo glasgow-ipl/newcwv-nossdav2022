@@ -35,7 +35,8 @@ RTTS = $(shell seq 20 10 200)
 MULTI_LOG_VARYING = $(foreach client, $(shell seq 1 1), $(foreach bw, ${BWS}, $(foreach rtt, ${RTTS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 3), ${ROOT}/logs/clients/${client}/abr/abrThroughput/${bw}_${rtt}/${run_instance}_${alg}/nginx_access.log)))))
 
 
-MULTI_LOG_NEW = $(foreach client, ${CLIENTS}, $(foreach abr_alg, ${ABR_ALGS}, $(foreach link, ${LINKS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 8), ${ROOT}/logs/clients/${client}/abr/${abr_alg}/${link}/${run_instance}_${alg}/nginx_access.log)))))
+MUTLI_LOG_RUNS_MAX = 2
+MULTI_LOG_NEW = $(foreach client, ${CLIENTS}, $(foreach abr_alg, ${ABR_ALGS}, $(foreach link, ${LINKS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 ${MUTLI_LOG_RUNS_MAX}), ${ROOT}/logs/clients/${client}/abr/${abr_alg}/${link}/${run_instance}_${alg}/nginx_access.log)))))
 
 RTT_NEWCWV = 400
 BW_NEWCWV = 1
