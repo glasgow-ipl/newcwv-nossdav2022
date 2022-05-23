@@ -471,11 +471,11 @@ ${FIGURES_FOLDER}/Throughput_FTTC.pdf:
 
 
 ${FIGURES_FOLDER}/lost_packets_vreno.pdf:
-	/usr/bin/python3 ${ROOT}/scripts/analytics/paper/plot_lost_packets.py --root ${ROOT}/logs/clients/1/DSL/1_vreno
+	/usr/bin/python3 ${ROOT}/scripts/analytics/paper/plot_lost_packets.py --root --root ${ROOT}/logs/clients/1/abr/abrThroughput/DSL/1_vreno
 
 
 ${FIGURES_FOLDER}/lost_packets_newcwv.pdf:
-	/usr/bin/python3 ${ROOT}/scripts/analytics/paper/plot_lost_packets.py --root ${ROOT}/logs/clients/1/DSL/1_newcwv
+	/usr/bin/python3 ${ROOT}/scripts/analytics/paper/plot_lost_packets.py --root ${ROOT}/logs/clients/1/abr/abrThroughput/DSL/1_newcwv
 
 
 ${FIGURES_FOLDER}/lost_packets.pdf:
