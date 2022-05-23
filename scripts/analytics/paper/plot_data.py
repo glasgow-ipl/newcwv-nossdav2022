@@ -123,12 +123,13 @@ def plot_rebuffer_ratio(*, metric_name, data, algs, links, extension, format_per
                 ax.set_title(title_map[alg])
 
     save_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures')
-    fig_name = os.path.join(save_path, f'{metric_name.replace(" ", "_")}.{extension}')
+    fig_name = os.path.join(save_path, f'{metric_name.replace(" ", "_")}_dynamic.{extension}')
     fig.set_size_inches(8.5, 3)
     print(f"Saving {fig_name}")
     fig.savefig(fig_name, bbox_inches='tight')
     print(f"Font restored")
     plt.rc('font',**{'size': 15})
+
 
 def plot_line_errorbar(*, metric_name, data, algs, links, extension, format_percent=False, y_label=''):
 
@@ -532,14 +533,15 @@ def plot_data(*, links, algs, extension = 'png', clients=0, target='all'):
         plot_boxplot('Rebuffer Ratio', combined, algs, clients, extension, ylabel='Rebuffer Ratio', format_percent=True, xticks=['New CWV', 'Reno'])
 
 
-def plot_data_multiple(*, links, algs, extension = 'png', clients=0, target='all', clients_combined=None, link_agg=None):
+def plot_data_multiple(*, links, algs, extension = 'png', clients=0, target='all', clients_combined=None, link_agg=None, root=None):
     if not clients and target == 'throughput':
         print('Client argument must be supplied and different from 0', file=sys.stderr)
         sys.exit(1)
 
     data_aggregate = {}
     for c in clients_combined:
-        tmp_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp', c)
+        #TODO: Make use of root
+        tmp_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'parsed_data', 'clients', 'dynamic', c)
         tmp_path_data = os.path.join(tmp_path, 'parsed_data.json')
         print(f"Using file {tmp_path_data}")
         with open(tmp_path_data, 'r') as f:
@@ -563,14 +565,13 @@ def plot_data_multiple(*, links, algs, extension = 'png', clients=0, target='all
    
     if target.lower() == 'rebuffer ratio' or target.lower() == 'all':
         rebuffer_data_aggregate = {}
-        base_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp')
+        base_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'parsed_data', 'clients', 'dynamic')
         for c in clients_combined:
-            rebuffer_data_path = os.path.join(base_path, c,'rebuffer_ratio.json')
+            rebuffer_data_path = os.path.join(base_path, c,'parsed_data.json')
             with open(rebuffer_data_path) as f:
                 rebuffer_data = json.load(f)
             
             rebuffer_data_aggregate[c] = rebuffer_data
-        
         plot_rebuffer_ratio(metric_name='Rebuffer Ratio', data=rebuffer_data_aggregate, links=links, algs=algs, extension=extension, format_percent=True, y_label='Rebuffer Ratio')
    
     if target.lower() == 'bitrate_derivatives':
@@ -587,7 +588,7 @@ def plot_bitrate_distribution(client_runs, links, algs, extension):
     y_min = 100
     y_max = 0
     for i, client in enumerate(client_runs):
-        data_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp', str(client), 'quality_distribution.json')
+        data_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'parsed_data', 'clients', 'dynamic', str(client), 'quality_distribution.json')
         with open(data_path) as f:
             quality_distribution_alg_link = json.load(f)
 
@@ -595,6 +596,8 @@ def plot_bitrate_distribution(client_runs, links, algs, extension):
             y_lim = 0
             for k, alg in enumerate(algs):
                 # plot_dic = {k: v for k, v in quality_distribution_alg_link_clients[client][link][alg].items() if k != 0}
+                if alg == 'vreno':
+                    alg = 'reno'
                 plot_dic = quality_distribution_alg_link[link][alg]
                 plot_dic = {int(offset): occ for offset, occ in plot_dic.items()}
                 if plot_dic:
@@ -619,7 +622,7 @@ def plot_bitrate_distribution(client_runs, links, algs, extension):
                 ax.set_xticks(np.arange(-2, 3))
 
                 if i == 0:
-                    ax.set_ylabel('Fraction of chunks')
+                    ax.set_ylabel('Fraction of chunks\n(Log Scale)')
                 if j == len(links) - 1:
                     ax.set_xlabel('Representation Change')
 
@@ -630,6 +633,7 @@ def plot_bitrate_distribution(client_runs, links, algs, extension):
                 axs_list.append(ax)
                 
     for i, ax in enumerate(axs_list):
+        ax.grid(True, which='both')
         ax.set_ylim(bottom=y_min, top=100)
         ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda y, _: f'{y:g}%'))
         if i != 0 and i != 1:
@@ -637,7 +641,7 @@ def plot_bitrate_distribution(client_runs, links, algs, extension):
     
     fig.legend(bbox_to_anchor=(0.65, -0.1), ncol=2)
     fig.set_size_inches(15, 3)
-    fig_name = f'/vagrant/doc/paper/figures/bitrate_derivative_distribution.{extension}'
+    fig_name = f'/vagrant/doc/paper/figures/bitrate_derivative_distribution_dynamic.{extension}'
     print(f"Saving {fig_name}")
     fig.savefig(fig_name, bbox_inches='tight')
 
@@ -651,7 +655,7 @@ def plot_packet_loss(root):
 
     data_aggregate = {}
     for c in clients_combined:
-        tmp_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'tmp', c)
+        tmp_path = os.path.join('/', 'vagrant', 'doc', 'paper', 'figures', 'parsed_data', 'clients', c)
         tmp_path = os.path.join(tmp_path, 'parsed_data.json')
         print(f"Using file {tmp_path}")
         with open(tmp_path, 'r') as f:
@@ -689,6 +693,7 @@ def main():
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
+        root = '/vagrant/logs/clients/5'
         plot_bitrate_distribution(client_runs=[1, 2, 3, 5], links=['DSL'], algs=['reno', 'newcwv'], extension='png')
         exit()
         main()
