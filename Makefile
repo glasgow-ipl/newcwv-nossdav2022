@@ -628,6 +628,11 @@ CFLAGS = -W -Wall -Wextra -O2 -g -std=c99
 bin/%: src/%.c
 	$(CC) $(CFLAGS) -o $@ $^
 
+archive:
+	rm -rf archive
+	rm -rf archive.zip
+	@sh make_archive.sh
+
 # =================================================================================================
 # Generic rules to clean-up:
 

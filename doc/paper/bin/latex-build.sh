@@ -115,6 +115,7 @@ else
     grep "LaTeX Warning:" $DIR_NAME/$TEX_BASE.log | sed 's/^/## /'
     grep "pdfTeX warning:" $DIR_NAME/$TEX_BASE.log | sed 's/^/## /'
     grep "Package .* Warning:" $DIR_NAME/$TEX_BASE.log | sed 's/^/## /'
+    grep "Class .* Warning:" $DIR_NAME/$TEX_BASE.log | sed 's/^/## /'
     tput sgr0    || true
 
     # Check if we need to re-run LaTeX:

@@ -16,7 +16,6 @@ def parse_tcpinfo(line):
 	pass
 
 def parse_videoinfo(line):
-	print line
 	time, quality, chunk = line.split(',')
 	return int(float(time)), int(quality), int(chunk)
 
@@ -32,7 +31,6 @@ def parse_file(fname):
 			if i % 2 == 1:
 				parse_tcpinfo(line)
 			else:
-				print "line", line
 				time, quality, chunk = parse_videoinfo(line)
 				times += [time]
 				i = resolutions.index(str(quality))
@@ -73,7 +71,6 @@ def main():
 	opts, _ = getopt.getopt(sys.argv[1:], "", ['fname=', 'save', 'noshow', 'out='])
 	opts_d = {k:v for (k,v) in opts}
 
-	print opts_d
 
 	show = not ('--noshow' in opts_d)
 	save = '--save' in opts_d
@@ -91,7 +88,7 @@ def main():
 
 	ax2 = ax1.twinx()
 
-	print times, qualities
+	# print times, qualities
 	ax2.plot(times, qualities, 'b', marker='o', label='requested bit-rate')
 	ax2.set_yticks(available_bitrates)
 	ax2.set_ylabel('bit-rate')
@@ -112,7 +109,7 @@ def main():
 	if show:
 		plt.show()
 	if save:
-		print 'saving'	
+		# print 'saving'	
 		plt.savefig('results/DASH_CC_effect.pdf', bbox_inches='tight')
 
 if __name__ == '__main__':
