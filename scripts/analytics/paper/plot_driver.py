@@ -34,4 +34,4 @@ if __name__ == '__main__':
     if args.parse:
         parse_data(root, links, algs, numbers)
     if args.target.lower() != 'none':
-        plot_data_multiple(links=links, algs=algs, extension=extension, clients=args.clients, clients_combined=args.clients_combined, target=target, link_agg=link_agg)
+        plot_data_multiple(links=links, algs=algs, extension=extension, clients=args.clients, clients_combined=args.clients_combined, target=target, link_agg=link_agg, root=root)
