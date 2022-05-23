@@ -34,10 +34,11 @@ def split_runs(packet_list):
     return runs
 
 
-def plot_dropped_packets(algs, clients):
+def plot_dropped_packets(algs, clients, root, abr):
     drop_info = {a : {} for a in algs}
     for c in clients: 
-        with open(f'/vagrant/doc/paper/figures/parsed_data/clients/{c}/parsed_data.json') as f:
+        data_path = os.path.join(root, c, 'abr', abr, 'parsed_data.json')
+        with open(data_path) as f:
             tmp = json.load(f)['dropped_packets']['DSL']
             for a in algs:
                 drop_info[a][c] = tmp[a]
@@ -71,7 +72,7 @@ def plot_dropped_packets(algs, clients):
     # axs[0].set_yticks([0, 0.01, 0.02, 0.03, 0.04])
     axs[1].set_yticks([])
 
-    save_path = 'doc/paper/figures/lost_packets_dynamic.pdf'
+    save_path = 'doc/paper/figures/lost_packets.pdf'
     print(f"Saving {save_path}")
     fig.set_size_inches(8, 3)
     fig.savefig(save_path, bbox_inches='tight')
@@ -81,10 +82,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--algs', nargs='+', help='Algorithm names to consider', required=True)
     parser.add_argument('--clients_combined', nargs='+', help="List of all client combinations", required=True)
+    parser.add_argument('--root', required=True)
+    parser.add_argument('--abr', required=True)
 
     args = parser.parse_args()
 
-    plot_dropped_packets(algs=args.algs, clients=args.clients_combined)
+    plot_dropped_packets(algs=args.algs, clients=args.clients_combined, root=args.root, abr=args.abr)
 
 
 

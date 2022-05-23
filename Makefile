@@ -479,7 +479,7 @@ ${FIGURES_FOLDER}/lost_packets_newcwv.pdf:
 
 
 ${FIGURES_FOLDER}/lost_packets.pdf:
-	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_lost_packets_aggregate.py --algs newcwv vreno --clients_combined 1 2 3 5
+	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_lost_packets_aggregate.py --algs newcwv vreno --clients_combined 1 2 3 5 --root ${ROOT}/doc/paper/figures/parsed_data/clients --abr abrThroughput
 
 
 # ${FIGURES}: figures
