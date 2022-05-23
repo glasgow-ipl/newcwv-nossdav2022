@@ -35,8 +35,16 @@ RTTS = $(shell seq 20 10 200)
 MULTI_LOG_VARYING = $(foreach client, $(shell seq 1 1), $(foreach bw, ${BWS}, $(foreach rtt, ${RTTS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 3), ${ROOT}/logs/clients/${client}/abr/abrThroughput/${bw}_${rtt}/${run_instance}_${alg}/nginx_access.log)))))
 
 
-MUTLI_LOG_RUNS_MAX = 2
+MUTLI_LOG_RUNS_MAX = 1
 MULTI_LOG_NEW = $(foreach client, ${CLIENTS}, $(foreach abr_alg, ${ABR_ALGS}, $(foreach link, ${LINKS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 ${MUTLI_LOG_RUNS_MAX}), ${ROOT}/logs/clients/${client}/abr/${abr_alg}/${link}/${run_instance}_${alg}/nginx_access.log)))))
+
+SIMULATION_PATH = $(foreach client, ${CLIENTS}, $(foreach abr_alg, ${ABR_ALGS}, $(foreach link, ${LINKS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 ${MUTLI_LOG_RUNS_MAX}), clients/${client}/abr/${abr_alg}/${link}/${run_instance}_${alg})))))
+
+LOG_PATH = $(foreach path, ${SIMULATION_PATH}, ${ROOT}/logs/${path}/nginx_access.log)
+PARSED_PATH = $(foreach client, ${CLIENTS}, $(foreach abr_alg, ${ABR_ALGS}, $(foreach link, ${LINKS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 ${MUTLI_LOG_RUNS_MAX}), /vagrant/doc/paper/figures/parsed_data/clients/${client}/abr/${abr_alg}/parsed_data.json)))))
+
+echoer:
+	echo ${FIGURES_FOLDER}
 
 RTT_NEWCWV = 400
 BW_NEWCWV = 1
@@ -482,8 +490,8 @@ ${FIGURES_FOLDER}/parsed/newcwv/parsed_data.json: ${ROOT}/scripts/analytics/pape
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --root /vagrant/logs/clients/$* --algs newcwv vreno --runs ${shell seq 1 10} --links ${LINKS} --parse 1 --target none
 
 
-${FIGURES_FOLDER}/tmp/%/quality_distribution.json: ${ROOT}/scripts/analytics/paper/parse_data.py ${ROOT}/scripts/analytics/parse_access_log.py ${MULTI_LOGS}
-	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --root /vagrant/logs/clients/$* --algs newcwv vreno --runs ${shell seq 1 10} --links ${LINKS} --parse 1 --target none
+${ROOT}/${FIGURES_FOLDER}/parsed_data/%/parsed_data.json:
+	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --root /vagrant/logs/clients/$* --algs newcwv vreno --runs ${shell seq 1 1} --links ${LINKS} --parse 1 --target none
 
 
 #TODO need to fix parsed data dependency to allow for more clients
@@ -536,7 +544,7 @@ ${FIGURES_FOLDER}/lost_packets.pdf:
 # ${FIGURES}: figures
 
 # Master build rule:
-paper: ${RAW_DATA} ${FIGURES_APPLICATION} ${FIGURES_TRANSPORT} check-make git-revision $(TOOLS) $(PDF_FILES)
+paper: ${PARSED_PATH} ${FIGURES_APPLICATION} ${FIGURES_TRANSPORT} check-make git-revision $(TOOLS) $(PDF_FILES)
 
 # Build a paper without pre-building the figures
 paper-quick: check-make git-revision $(TOOLS)
