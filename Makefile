@@ -43,8 +43,6 @@ SIMULATION_PATH = $(foreach client, ${CLIENTS}, $(foreach abr_alg, ${ABR_ALGS}, 
 LOG_PATH = $(foreach path, ${SIMULATION_PATH}, ${ROOT}/logs/${path}/nginx_access.log)
 PARSED_PATH = $(foreach client, ${CLIENTS}, $(foreach abr_alg, ${ABR_ALGS}, $(foreach link, ${LINKS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 ${MUTLI_LOG_RUNS_MAX}), /vagrant/doc/paper/figures/parsed_data/clients/${client}/abr/${abr_alg}/parsed_data.json)))))
 
-echoer:
-	echo ${FIGURES_FOLDER}
 
 RTT_NEWCWV = 400
 BW_NEWCWV = 1
