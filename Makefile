@@ -597,6 +597,8 @@ ifneq ($(strip $(TOOLS)),)
 	$(call remove,$(PAPER_BUILD)/$(TOOLS))
 endif
 	$(foreach tool,$(TOOLS),rm -rf $(PAPER_BUILD)/$(tool).dSYM)
+	$(foreach figure,$(FIGURES_TRANSPORT), rm -rf ${figure})
+	$(foreach figure,$(FIGURES_APPLICATION), rm -rf ${figure})
 	@$(call remove-latex,$(PDF_FILES:%.pdf=%.tex))
 	rm -f $(PAPER_BUILD)/papers/paper_*.pdf
 	rm -f $(PAPER_BUILD)/papers/paper.synctex.gz
