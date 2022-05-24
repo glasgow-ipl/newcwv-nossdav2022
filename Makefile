@@ -41,7 +41,6 @@ MULTI_LOG_NEW = $(foreach client, ${CLIENTS}, $(foreach abr_alg, ${ABR_ALGS}, $(
 SIMULATION_PATH = $(foreach client, ${CLIENTS}, $(foreach abr_alg, ${ABR_ALGS}, $(foreach link, ${LINKS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 ${MUTLI_LOG_RUNS_MAX}), clients/${client}/abr/${abr_alg}/${link}/${run_instance}_${alg})))))
 
 LOG_PATH = $(foreach path, ${SIMULATION_PATH}, ${ROOT}/logs/${path}/nginx_access.log)
-PARSED_PATH = $(foreach client, ${CLIENTS}, $(foreach abr_alg, ${ABR_ALGS}, $(foreach link, ${LINKS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 ${MUTLI_LOG_RUNS_MAX}), /vagrant/doc/paper/figures/parsed_data/clients/${client}/abr/${abr_alg}/parsed_data.json)))))
 
 
 RTT_NEWCWV = 400
@@ -406,7 +405,7 @@ PAPER_BUILD = doc/paper
 
 FIGURES_FOLDER = ${PAPER_BUILD}/figures
 
-PARSED_DATA_PATHS = ${foreach client, ${CLIENTS}, ${foreach abr_alg, ${ABR_ALGS}, ${FIGURES_FOLDER}/parsed_data/clients/${client}/${abr_alg}/parsed_data.json}}
+PARSED_DATA_PATHS = $(foreach client, ${CLIENTS}, $(foreach abr_alg, ${ABR_ALGS}, $(foreach link, ${LINKS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 ${MUTLI_LOG_RUNS_MAX}), /vagrant/doc/paper/figures/parsed_data/clients/${client}/abr/${abr_alg}/parsed_data.json)))))
 
 # Tools to build before the PDF files. This is a list of executable files in
 # the bin/ directory:
