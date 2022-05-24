@@ -53,14 +53,20 @@ def plot_lost_packets(root, extension):
                 transferred_packets.append((transferred_ts, seq))
     
     # transfrerred_filtered = [(transfered)]
-    relative_ts, relative_seq = min(min(transferred_packets), min(lost_packets))
+    if lost_packets:
+        relative_ts, relative_seq = min(min(transferred_packets), min(lost_packets))
+    else:
+        relative_ts, relative_seq = min(transferred_packets)
+
     transferred_packets = [(t - relative_ts, s - relative_seq) for (t, s) in transferred_packets]
     lost_packets = [(t - relative_ts, s - relative_seq) for (t, s) in lost_packets]
 
 
     transferred_tss, transferred_seqs = zip(*transferred_packets)
-    lost_tss, lost_seqs = zip(*lost_packets)
-
+    if lost_packets:
+        lost_tss, lost_seqs = zip(*lost_packets)
+    else:
+        lost_tss, lost_seqs = [], []
 
     plt.scatter(transferred_tss, transferred_seqs, c='green', alpha=0.2, label='Received', marker='.')
     plt.scatter(lost_tss, lost_seqs, c='red', label='Lost', marker='X')
