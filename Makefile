@@ -408,84 +408,64 @@ PAPER_BUILD = doc/paper
 
 FIGURES_FOLDER = ${PAPER_BUILD}/figures
 
-
-BITRATE_DERIVATIVE_DATA = ${foreach client, ${CLIENTS}, ${FIGURES_FOLDER}/tmp/${client}/quality_distribution.json}
-
-REBUFFER_RATIO_DATA = ${foreach client, ${CLIENTS}, ${FIGURES_FOLDER}/tmp/${client}/rebuffer_ratio.json}
+PARSED_DATA_PATHS = ${foreach client, ${CLIENTS}, ${foreach abr_alg, ${ABR_ALGS}, ${FIGURES_FOLDER}/parsed_data/clients/${client}/${abr_alg}/parsed_data.json}}
 
 # Tools to build before the PDF files. This is a list of executable files in
 # the bin/ directory:
 TOOLS = 
-
-FIGURES_TRANSPORT = $(foreach client, ${CLIENTS},  ${FIGURES_FOLDER}/Throughput_${client}_clients.pdf)
 
 FIGURES_TRANSPORT = ${FIGURES_FOLDER}/Throughput_DSL.pdf ${FIGURES_FOLDER}/Throughput_FTTC.pdf ${FIGURES_FOLDER}/lost_packets_vreno.pdf ${FIGURES_FOLDER}/lost_packets_newcwv.pdf ${FIGURES_FOLDER}/lost_packets.pdf
 
 FIGURES_APPLICATION = ${FIGURES_FOLDER}/Rebuffer_Ratio_throughput.pdf ${FIGURES_FOLDER}/Rebuffer_Ratio_dynamic.pdf ${FIGURES_FOLDER}/bitrate_derivative_distribution_throughput.pdf ${FIGURES_FOLDER}/bitrate_derivative_distribution_dynamic.pdf
 
 
-${FIGURES_FOLDER}/tmp/%/rebuffer_ratio.json: ${ROOT}/scripts/analytics/paper/parse_rebuffer_ratio.py
-	/usr/bin/python3 /vagrant/scripts/analytics/paper/parse_rebuffer_ratio.py --root /vagrant/logs/clients/$* --algs newcwv vreno --runs ${shell seq 1 10} --links ${LINKS}
 
 
-${ROOT}/${FIGURES_FOLDER}/parsed_data/%/parsed_data.json:
+${ROOT}/${FIGURES_FOLDER}/parsed_data/%/parsed_data.json: ${MULTI_LOG_NEW}
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --root /vagrant/logs/clients/$* --algs newcwv vreno --runs ${shell seq 1 1} --links ${LINKS} --parse 1 --target none
 
 
-#TODO need to fix parsed data dependency to allow for more clients
-${FIGURES_FOLDER}/Average_Bitrate.pdf: ${RAW_DATA} ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py
-	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${LINKS} --target "average bitrate" --clients_combined ${CLIENTS} --extension pdf
-
-
-AVERAGE_OSCILLATIONS_LINKS = DSL FTTC
-${FIGURES_FOLDER}/Average_Oscillations.pdf: ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py
-	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${AVERAGE_OSCILLATIONS_LINKS} --target "average oscillations" --clients_combined ${CLIENTS} --extension pdf
-
-
 REBUFFER_RATIO_LINKS = DSL
-${FIGURES_FOLDER}/Rebuffer_Ratio_throughput.pdf: ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py ${REBUFFER_RATIO_DATA}
+${FIGURES_FOLDER}/Rebuffer_Ratio_throughput.pdf: ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py ${PARSED_DATA_PATHS}
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs vreno newcwv --links ${REBUFFER_RATIO_LINKS} --target "rebuffer ratio" --clients_combined ${CLIENTS} --extension pdf --root ${ROOT}/doc/paper/figures/parsed_data/clients --abr abrThroughput
 
 
 REBUFFER_RATIO_LINKS = DSL
-${FIGURES_FOLDER}/Rebuffer_Ratio_dynamic.pdf: ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py ${REBUFFER_RATIO_DATA}
+${FIGURES_FOLDER}/Rebuffer_Ratio_dynamic.pdf: ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py ${PARSED_DATA_PATHS}
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs vreno newcwv --links ${REBUFFER_RATIO_LINKS} --target "rebuffer ratio" --clients_combined ${CLIENTS} --extension pdf --root ${ROOT}/doc/paper/figures/parsed_data/clients --abr abrDynamic
 
 
 BITRATE_DERIVATIVE_LINKS = DSL
-${FIGURES_FOLDER}/bitrate_derivative_distribution_throughput.pdf: ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py
+${FIGURES_FOLDER}/bitrate_derivative_distribution_throughput.pdf: ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py ${PARSED_DATA_PATHS}
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${BITRATE_DERIVATIVE_LINKS} --target "bitrate_derivatives" --clients_combined ${CLIENTS} --extension pdf --root ${ROOT}/doc/paper/figures/parsed_data/clients --abr abrThroughput
 
 
 BITRATE_DERIVATIVE_LINKS = DSL
-${FIGURES_FOLDER}/bitrate_derivative_distribution_dynamic.pdf: ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py
+${FIGURES_FOLDER}/bitrate_derivative_distribution_dynamic.pdf: ${ROOT}/scripts/analytics/paper/plot_driver.py ${ROOT}/scripts/analytics/paper/plot_data.py ${PARSED_DATA_PATHS}
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${BITRATE_DERIVATIVE_LINKS} --target "bitrate_derivatives" --clients_combined ${CLIENTS} --extension pdf --root ${ROOT}/doc/paper/figures/parsed_data/clients --abr abrDynamic
 
 
-${FIGURES_FOLDER}/Throughput_DSL.pdf:
+${FIGURES_FOLDER}/Throughput_DSL.pdf: ${PARSED_DATA_PATHS}
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${LINKS} --target "throughput agg" --clients_combined ${CLIENTS} --link_agg DSL --extension pdf --abr abrDynamic --root ${ROOT}/doc/paper/figures/parsed_data/clients
 
 
-${FIGURES_FOLDER}/Throughput_FTTC.pdf:
+${FIGURES_FOLDER}/Throughput_FTTC.pdf: ${PARSED_DATA_PATHS}
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --algs newcwv vreno --links ${LINKS} --target "throughput agg" --clients_combined ${CLIENTS} --link_agg FTTC --extension pdf --abr abrDynamic --root ${ROOT}/doc/paper/figures/parsed_data/clients
 
 
-${FIGURES_FOLDER}/lost_packets_vreno.pdf:
+${FIGURES_FOLDER}/lost_packets_vreno.pdf: ${ROOT}/logs/clients/1/abr/abrThroughput/DSL/1_vreno/nginx_access.log
 	/usr/bin/python3 ${ROOT}/scripts/analytics/paper/plot_lost_packets.py --root ${ROOT}/logs/clients/1/abr/abrThroughput/DSL/1_vreno
 
 
-${FIGURES_FOLDER}/lost_packets_newcwv.pdf:
+${FIGURES_FOLDER}/lost_packets_newcwv.pdf: ${ROOT}/logs/clients/1/abr/abrThroughput/DSL/1_newcwv/nginx_access.log
 	/usr/bin/python3 ${ROOT}/scripts/analytics/paper/plot_lost_packets.py --root ${ROOT}/logs/clients/1/abr/abrThroughput/DSL/1_newcwv
 
 
-${FIGURES_FOLDER}/lost_packets.pdf:
+${FIGURES_FOLDER}/lost_packets.pdf: ${PARSED_DATA_PATHS}
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_lost_packets_aggregate.py --algs newcwv vreno --clients_combined 1 2 3 5 --root ${ROOT}/doc/paper/figures/parsed_data/clients --abr abrThroughput
 
-
-# ${FIGURES}: figures
-
 # Master build rule:
-paper: ${PARSED_PATH} ${FIGURES_APPLICATION} ${FIGURES_TRANSPORT} check-make git-revision $(TOOLS) $(PDF_FILES)
+paper: ${FIGURES_APPLICATION} ${FIGURES_TRANSPORT} check-make git-revision $(TOOLS) $(PDF_FILES)
 
 # Build a paper without pre-building the figures
 paper-quick: check-make git-revision $(TOOLS)
