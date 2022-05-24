@@ -419,7 +419,7 @@ FIGURES_APPLICATION = ${FIGURES_FOLDER}/Rebuffer_Ratio_throughput.pdf ${FIGURES_
 
 
 ${ROOT}/${FIGURES_FOLDER}/parsed_data/%/parsed_data.json: ${MULTI_LOG_NEW}
-	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --root /vagrant/logs/clients/$* --algs newcwv vreno --runs ${shell seq 1 1} --links ${LINKS} --parse 1 --target none
+	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_driver.py --root /vagrant/logs/$* --algs newcwv vreno --runs ${shell seq 1 1} --links ${LINKS} --parse 1 --target none
 
 
 REBUFFER_RATIO_LINKS = DSL
