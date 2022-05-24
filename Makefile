@@ -379,6 +379,8 @@ ${ROOT}/logs/single/newcwv/nginx_access.log: ${ROOT}/scripts/mn_script.py ${ROOT
 	@echo $@
 	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir $(@D) --cong_alg newcwv --network_model /vagrant/network_models/links/FTTP.json --mpd_location $(MPD_LOCATION) --dash_alg ${DASH_ALG} --ignore_link_loss ${IGNORE_LINK_LOSS} --clients 2
 
+stage2-logs: multi_log_new
+
 ############################
 # Paper 
 ############################
@@ -414,8 +416,6 @@ TOOLS =
 FIGURES_TRANSPORT = ${FIGURES_FOLDER}/Throughput_DSL.pdf ${FIGURES_FOLDER}/Throughput_FTTC.pdf ${FIGURES_FOLDER}/lost_packets_vreno.pdf ${FIGURES_FOLDER}/lost_packets_newcwv.pdf ${FIGURES_FOLDER}/lost_packets.pdf
 
 FIGURES_APPLICATION = ${FIGURES_FOLDER}/Rebuffer_Ratio_throughput.pdf ${FIGURES_FOLDER}/Rebuffer_Ratio_dynamic.pdf ${FIGURES_FOLDER}/bitrate_derivative_distribution_throughput.pdf ${FIGURES_FOLDER}/bitrate_derivative_distribution_dynamic.pdf
-
-
 
 
 ${ROOT}/${FIGURES_FOLDER}/parsed_data/%/parsed_data.json: ${MULTI_LOG_NEW}
@@ -461,8 +461,12 @@ ${FIGURES_FOLDER}/lost_packets_newcwv.pdf: ${ROOT}/logs/clients/1/abr/abrThrough
 ${FIGURES_FOLDER}/lost_packets.pdf: ${PARSED_DATA_PATHS}
 	/usr/bin/python3 /vagrant/scripts/analytics/paper/plot_lost_packets_aggregate.py --algs newcwv vreno --clients_combined 1 2 3 5 --root ${ROOT}/doc/paper/figures/parsed_data/clients --abr abrThroughput
 
+stage3-plots: ${FIGURES_APPLICATION} ${FIGURES_TRANSPORT}
+
 # Master build rule:
 paper: ${FIGURES_APPLICATION} ${FIGURES_TRANSPORT} check-make git-revision $(TOOLS) $(PDF_FILES)
+
+stage4-paper: paper
 
 # Build a paper without pre-building the figures
 paper-quick: check-make git-revision $(TOOLS)
