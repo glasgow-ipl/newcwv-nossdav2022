@@ -39,6 +39,17 @@ $RUN_PROBE = <<SCRIPT
   git clone https://github.com/janev94/verbose_reno && cd verbose_reno && git checkout dash_verbose
   cd /home/vagrant
   git clone https://github.com/janev94/newcwv 
+
+  # Required to build the figures
+  apt-get install -y python3-pip
+  pip3 install -r /vagrant/deps/requirements.txt
+
+  # Required to build the paper
+  apt-get install -y texlive-latex-extra
+  apt-get install -y texlive-fonts-extra
+
+  # Required to verify the paper build
+  apt-get install -y poppler-utils
 SCRIPT
 
 
