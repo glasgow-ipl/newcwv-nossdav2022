@@ -47,6 +47,10 @@ RTT_NEWCWV = 400
 BW_NEWCWV = 1
 LOGS_NEWCWV = $(foreach client, $(shell seq 1 1), $(foreach bw, ${BW_NEWCWV}, $(foreach rtt, ${RTT_NEWCWV}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 3), ${ROOT}/logs/newcwv/clients/${client}/abr/abrThroughput/${bw}_${rtt}/${run_instance}_${alg}/nginx_access.log)))))
 
+# ALL Rule
+all: ${ROOT}/%{MPD_LOCATION} stage2-logs stage3-plots stage4-paper
+
+
 # Encoding video
 
 #setup
