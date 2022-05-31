@@ -1,5 +1,0 @@
-1. Run Vagrant up (This will download all necessary dependencies and will take a while...)
-2. Ssh into the machine
-3. make sure your Xserver is setup correctly (e.g., you can run firefox)
-4. Encode the video using the makefile (make -f verify.mk stage1-mpd-3s) rule or obtain the data and the mpd otherwise
-5. Run the log generating script (make -f verify.mk logs) and follow the instructions
