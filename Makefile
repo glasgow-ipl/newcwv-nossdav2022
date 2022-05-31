@@ -342,7 +342,7 @@ logs: ${LOGS}
 ${ROOT}/logs:
 	mkdir ${ROOT}/logs
 
-${ROOT}/logs/clients/%/nginx_access.log: stage1-mpd-ietf
+${ROOT}/logs/clients/%/nginx_access.log: ${ROOT}/%{MPD_LOCATION} | ${ROOT}/logs
 	$(eval SIM_DIR = $(@D))
 	$(eval CC_ALG = $(shell echo $(shell basename $(@D)) | cut -d'_' -f2))
 	$(eval LINK_TYPE = $(shell basename `dirname $(@D)`))
