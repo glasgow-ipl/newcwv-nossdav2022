@@ -48,7 +48,7 @@ BW_NEWCWV = 1
 LOGS_NEWCWV = $(foreach client, $(shell seq 1 1), $(foreach bw, ${BW_NEWCWV}, $(foreach rtt, ${RTT_NEWCWV}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 3), ${ROOT}/logs/newcwv/clients/${client}/abr/abrThroughput/${bw}_${rtt}/${run_instance}_${alg}/nginx_access.log)))))
 
 # ALL Rule
-all: ${ROOT}/%{MPD_LOCATION} stage2-logs stage3-plots stage4-paper
+all: ${ROOT}/${MPD_LOCATION} stage2-logs stage3-plots stage4-paper
 
 
 # Encoding video
@@ -346,7 +346,7 @@ logs: ${LOGS}
 ${ROOT}/logs:
 	mkdir ${ROOT}/logs
 
-${ROOT}/logs/clients/%/nginx_access.log: ${ROOT}/%{MPD_LOCATION} | ${ROOT}/logs
+${ROOT}/logs/clients/%/nginx_access.log: ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
 	$(eval SIM_DIR = $(@D))
 	$(eval CC_ALG = $(shell echo $(shell basename $(@D)) | cut -d'_' -f2))
 	$(eval LINK_TYPE = $(shell basename `dirname $(@D)`))
