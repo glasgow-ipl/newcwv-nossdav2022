@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
 	parser.add_argument('--segment_duration', help="Segment duration length in seconds. Used by the encoder", type=int)
 
-	parser.add_argument('--use_dataset', help="0 for dash-if bitrates, 1 for youtube bitrates, 2 for ietf bitrates", default=1, type=int)
+	parser.add_argument('--use_dataset', help="0 for dash-if bitrates, 1 for youtube bitrates, 2 for ietf bitrates, 3 for ietf bitrates without 2160p (4k) video", default=1, type=int)
 
 	parser.add_argument('--newcwv', action="store_true", help='Generate dataset that matches the newcwv paper')
 
@@ -77,6 +77,9 @@ if __name__ == '__main__':
 	elif args.use_dataset == 2:
 		meta['bitrates'] = bitrates_ietf
 		meta['resolutions'] = resolutions_ietf
+	elif args.use_dataset == 3:
+		meta['bitrates'] = bitrates_ietf[:-1]
+		meta['resolutions'] = resolutions_ietf[:-1]
 
 	meta['prefix'] = prefix
 

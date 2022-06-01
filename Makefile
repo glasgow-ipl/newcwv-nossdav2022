@@ -317,9 +317,10 @@ ${OUT_DIR}/3s/bbb.mpd: ${OUT_DIR}/3s/360/out/output.mpd ${OUT_DIR}/3s/480/out/ou
 
 ####### IETF
 
-${OUT_DIR}/ietf/bbb.mpd: ${OUT_DIR}/ietf/480/out/output.mpd ${OUT_DIR}/ietf/720/out/output.mpd ${OUT_DIR}/ietf/1080/out/output.mpd ${OUT_DIR}/ietf/2160/out/output.mpd  ${ROOT}/scripts/video_processing/video_driver.py ${ROOT}/scripts/video_processing/mpd_generator.py
+${OUT_DIR}/ietf/bbb.mpd: ${OUT_DIR}/ietf/480/out/output.mpd ${OUT_DIR}/ietf/720/out/output.mpd ${OUT_DIR}/ietf/1080/out/output.mpd ${ROOT}/scripts/video_processing/video_driver.py ${ROOT}/scripts/video_processing/mpd_generator.py
 	@echo 'stitching mpds'
-	python3 ${ROOT}/scripts/video_processing/video_driver.py --prefix ${OUT_DIR}/ietf --action mpd --media_prefix ../ietf --use_dataset 2
+#using use_dataset 2 will produce 4k encoded video and put that to the mpd as well
+	python3 ${ROOT}/scripts/video_processing/video_driver.py --prefix ${OUT_DIR}/ietf --action mpd --media_prefix ../ietf --use_dataset 3
 
 ####### Newcwv
 
