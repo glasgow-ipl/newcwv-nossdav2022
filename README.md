@@ -18,7 +18,7 @@ installs all required dependencies. To obtain a copy of the data using the recom
 3. Log into the virtual machine using `vagrant ssh`
 4. Navigate to the shared directory `cd /vagrant/`
 
-From there you can use:
+From there you can use `make all` -> To build all dependencies and reproduce the paper, or you can run any of the following commands to carry out individual build steps:
 
 1. `make stage1-mpd-ietf` -> To build the different video encodings required to carry out the simulations
 2. `make stage2-logs` -> To produce the data used in this paper _Note: This will execute all previous stages_
