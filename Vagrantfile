@@ -91,6 +91,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "shell", privileged: true, inline: $RUN_PROBE
   
-  config.vm.network :forwarded_port, guest: 22, host: 2299, id: 'ssh'
+  #config.vm.network :forwarded_port, guest: 22, host: 2299, id: 'ssh'
+  config.vm.synced_folder ".", "/vagrant", mount_options: ["dmode=755", "fmode=664"]
 
 end
