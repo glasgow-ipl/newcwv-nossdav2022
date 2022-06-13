@@ -36,9 +36,9 @@ $RUN_PROBE = <<SCRIPT
 	apt-get install -y iperf3
   cd /vagrant/deps && python3 enable_high_precision.py
   cd /home/vagrant
-  git clone https://github.com/janev94/verbose_reno && cd verbose_reno && git checkout dash_verbose
+  git clone https://github.com/glasgow-ipl/verbose_reno && cd verbose_reno && git checkout dash_verbose
   cd /home/vagrant
-  git clone https://github.com/janev94/newcwv 
+  git clone https://github.com/glasgow-ipl/newcwv 
 
   # Required to build the figures
   apt-get install -y python3-pip
