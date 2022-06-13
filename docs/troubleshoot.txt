@@ -1,5 +1,10 @@
-Hopefully, at some point I'll just delete this file as it will be redundant. Rather than keeping it as a collection of hacks.
+Issue: Browser gives CORS blocking error.
+Resolution: Make sure all served files are fetched from the same origin.
 
-Q: Browser gives CORS blocking error.
-A: Make sure all served files are fetched from the same origin.
-
+Issue: Simulation hung on (non-first run).
+Resolution: Sometimes Firefox fails to fire playback finished event, which is required in order to successfully terminate the experiment.
+It happens in only 2 or 3% of the runs so it is hard to debug. Resolution is to:
+1. terminate the simulation manually
+2. delete the simulation directory rooted in logs/
+3. run ```mn -c``` in order to enable mininet to recover from the forceful shutdown
+4. run ```make``` again
