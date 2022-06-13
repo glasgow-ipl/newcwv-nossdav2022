@@ -30,4 +30,21 @@ From there you can use `make` -> To build all dependencies and reproduce the pap
 The Vagrantfile in this repository is tied to VirtualBox.
 The dataset was obtained with the following versions of its dependencies:
 
-TODO
+VirtualBox 6.1.32r149290
+Vagrant 2.2.19
+
+Additionally, internal dependency packahges were as follows:
+
+Mozilla Firefox 100.0.2
+ffmpeg version 4.2.4-1ubuntu0.1
+Python 2.7.18
+xorg-server 1.20.13
+Python 3.8.10
+GNU Make 4.2.1
+gcc 9.4.0
+nginx 1.18.0
+iperf 3.7
+
+Host machine used to produce the original dataset used:
+Intel(R) Xeon(R) CPU E5-2609 0 @ 2.40GHz
+
