@@ -133,7 +133,7 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
     # If congestion control algorithm was specified, enable that algortithm on the server
     if cong_alg:
         print("Enabling " + cong_alg + " at the server...")
-        server.cmd('sudo /vagrant/scripts/enable_' + cong_alg + '.sh')
+        server.cmd('sudo bash /vagrant/scripts/enable_' + cong_alg + '.sh')
     else:
         print("No congestion control algorithm specified")
 
@@ -284,7 +284,7 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
     with open(logger_path, 'w') as f:
         f.write(logger)
 
-    os.system('su - %s -c "/vagrant/scripts/quitff.sh"' % user)
+    os.system('su - %s -c "bash /vagrant/scripts/quitff.sh"' % user)
 
     # if we got to here everything is good, remove the event_log.json we do not need it anymore
     for entry in glob.glob("event_log_*.json"):
