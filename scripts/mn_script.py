@@ -7,6 +7,7 @@ from mininet.log import setLogLevel
 from mininet.cli import CLI
 #from mininet.node import OVSController
 
+import random
 import time
 from threading import Thread
 import os
@@ -221,11 +222,25 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
     firefox_output = os.path.join(pcap_path, "browser_out.txt")
     firefox_log_format = "timestamp,rotate:200,nsHttp:5,cache2:5,nsSocketTransport:5,nsHostResolver:5,cookie:5"
 
+    start_times = []
+    for _ in range(len(client_hosts) - 1):
+        # generate start times for the clients randomly within the first 5 minutes
+        start_times.append(random.randint(0, 60*5))
+
+    start_times = sorted(start_times)
+    start_times = [start_times[i+1] - start_times[i] for i in range(len(start_times) - 1)]
+    start_times = [0] + start_times
+    msg = "Client start times " + str(start_times)
+    print(msg)
+    logger.append(msg)
+
     for idx, client in enumerate(client_hosts):
         client_cmd = 'su - %s -c "xvfb-run -a -e /vagrant/xvfb_error.log firefox -P client%s --private http://%s/scripts/player.html http://%s/scripts/player.html&"' % (user, (idx + 1), server_ip, server_ip)
-        client.cmd(client_cmd)
 
         print ("Client cmd: %s " % client_cmd)
+        if idx != 0:
+            time.sleep(start_times[idx])
+        
         client.cmd(client_cmd)
  
     msg = "Waiting for server to finish %s" % datetime.datetime.now().strftime(precise_time_str)
