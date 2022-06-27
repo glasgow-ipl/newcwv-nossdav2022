@@ -17,6 +17,7 @@ import math
 import argparse
 import generate_player
 import glob
+import threading
 
 import subprocess
 
@@ -326,5 +327,26 @@ if __name__ == '__main__':
 
     clients = args.clients
 
-    setLogLevel( 'info' )
-    doSimulation(log_root=log_dir, cong_alg=cong_alg, network_model_file=network_model_file, dash_alg=dash_alg, mpd_location=mpd_location, ignore_link_loss=ignore_link_loss, clients=clients)
+    fails = 0
+    while True:
+        t = threading.Thread(target=doSimulation, args=(log_dir, cong_alg, network_model_file, dash_alg, mpd_location, ignore_link_loss, clients))
+        t.setDaemon(True)
+        t.start()
+
+        WAIT_TIME = 40*60 # 40 minutes
+        # Wait for the simulation thread to complete for 40 minutes
+        # then cleanup and record unsuccessful event
+        t.join(WAIT_TIME)
+
+        if not t.is_alive():
+            # If the thread completed successfully in the time interval, terminate the execution
+            break
+
+        fails += 1
+        os.system("killall nginx")
+        os.system("killall firefox")
+        os.system("killall Xvfb")
+        os.system("rm -rf " + log_dir)
+        os.system("sudo mn -c")
+        os.system("touch /vagrant/rerun/" + log_dir.replace("/", "_") + str(fails))
+
