@@ -228,7 +228,9 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
         start_times.append(random.randint(0, 60*5))
 
     start_times = sorted(start_times)
-    start_times = [start_times[i+1] - start_times[i] for i in range(len(start_times) - 1)]
+    if len(start_times) > 1:
+        start_times = [start_times[i+1] - start_times[i] for i in range(len(start_times) - 1)]
+    
     start_times = [0] + start_times
     msg = "Client start times " + str(start_times)
     print(msg)
@@ -344,7 +346,7 @@ if __name__ == '__main__':
 
     fails = 0
     while True:
-        t = threading.Thread(target=doSimulation, args=(log_dir, cong_alg, network_model_file, dash_alg, mpd_location, ignore_link_loss, clients))
+        t = threading.Thread(target=doSimulation, args=(log_dir, cong_alg, network_model_file, mpd_location, dash_alg, ignore_link_loss, clients))
         t.setDaemon(True)
         t.start()
 
