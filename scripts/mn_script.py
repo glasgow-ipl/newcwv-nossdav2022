@@ -365,5 +365,6 @@ if __name__ == '__main__':
         os.system("killall Xvfb")
         os.system("rm -rf " + log_dir)
         os.system("sudo mn -c")
+        os.system('su - %s -c "bash /vagrant/scripts/quitff.sh"' % os.getlogin())
         os.system("touch /vagrant/rerun/" + log_dir.replace("/", "_") + str(fails))
 
