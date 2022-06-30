@@ -228,13 +228,16 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
         start_times.append(random.randint(0, 60*5))
 
     start_times = sorted(start_times)
-    if len(start_times) > 1:
-        start_times = [start_times[i+1] - start_times[i] for i in range(len(start_times) - 1)]
-    
     start_times = [0] + start_times
     msg = "Client start times " + str(start_times)
     print(msg)
     logger.append(msg)
+    
+    if len(start_times) > 1:
+        start_times = [start_times[i+1] - start_times[i] for i in range(len(start_times) - 1)]
+    
+    # We start the first client at time 0, but realistically here can be any value
+    start_times = [0] + start_times
 
     for idx, client in enumerate(client_hosts):
         client_cmd = 'su - %s -c "xvfb-run -a -e /vagrant/xvfb_error.log firefox -P client%s --private http://%s/scripts/player.html http://%s/scripts/player.html&"' % (user, (idx + 1), server_ip, server_ip)
