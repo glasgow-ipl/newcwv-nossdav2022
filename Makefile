@@ -7,6 +7,8 @@ IGNORE_LINK_LOSS=0
 
 MPD_LOCATION_NEWCWV=data/newcwv/bbb.mpd
 
+START_TIMES_FILE_LOC=${ROOT}/start_times.json
+
 REPEAT = 10
 RUNS = $(shell seq 1 ${REPEAT})
 ALGS = vreno newcwv reno
@@ -37,6 +39,8 @@ MULTI_LOG_VARYING = $(foreach client, $(shell seq 1 1), $(foreach bw, ${BWS}, $(
 
 MUTLI_LOG_RUNS_MAX = 1
 MULTI_LOG_NEW = $(foreach client, ${CLIENTS}, $(foreach abr_alg, ${ABR_ALGS}, $(foreach link, ${LINKS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 ${MUTLI_LOG_RUNS_MAX}), ${ROOT}/logs/clients/${client}/abr/${abr_alg}/${link}/${run_instance}_${alg}/nginx_access.log)))))
+
+MULTI_LOG_NEW_ST = $(foreach alg, ${TEST_ALGS}, $(foreach abr_alg, ${ABR_ALGS}, $(foreach link, ${LINKS}, $(foreach client, ${CLIENTS}, $(foreach run_instance, $(shell seq 1 ${MUTLI_LOG_RUNS_MAX}), ${ROOT}/logs/st/clients/${client}/abr/${abr_alg}/${link}/${run_instance}_${alg}/nginx_access.log)))))
 
 SIMULATION_PATH = $(foreach client, ${CLIENTS}, $(foreach abr_alg, ${ABR_ALGS}, $(foreach link, ${LINKS}, $(foreach alg, ${TEST_ALGS}, $(foreach run_instance, $(shell seq 1 ${MUTLI_LOG_RUNS_MAX}), clients/${client}/abr/${abr_alg}/${link}/${run_instance}_${alg})))))
 
@@ -347,13 +351,24 @@ logs: ${LOGS}
 ${ROOT}/logs:
 	mkdir ${ROOT}/logs
 
+
 ${ROOT}/logs/clients/%/nginx_access.log: ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
 	$(eval SIM_DIR = $(@D))
 	$(eval CC_ALG = $(shell echo $(shell basename $(@D)) | cut -d'_' -f2))
 	$(eval LINK_TYPE = $(shell basename `dirname $(@D)`))
 	$(eval ABR_ALG = $(shell basename $(shell dirname `dirname $(@D)`)))
 	$(eval CLIENT_NUM = $(shell basename $(shell dirname $(shell dirname $(shell dirname `dirname $(@D)`)))))
-	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir ${SIM_DIR} --cong_alg ${CC_ALG} --network_model /vagrant/network_models/links/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg ${ABR_ALG} --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM}
+	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir ${SIM_DIR} --cong_alg ${CC_ALG} --network_model /vagrant/network_models/links/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg ${ABR_ALG} --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM} --start_seeds_file ${START_TIMES_FILE_LOC}
+
+
+${ROOT}/logs/st/clients/%/nginx_access.log: ${ROOT}/${MPD_LOCATION} | ${ROOT}/logs
+	$(eval SIM_DIR = $(@D))
+	$(eval CC_ALG = $(shell echo $(shell basename $(@D)) | cut -d'_' -f2))
+	$(eval LINK_TYPE = $(shell basename `dirname $(@D)`))
+	$(eval ABR_ALG = $(shell basename $(shell dirname `dirname $(@D)`)))
+	$(eval CLIENT_NUM = $(shell basename $(shell dirname $(shell dirname $(shell dirname `dirname $(@D)`)))))
+	cd ${ROOT}/scripts && sudo python mn_script.py --log_dir ${SIM_DIR} --cong_alg ${CC_ALG} --network_model /vagrant/network_models/links/${LINK_TYPE}.json --mpd_location $(MPD_LOCATION) --dash_alg ${ABR_ALG} --ignore_link_loss $(IGNORE_LINK_LOSS) --clients ${CLIENT_NUM} --start_seeds_file ${START_TIMES_FILE_LOC}
+
 
 
 varying_rtt: ${MULTI_LOG_VARYING}
@@ -375,6 +390,12 @@ multi_log: ${MULTI_LOGS} ${MULTI_LOGS_DYNAMIC}
 multi_log_new: ${MULTI_LOG_NEW}
 	echo "Completed"
 
+log_st: ${MULTI_LOG_NEW_ST}
+	echo "Completed"
+
+
+echo_log:
+	@echo ${MULTI_LOG_NEW_ST}
 
 single_run: ${ROOT}/logs/single/newcwv/nginx_access.log
 	@echo "Single run executed successfully"
