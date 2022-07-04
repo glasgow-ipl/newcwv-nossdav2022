@@ -19,6 +19,7 @@ import argparse
 import generate_player
 import glob
 import threading
+import json
 
 import subprocess
 
@@ -93,7 +94,9 @@ def test_change_bw():
 
     setLogLevel('info')
 
-def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_location=None, dash_alg=None, ignore_link_loss=None, clients=1):
+def doSimulation(log_root=None, cong_alg=None,
+                     network_model_file=None, mpd_location=None, dash_alg=None,
+                      ignore_link_loss=None, clients=1, start_seeds_file=''):
     "Create network and run simple performance test"
 
     # Create a list to keep logging events
@@ -223,9 +226,14 @@ def doSimulation(log_root=None, cong_alg=None, network_model_file=None, mpd_loca
     firefox_log_format = "timestamp,rotate:200,nsHttp:5,cache2:5,nsSocketTransport:5,nsHostResolver:5,cookie:5"
 
     start_times = []
-    for _ in range(len(client_hosts) - 1):
-        # generate start times for the clients randomly within the first 5 minutes
-        start_times.append(random.randint(0, 60*5))
+    if start_seeds_file:
+        with open(start_seeds_file) as f:
+            start_times_json = json.load(f)
+        print(start_times_json[log_root])
+        if log_root not in start_times_json:
+            print("Warning: Not found start times for simulation " + log_root + " starting all clients at time 0")
+        else:
+            start_times = start_times_json[log_root]
 
     start_times = sorted(start_times)
     start_times = [0] + start_times
@@ -332,6 +340,10 @@ if __name__ == '__main__':
 
     parser.add_argument('--clients', help="Number of concurrent video streams to run", default=1, type=int)
 
+    parser.add_argument('--start_seeds_file', help="File, containing the start times for every client \
+                                other than the first. Offset in seconds relative to the start of the simulation.\
+                                    First client always starts at time 0.")
+
     args = parser.parse_args()
     log_dir = args.log_dir
 
@@ -347,9 +359,11 @@ if __name__ == '__main__':
 
     clients = args.clients
 
+    start_seeds_file = args.start_seeds_file
+
     fails = 0
     while True:
-        t = threading.Thread(target=doSimulation, args=(log_dir, cong_alg, network_model_file, mpd_location, dash_alg, ignore_link_loss, clients))
+        t = threading.Thread(target=doSimulation, args=(log_dir, cong_alg, network_model_file, mpd_location, dash_alg, ignore_link_loss, clients, start_seeds_file))
         t.setDaemon(True)
         t.start()
 
