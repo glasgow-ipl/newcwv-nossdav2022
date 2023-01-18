@@ -306,11 +306,12 @@ In this section, we first validate the results of Nazir et al.
 ~\cite{Nazir-2014-performance-evaluation-congestion-window-validation-dash-newcwv}, 
 before testing whether New CWV will enable \emph{applications} to obtain more consistent 
 throughput estimates, and, in turn, improve the stability of rate adaptation algorithms.
+We also compare the results of New CWV, using New Reno, with HyStart, using Cubic.
 We first describe our experimental setup (\S~\ref{sec:experimental-setup}). 
-Second, we investigate the transport layer impact to check if New CWV connections obtain 
-more consistent throughput estimates (\S~\ref{sec:transport-impact}). Then, we investigate 
-the application impact, specifically the difference on video QoE due to New CWV 
-(\S~\ref{sec:QoE-impact}). Finally, we summarise our findings (\S\ref{sec:summary}).
+Next, we investigate the transport layer impact and show the different throughput estimates
+obtained by each variant (\S~\ref{sec:transport-impact}). Then, we investigate 
+the video QoE impact in the application layer (\S~\ref{sec:QoE-impact}).
+ Finally, we summarise our findings (\S\ref{sec:summary}).
 
 %--------------------------------------------------------------------------------------------------
 \subsection{Experimental Setup}
@@ -318,16 +319,17 @@ the application impact, specifically the difference on video QoE due to New CWV
 
 % Overview
 Our evaluation consists of a network emulated in Mininet, running on Ubuntu 20.04, 
-as shown in Figure~\ref{fig:experimental-setup}. Both the server and clients use TCP New Reno 
-and run Linux Kernel 5.4.0 modified to include New CWV and RFC 
+as shown in Figure~\ref{fig:experimental-setup}. Both the server and clients use TCP New Reno
+for CWV and New CWV simulations, and Cubic with HyStart for the Cubic simulations. We run a 
+modified Linux 5.4.0 Kernel that includes RFC 
 3339~\cite{rfc3339-precise-timestamps} compliant timestamps to enable high precision event 
-tracking. 
+tracking. We also use our New CWV implementation ported for the 5.4 kernel series.
 
 % Server
 The server uses \texttt{nginx} (v1.18) with HTTP/2, serving three representations of 
 Big Buck Bunny\footnote{\url{https://download.blender.org/demo/movies/BBB/}}: 
-480p (0.44Mbps), 720p (2.64Mbps), and 1080p (4.82Mbps). Each is encoded in chunks of 3 seconds
- duration.
+480p (0.44Mbps), 720p (2.64Mbps), and 1080p (4.82Mbps). All videos are encoded in 3 second chunks.
+
 %  Client
 Clients use Firefox (v91) with \texttt{dash.js}
 \footnote{\url{https://github.com/Dash-Industry-Forum/dash.js}} (v4.0.0). We
@@ -343,20 +345,29 @@ While FTTP links are common in some regions, ADSL2 and FTTC links are still wide
 ACCC-measuring-broadband-australia}. As higher resolution video and other network-heavy 
 operations such as virtual reality environments see more use we expect issues observed with 
 ADSL2 and FTTC will translate to the higher capacity FTTP links.
-We send only video traffic and assume consistent RTT, broadly modelling a home environment 
-with multiple people watching simultaneous video streams and little other traffic. 
-Evaluating effects of cross traffic and video synchronisation is future work.
+
+We evaluate three different traffic scenarios. The first assumes all clients start at the same
+time and includes no background traffic, the second considers clients joining at random times
+to measure the impact of the staggered start times, and the final one has clients joining at 
+random times while a single long TCP connection is also present in the background. All
+scenarios broadly model a single household environment where multiple people watch video,
+starting either at the same or at different times, while some background network heavy task
+may be taking place in the background.
+
+We evaluate the synchronization of the different clients as a factor of their 
+initial start times and the presence of other background traffic on the link.
 
 To evaluate the impact of congestion and competing flows, experiments were run with both 
 \textsc{dynamic} and \textsc{throughput} algorithms and several (1, 2, 3, and 5) 
 simultaneous clients.
-\todo{Additionally, we measure all clients starting at T0, and all clients joining randomly}
 
-Finally, to reduce noise, we ran each combination of CWV or New CWV, adaptive algorithm,
-number of clients, and link type, 10 times before reporting the average results.
-The results presented includes data accumulated from 480 simulations 
-(2 congestion control algorithms $\times$ 2 adaptive algorithms $\times$ 3 link 
-types $\times$ 4 client variations $\times$ 10 repetitions). 
+Finally, to reduce noise, we ran each combination of congestion control algorithm,
+ adaptation algorithm, number of clients, link type, and client start order
+  10 times before reporting the average results.
+The results presented includes data accumulated from 2880 simulations 
+(3 congestion control algorithms $\times$ 2 adaptive algorithms $\times$ 3 link 
+types $\times$ 4 client variations $\times$ 2 client start-patterns $\times$ 2
+background traffic profiles $\times$ 10 repetitions). 
 During each run we collect client bandwidth estimates. Additionally, to evaluate the video 
 QoE impact we report the rebuffer ratio and bit-rate switch frequency distribution.
 
@@ -388,7 +399,7 @@ is the input value to the client's rate adaptation algorithm.
     \Description{Cumulative Distribution Function plots showing the distribution of bandwidth estimates under the emulated FTTC link, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
     \label{fig:throughput-clients-FTTC}
   }
-  \caption{Measured dash.js client bandwidth estimates \textsc{dynamic}}
+  \caption{Measured dash.js client bandwidth estimates \textsc{dynamic} \todo{add cubic}}
   \label{fig:throughput-clients}
 \end{figure*}
 
@@ -418,9 +429,21 @@ clients measuring throughput will be able to obtain estimates that are more stab
 
 \begin{figure}[t!]
   \centering
-  \includegraphics[width=\textwidth]{figures/lost_packets.pdf}
-  \Description{Boxplots showing the percentage of packets loss under the emulated DSL link, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
-  \caption{Lost Packets DSL \textsc{dynamic}}
+  \subfloat[Profile 1]{
+    \includegraphics[width=.8\textwidth]{figures/lost_packets.pdf}
+    \Description{Boxplots showing the percentage of packets loss under the emulated DSL link, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
+  }
+  \\
+  \subfloat[Profile 2]{
+    \includegraphics[width=.8\textwidth]{figures/lost_packets.pdf}
+    \Description{Boxplots showing the percentage of packets loss under the emulated DSL link, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
+  }
+  \\
+  \subfloat[Profile 3]{
+    \includegraphics[width=.8\textwidth]{figures/lost_packets.pdf}
+    \Description{Boxplots showing the percentage of packets loss under the emulated DSL link, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
+  }
+  \caption{Lost Packets DSL \textsc{dynamic} \todo{add cubic}}
   \label{fig:lost-packets}
 \end{figure}
 
@@ -432,6 +455,17 @@ We illustrate the impact of New CWV on packet loss in Figure~\ref{fig:lost-packe
 
 The results in this section are reported for the \textsc{dynamic} rate adaptation algorithm.
  Results for the \textsc{throughput} algorithm show no significant differences.
+
+ \begin{figure}[t!]
+  \centering
+  \includegraphics[width=\textwidth]{figures/Placeholder.png}
+  \Description{}
+  \caption{Client Synchronization}
+  \label{fig:client-synchronization}
+\end{figure}
+
+\todo{Discussion of client syncronization w.r.t cross-traffic and client start times}
+
 
 \todo{For each combination of clients and start times, we can measure to what extent: \\
 \begin{itemize}
@@ -446,17 +480,41 @@ The results in this section are reported for the \textsc{dynamic} rate adaptatio
 
 \begin{figure*}
   \centering
-  \includegraphics[width=\textwidth, keepaspectratio]{figures/bitrate_derivative_distribution_throughput.pdf}
-  \Description{Bar plots showing the distribution of representation changes under the emulated DSL link, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
-  \caption{Absolute Bitrate Switches (\textsc{throughput})}
+  \subfloat[Profile 1]{
+    \includegraphics[width=.8\textwidth, keepaspectratio]{figures/bitrate_derivative_distribution_throughput.pdf}
+    \Description{Bar plots showing the distribution of representation changes under the emulated DSL link, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
+  }
+  \\
+  \subfloat[Profile 2]{
+    \includegraphics[width=.8\textwidth, keepaspectratio]{figures/bitrate_derivative_distribution_throughput.pdf}
+    \Description{Bar plots showing the distribution of representation changes under the emulated DSL link, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
+  }
+  \\
+  \subfloat[Profile 3]{
+    \includegraphics[width=.8\textwidth, keepaspectratio]{figures/bitrate_derivative_distribution_throughput.pdf}
+    \Description{Bar plots showing the distribution of representation changes under the emulated DSL link, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
+  }
+  \caption{Absolute Bitrate Switches (\textsc{throughput}) \todo{add cubic}}
   \label{fig:bitrate-switches}
 \end{figure*}
 
 \begin{figure*}
   \centering
-  \includegraphics[width=\textwidth, keepaspectratio]{figures/bitrate_derivative_distribution_dynamic.pdf}
-  \Description{Bar plots showing the distribution of representation changes under the emulated FTTC link, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
-  \caption{Absolute Bitrate Switches (\textsc{dynamic})}
+  \subfloat[Profile 1]{
+    \includegraphics[width=\textwidth, keepaspectratio]{figures/bitrate_derivative_distribution_dynamic.pdf}
+    \Description{Bar plots showing the distribution of representation changes under the emulated FTTC link, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
+  }
+  \\
+  \subfloat[Profile 1]{
+    \includegraphics[width=\textwidth, keepaspectratio]{figures/bitrate_derivative_distribution_dynamic.pdf}
+    \Description{Bar plots showing the distribution of representation changes under the emulated FTTC link, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
+  }
+  \\
+  \subfloat[Profile 1]{
+    \includegraphics[width=\textwidth, keepaspectratio]{figures/bitrate_derivative_distribution_dynamic.pdf}
+    \Description{Bar plots showing the distribution of representation changes under the emulated FTTC link, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
+  }
+  \caption{Absolute Bitrate Switches (\textsc{dynamic}) \todo{add cubic}}
   \label{fig:bitrate-switches-dynamic}
 \end{figure*}
 
@@ -516,16 +574,40 @@ connections using CWV, but still gives lower QoE than the simpler adaptation alg
 used with New CWV.
 
 \begin{figure}
-    \includegraphics[width=\textwidth, keepaspectratio]{figures/Rebuffer_Ratio_throughput.pdf}
-    \Description{Boxplots showing the rebuffer ratio under the emulated DSL link, with the throughput algorithm, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
-    \caption{DSL Rebuffer Ratio (\textsc{throughput})}
+    \subfloat[Profile 1]{
+      \includegraphics[width=.8\textwidth, keepaspectratio]{figures/Rebuffer_Ratio_throughput.pdf}
+      \Description{Boxplots showing the rebuffer ratio under the emulated DSL link, with the throughput algorithm, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
+    }
+    \\
+    \subfloat[Profile 2]{
+      \includegraphics[width=.8\textwidth, keepaspectratio]{figures/Rebuffer_Ratio_throughput.pdf}
+      \Description{Boxplots showing the rebuffer ratio under the emulated DSL link, with the throughput algorithm, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
+    }
+    \\
+    \subfloat[Profile 3]{
+      \includegraphics[width=.8\textwidth, keepaspectratio]{figures/Rebuffer_Ratio_throughput.pdf}
+      \Description{Boxplots showing the rebuffer ratio under the emulated DSL link, with the throughput algorithm, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
+    }
+    \caption{DSL Rebuffer Ratio (\textsc{throughput}) \todo{add cubic}}
     \label{fig:rebuffer-ratio}
 \end{figure}
 
 \begin{figure}
-    \includegraphics[width=\textwidth, keepaspectratio]{figures/Rebuffer_Ratio_dynamic.pdf}
-    \Description{Boxplots showing the rebuffer ratio under the emulated DSL link, with the dynamic algorithm, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
-    \caption{DSL Rebuffer Ratio (\textsc{dynamic})}
+    \subfloat[Profile 1]{
+      \includegraphics[width=.8\textwidth, keepaspectratio]{figures/Rebuffer_Ratio_dynamic.pdf}
+      \Description{Boxplots showing the rebuffer ratio under the emulated DSL link, with the dynamic algorithm, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
+    }
+    \\
+    \subfloat[Profile 2]{
+      \includegraphics[width=.8\textwidth, keepaspectratio]{figures/Rebuffer_Ratio_dynamic.pdf}
+      \Description{Boxplots showing the rebuffer ratio under the emulated DSL link, with the dynamic algorithm, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
+    }
+    \\
+    \subfloat[Profile 3]{
+      \includegraphics[width=.8\textwidth, keepaspectratio]{figures/Rebuffer_Ratio_dynamic.pdf}
+      \Description{Boxplots showing the rebuffer ratio under the emulated DSL link, with the dynamic algorithm, for 1, 2, 3, and 5 clients, comparing New Congestion Window Validation with Congestion Window Validation.}
+    }
+    \caption{DSL Rebuffer Ratio (\textsc{dynamic}) \todo{add cubic}}
     \label{fig:rebuffer-ratio-dynamic}
 \end{figure}
 
